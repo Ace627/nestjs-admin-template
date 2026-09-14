@@ -1,0 +1,11 @@
+registry: https://registry.npmmirror.com
+lockfile: true
+fetchRetries: 2
+saveExact: true
+engineStrict: false
+enablePrePostScripts: true
+shamefullyHoist: true
+packageManagerStrict: false
+
+allowBuilds:
+  '@parcel/watcher': true

@@ -1,0 +1,10 @@
+{
+  // 继承基础配置 tsconfig.json，仅覆盖构建差异项
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    // 指定项目根目录，用于计算相对路径
+    "rootDir": "./src"
+  },
+  // 构建时排除的目录/文件：依赖、测试与产物目录，不参与编译
+  "exclude": ["node_modules", "test", "dist", "**/*spec.ts"]
+}

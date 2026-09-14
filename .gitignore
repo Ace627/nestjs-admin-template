@@ -1,0 +1,24 @@
+dist
+logs
+node_modules
+admin/src/types/auto-generate
+
+# 根目录 .env 供 docker compose 读取，含真实密钥，禁止提交
+/.env
+# server 工程密钥配置禁止提交；前端 admin/.env* 为纯 UI 配置，有意提交
+server/.env
+.env.local
+*.local
+
+# AI 协作数据，不开源
+.trae
+.qwen
+.qoder
+.codex
+.cline
+.cursor
+.claude
+.gemini
+.opencode
+.codebuddy
+.workbuddy

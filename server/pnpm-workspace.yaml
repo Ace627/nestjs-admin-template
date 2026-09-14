@@ -1,0 +1,15 @@
+registry: https://registry.npmmirror.com
+lockfile: true
+fetchRetries: 2
+saveExact: true
+engineStrict: false
+enablePrePostScripts: true
+shamefullyHoist: true
+packageManagerStrict: false
+
+allowBuilds:
+  argon2: true
+  esbuild: true
+  ip2region-ts: true
+  msgpackr-extract: true
+  unrs-resolver: true

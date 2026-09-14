@@ -1,0 +1,12 @@
+.el-dialog {
+  // 弹框表单的标签样式
+  .el-form-item__label {
+    font-weight: bold;
+  }
+
+  .el-dialog__footer {
+    .el-button {
+      width: 100px;
+    }
+  }
+}

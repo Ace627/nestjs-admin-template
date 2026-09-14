@@ -1,0 +1,12 @@
+# 构建上下文是仓库根，故用 ** 递归匹配（裸 node_modules 这类单段模式不保证匹配到子目录）
+**/node_modules
+**/dist
+**/logs
+**/uploads
+# 会话记录，不该进镜像
+**/.codebuddy
+**/.git
+**/.env
+**/.env.*
+**/*.md
+**/*.log

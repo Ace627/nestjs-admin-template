@@ -1,0 +1,75 @@
+ARG NODE_VERSION=24.18.0
+ARG PNPM_VERSION=10.34.5
+
+# ==================== 阶段 1：编译 ====================
+FROM node:${NODE_VERSION}-alpine AS builder
+
+ARG PNPM_VERSION
+
+WORKDIR /app
+
+# 先拷依赖清单：只改业务代码时，下面两层缓存不会失效
+# 镜像源等配置在 pnpm-workspace.yaml（pnpm v10 起 npmrc 配置可写进 workspace 文件）
+COPY server/package.json server/pnpm-lock.yaml server/pnpm-workspace.yaml ./
+RUN npm i -g pnpm@${PNPM_VERSION}
+RUN pnpm install --frozen-lockfile
+
+# nest build 默认读 tsconfig.build.json，路径别名 @/* 由 webpack 侧解析
+COPY server/nest-cli.json server/tsconfig.json server/tsconfig.build.json ./
+COPY server/src ./src
+RUN pnpm build
+
+# ==================== 阶段 2：只装生产依赖 ====================
+FROM node:${NODE_VERSION}-alpine AS prod-deps
+
+ARG PNPM_VERSION
+
+WORKDIR /app
+
+COPY server/package.json server/pnpm-lock.yaml server/pnpm-workspace.yaml ./
+RUN npm i -g pnpm@${PNPM_VERSION}
+# --prod 跳过 devDependencies；argon2 自带 linux-x64 的 glibc/musl 预编译产物，
+# 无需在镜像里准备 python3/make/g++（pnpm 默认拦截构建脚本也不影响运行时加载）
+RUN pnpm install --prod --frozen-lockfile
+
+# ==================== 阶段 3：运行 ====================
+FROM node:${NODE_VERSION}-alpine AS runner
+
+WORKDIR /app
+
+# NODE_ENV 必须显式声明，否则 winston 不写文件日志
+# TZ + tzdata + /etc/localtime 三者齐备，见下面的时区注释
+ENV NODE_ENV=production \
+    TZ=Asia/Shanghai \
+    SERVER_PORT=3000 \
+    SERVER_GLOBAL_PREFIX=/api
+
+# 时区：本项目 dayjs(本地时区) / winston 日志文件名 / BullMQ cron 都依赖它，
+#       故 tzdata 常驻不卸载（约 3MB，换来命名时区解析无盲区）
+# - TZ=Asia/Shanghai 供 Node 与读 TZ 的进程使用
+# - /etc/localtime 软链兜底 libc / busybox 的默认时区
+# 国内构建慢可在 apk 前加：
+#   sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories
+RUN apk add --no-cache tzdata \
+ && ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
+ && mkdir -p logs/info logs/error uploads \
+ && chown -R node:node /app/logs /app/uploads
+
+# 生产依赖（pnpm 的 node_modules 内部是相对软链接，跨阶段 COPY 会原样保留）
+COPY --from=prod-deps --chown=node:node /app/node_modules ./node_modules
+COPY --from=builder --chown=node:node /app/dist ./dist
+COPY --chown=node:node server/package.json ./
+# 探针脚本，配合下面的 HEALTHCHECK 使用
+COPY --chown=node:node server/scripts/healthcheck.js ./scripts/healthcheck.js
+
+# 非 root 运行；日志目录 logs/、上传目录 uploads/ 都相对 process.cwd()，即 /app
+USER node
+
+EXPOSE 3000
+
+# 探 /api/monitor/health/live（@Public + 无外部依赖，不会因 DB/Redis 抖动而误判）
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+  CMD ["node", "scripts/healthcheck.js"]
+
+# exec 形式启动，node 直接收到 SIGTERM，配合 main.ts 的 enableShutdownHooks() 优雅退出
+CMD ["node", "dist/main.js"]

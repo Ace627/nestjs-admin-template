@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>%VITE_APP_TITLE%</title>
+    <!-- 引入应用图标 -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script>
+      ;(() => {
+        try {
+          // 读取本地持久化的主题设置，供白屏阶段暗色适配
+          const settingJson = localStorage.getItem('app:storage:systemSetting')
+          if (settingJson && JSON.parse(settingJson).value?.theme === 'dark') document.documentElement.classList.add('dark')
+        } catch {}
+      })()
+    </script>
+    <!-- 引入浏览器重置样式表 -->
+    <link rel="stylesheet" href="./css/reset.css" />
+    <link rel="stylesheet" href="./css/app-loading.css" />
+  </head>
+  <body>
+    <!-- VueJS 挂载的 DOM 容器 -->
+    <div id="app">
+      <!-- 白屏阶段会执行的 CSS 加载动画 -->
+      <div class="app-loading">
+        <div class="app-loading-wrap">
+          <img src="/favicon.svg" class="app-loading-logo" alt="Logo" />
+          <div class="app-loading-progress"><i></i></div>
+          <div class="app-loading-title">%VITE_APP_TITLE%</div>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

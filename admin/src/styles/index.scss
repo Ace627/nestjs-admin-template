@@ -1,0 +1,22 @@
+@use './variables.scss';
+@use './transition.scss';
+@use 'nprogress/nprogress.css';
+@use './element-plus/el-theme-dark.scss';
+@use './element-plus/el-table.scss';
+@use './element-plus/el-dialog.scss';
+@use './element-plus/el-dropdown.scss';
+
+body {
+  font-family: var(--el-font-family);
+  background-color: var(--el-bg-color-page);
+}
+
+#nprogress .bar {
+  background-color: var(--el-color-primary);
+}
+
+.app-content {
+  position: relative;
+  width: 100%;
+  padding: 16px;
+}

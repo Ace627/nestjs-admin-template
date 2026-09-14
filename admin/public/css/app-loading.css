@@ -1,0 +1,112 @@
+.app-loading {
+  /* 浅色主题变量 */
+  --loading-bg: #eef3f8;
+  --loading-grid: rgb(0 101 204 / 9%);
+  --loading-glow-a: rgb(0 101 204 / 22%);
+  --loading-glow-b: rgb(0 101 204 / 18%);
+  --loading-title: rgb(0 0 0 / 85%);
+  --loading-track: rgb(0 0 0 / 8%);
+  --loading-bar: #0065cc;
+
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background:
+    linear-gradient(var(--loading-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--loading-grid) 1px, transparent 1px),
+    radial-gradient(circle 480px at 12% 8%, var(--loading-glow-a), transparent 70%),
+    radial-gradient(circle 560px at 88% 92%, var(--loading-glow-b), transparent 70%),
+    var(--loading-bg);
+  background-size:
+    40px 40px,
+    40px 40px,
+    auto,
+    auto,
+    auto;
+}
+
+/* 深色主题变量（html.dark 由 index.html 内联脚本在白屏阶段点亮） */
+html.dark .app-loading {
+  --loading-bg: #141414;
+  --loading-grid: rgb(255 255 255 / 6%);
+  --loading-glow-a: rgb(0 101 204 / 35%);
+  --loading-glow-b: rgb(0 101 204 / 28%);
+  --loading-title: rgb(255 255 255 / 88%);
+  --loading-track: rgb(255 255 255 / 10%);
+  --loading-bar: #4d9fff;
+}
+
+.app-loading .app-loading-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  animation: loading-fade-in 0.6s ease both;
+}
+
+.app-loading .app-loading-logo {
+  width: 96px;
+  border-radius: 50%;
+  filter: drop-shadow(0 12px 28px rgb(0 101 204 / 25%));
+  animation: logo-float 2.4s ease-in-out infinite;
+}
+
+.app-loading .app-loading-progress {
+  position: relative;
+  width: 220px;
+  height: 4px;
+  margin-top: 32px;
+  overflow: hidden;
+  border-radius: 9999px;
+  background-color: var(--loading-track);
+}
+
+.app-loading .app-loading-progress i {
+  position: absolute;
+  left: -40%;
+  width: 40%;
+  height: 100%;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, transparent, var(--loading-bar));
+  animation: progress-slide 1.2s ease-in-out infinite;
+}
+
+.app-loading .app-loading-title {
+  margin-top: 24px;
+  color: var(--loading-title);
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: 3px;
+}
+
+@keyframes logo-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes progress-slide {
+  to {
+    left: 100%;
+  }
+}
+
+@keyframes loading-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

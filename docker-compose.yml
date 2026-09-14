@@ -1,0 +1,98 @@
+# ============================================================================
+# 一键起后端：NestJS 服务 + MySQL（首次自动导入 init.sql） + Redis
+#
+# 位置：与 init.sql / Dockerfile.server / .dockerignore 同级（仓库根）
+# 用法：先在仓库根建 .env 写入下面两个变量，然后
+#   docker compose up -d --build
+#
+# .env 内容（仓库根，勿提交）：
+#   MYSQL_PASSWORD=your-strong-password
+#   JWT_SECRET=your-random-secret
+# ============================================================================
+
+services:
+  server:
+    build:
+      # 上下文 = 仓库根，和根目录的 .dockerignore 同级（Docker 只读上下文根下的 .dockerignore）
+      context: .
+      dockerfile: Dockerfile.server
+    image: nest-admin-server:latest
+    container_name: nest-admin-server
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    environment:
+      NODE_ENV: production
+      TZ: Asia/Shanghai
+      SERVER_PORT: 3000
+      SERVER_GLOBAL_PREFIX: /api
+      SERVER_IS_DEMO: 'false'
+      # 容器网络内直接用服务名当主机名，不要写 127.0.0.1
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?请先在仓库根 .env 配置 MYSQL_PASSWORD}
+      MYSQL_DATABASE: nestdemo
+      # 表结构由 init.sql 负责，禁止 TypeORM 自动改表
+      MYSQL_SYNCHRONIZE: 'false'
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DB: 0
+      JWT_SECRET: ${JWT_SECRET:?请先在仓库根 .env 配置 JWT_SECRET}
+      JWT_EXPIRES_IN: 1800
+    volumes:
+      # 上传文件 / 日志目录都相对 process.cwd()，即 /app
+      - uploads:/app/uploads
+      - logs:/app/logs
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  mysql:
+    image: mysql:8.4.7
+    container_name: nest-admin-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD:?}
+      # init.sql 没有 CREATE DATABASE / USE，全靠这个变量给它一个默认库
+      MYSQL_DATABASE: nestdemo
+      TZ: Asia/Shanghai
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - mysql-data:/var/lib/mysql
+      # 只在数据目录为空（首次初始化）时执行一次；
+      # 想重新导入：docker compose down -v 后重新 up
+      - ./init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    # 需要从宿主机连库调试时打开（本机已有 3306 会冲突）
+    # ports:
+    #   - '3306:3306'
+    healthcheck:
+      test: ['CMD-SHELL', 'mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  redis:
+    image: redis:7.4.5-alpine
+    container_name: nest-admin-redis
+    restart: unless-stopped
+    # 不加 requirepass，与 server 端「REDIS_PASSWORD 缺省即不传密码」一致
+    command: ['redis-server', '--appendonly', 'yes']
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  uploads:
+  logs:
+  mysql-data:
+  redis-data:
