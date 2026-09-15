@@ -1,0 +1,42 @@
+/* 全局滚动条美化（对齐 Element Plus el-scrollbar 视觉，深色模式跟随 html.dark） */
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #9093994d transparent;
+}
+
+/* WebKit */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #9093994d;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #90939980;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+html.dark * {
+  scrollbar-color: #a3a6ad4d transparent;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background-color: #a3a6ad4d;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background-color: #a3a6ad80;
+}

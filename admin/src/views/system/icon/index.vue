@@ -28,13 +28,11 @@ const mode = ref<number>(1)
 /** 输入时同步筛选 */
 const list = computed(() => (name.value ? iconNameList.value.filter((item) => item.includes(name.value)) : iconNameList.value))
 
-/**
- * 获取 SVG 图标文件列表
- * @description 从指定目录读取所有 SVG 文件并提取文件名（不含扩展名）
- */
+/** 获取 SVG 图标文件列表 */
+const svgModules = import.meta.glob('@/assets/svg-icons/*.svg', { query: '?raw', import: 'default' })
+
 function getList() {
-  const svgFileList = import.meta.glob('@/assets/svg-icons/*.svg')
-  const svgPathList: string[] = Object.keys(svgFileList)
+  const svgPathList: string[] = Object.keys(svgModules)
   iconNameList.value = svgPathList.map((svgPath) => svgPath.match(/\/([^/]+)\.\w+$/)?.[1] || svgPath)
 }
 
@@ -47,8 +45,7 @@ function handleClickIcon(name: string) {
 }
 
 async function handleDownload(name: string) {
-  const data = await import(`@/assets/icons/${name}.svg`)
-  const svgContent: string = decodeURIComponent(data.default).replace('data:image/svg+xml,', '')
+  const svgContent = await svgModules[`/src/assets/svg-icons/${name}.svg`]()
   const blob = new Blob([svgContent], { type: 'image/svg+xml' })
   linkDownload(blob, `${name}.svg`)
 }

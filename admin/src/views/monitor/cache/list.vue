@@ -62,9 +62,8 @@
 
 <script setup lang="ts">
 import { isNil, TipModal } from '@/utils'
-import type { Cache } from '@/types'
+import type { Cache, ProTableColumn } from '@/types'
 import { CacheRequest } from '@/api/monitor/cache.request'
-import type { ProTableColumn } from '@/types'
 
 /** 缓存名称列表 */
 const names = ref<Cache.Name[]>([])
@@ -90,8 +89,8 @@ const nameColumns: ProTableColumn<Cache.Name>[] = [
 /** 缓存键名列表的展示列配置项 */
 const keyColumns: ProTableColumn<{ key: string }>[] = [
   { align: 'center', label: '序号', type: 'index', width: 64 },
-  { align: 'center', label: '缓存键名', prop: 'key', width: 240, slot: 'key' },
-  { align: 'center', label: '操作', slot: 'action' },
+  { align: 'center', label: '缓存键名', prop: 'key', minWidth: 260, slot: 'key' },
+  { align: 'center', label: '操作', slot: 'action', fixed: 'right' },
 ]
 
 /** TTL 展示文本 */
