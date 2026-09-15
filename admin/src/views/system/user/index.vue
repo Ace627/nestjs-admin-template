@@ -44,14 +44,12 @@
 
 <script setup lang="ts">
 import { TipModal } from '@/utils'
-import type { User } from '@/types'
-import { UserRequest } from '@/api/system/user.request'
 import { useDict } from '@/hooks/useDict'
-import UserDialog from './components/UserDialog.vue'
-import ResetPwdDialog from './components/ResetPwdDialog.vue'
-import type { ProSearchItem } from '@/components/ProSearch/types.ts'
-import type { ProTableColumn } from '@/components/ProTable/types.ts'
 import DeptTree from './components/DeptTree.vue'
+import UserDialog from './components/UserDialog.vue'
+import { UserRequest } from '@/api/system/user.request'
+import ResetPwdDialog from './components/ResetPwdDialog.vue'
+import type { User, ProSearchItem, ProTableColumn } from '@/types'
 
 const list = ref<User.SysUser[]>([])
 const multipleSelection = ref<User.SysUser[]>([])

@@ -40,13 +40,12 @@
 </template>
 
 <script setup lang="ts">
+defineOptions({ name: 'FileUploadDialog' })
 import type { UploadFile, UploadRawFile } from 'element-plus'
 import { TipModal } from '@/utils'
 import { UploadRequest } from '@/api/common/upload.request'
 import { FileRequest } from '@/api/system/file.request'
 import type { File as SysFile } from '@/types'
-
-defineOptions({ name: 'FileUploadDialog' })
 
 const SINGLE_LIMIT = 10 * 1024 * 1024
 const CHUNK_SIZE = 5 * 1024 * 1024

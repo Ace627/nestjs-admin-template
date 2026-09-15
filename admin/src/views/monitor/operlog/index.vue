@@ -40,13 +40,11 @@
 </template>
 
 <script setup lang="ts">
-import type { Operlog } from '@/types'
 import { useDict } from '@/hooks/useDict'
 import OperateDetailDialog from './detail.vue'
 import { linkDownload, TipModal } from '@/utils'
 import { OperateinfoRequest } from '@/api/monitor/operlog.request'
-import type { ProSearchItem } from '@/components/ProSearch/types.ts'
-import type { ProTableColumn } from '@/components/ProTable/types.ts'
+import type { Operlog, ProTableColumn, ProSearchItem } from '@/types'
 
 const { sys_common_status, sys_oper_type } = useDict('sys_common_status', 'sys_oper_type')
 

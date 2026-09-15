@@ -36,13 +36,11 @@
 </template>
 
 <script setup lang="ts">
-import { linkDownload, TipModal } from '@/utils'
-import type { JobLog } from '@/types'
-import type { ProSearchItem } from '@/components/ProSearch/types.ts'
-import type { ProTableColumn } from '@/components/ProTable/types.ts'
-import { JobLogRequest } from '@/api/monitor/job-log.request'
 import { useDict } from '@/hooks/useDict'
 import JobLogDetailDialog from './detail.vue'
+import { linkDownload, TipModal } from '@/utils'
+import { JobLogRequest } from '@/api/monitor/job-log.request'
+import type { JobLog, ProSearchItem, ProTableColumn } from '@/types'
 
 const { sys_common_status } = useDict('sys_common_status')
 const router = useRouter()

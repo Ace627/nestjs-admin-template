@@ -64,7 +64,7 @@
 import { isNil, TipModal } from '@/utils'
 import type { Cache } from '@/types'
 import { CacheRequest } from '@/api/monitor/cache.request'
-import type { ProTableColumn } from '@/components/ProTable/types'
+import type { ProTableColumn } from '@/types'
 
 /** 缓存名称列表 */
 const names = ref<Cache.Name[]>([])

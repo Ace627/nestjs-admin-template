@@ -40,13 +40,11 @@
 
 <script setup lang="ts">
 import { TipModal } from '@/utils'
-import type { Role } from '@/types'
-import { RoleRequest } from '@/api/system/role.request'
 import RoleDialog from './components/RoleDialog.vue'
+import { RoleRequest } from '@/api/system/role.request'
 import AuthPermission from './components/AuthPermission.vue'
 import DataScopeDialog from './components/DataScopeDialog.vue'
-import type { ProSearchItem } from '@/components/ProSearch/types.ts'
-import type { ProTableColumn } from '@/components/ProTable/types.ts'
+import type { Role, ProSearchItem, ProTableColumn } from '@/types'
 
 const list = ref<Role.RoleItem[]>([])
 const multipleSelection = ref<Role.RoleItem[]>([])

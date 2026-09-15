@@ -47,13 +47,12 @@
 </template>
 
 <script setup lang="ts">
+defineOptions({ name: 'RecycleDrawer' })
 import { TipModal } from '@/utils'
 import type { File } from '@/types'
 import { FileRequest } from '@/api/system/file.request'
 import { FILE_TYPE } from '@/types/api/system/file'
 import { formatFileSize } from '@/utils/file'
-
-defineOptions({ name: 'RecycleDrawer' })
 
 const emit = defineEmits<{ changed: [] }>()
 

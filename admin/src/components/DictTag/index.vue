@@ -10,9 +10,8 @@
 </template>
 
 <script setup lang="ts">
-import type { DictSelectItem } from '@/hooks/useDict'
-
 defineOptions({ name: 'DictTag' })
+import type { DictSelectItem } from '@/hooks/useDict'
 
 /** el-tag 支持的回显样式（dict 数据 listClass 字段取值须在此范围内） */
 type TagType = 'primary' | 'success' | 'warning' | 'info' | 'danger'

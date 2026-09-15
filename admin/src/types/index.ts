@@ -14,3 +14,8 @@ export * as Dept from './api/system/dept'
 export * as File from './api/system/file'
 export * as Upload from './api/common/upload'
 export * as Dashboard from './api/dashboard'
+
+// 此处统一暴露全局组件的类型
+export * from '@/components/SvgIcon/types'
+export * from '@/components/ProTable/types'
+export * from '@/components/ProSearch/types'

@@ -53,18 +53,14 @@
 
 <script setup lang="ts">
 import { TipModal } from '@/utils'
-import type { File } from '@/types'
-import { FileRequest } from '@/api/system/file.request'
 import { FILE_TYPE } from '@/types/api/system/file'
-import { formatFileSize, linkDownload } from '@/utils/file'
-import type { ProSearchItem } from '@/components/ProSearch/types.ts'
-import type { ProTableColumn } from '@/components/ProTable/types.ts'
 import FolderTree from './components/FolderTree.vue'
+import { FileRequest } from '@/api/system/file.request'
 import FolderDialog from './components/FolderDialog.vue'
-import FileUploadDialog from './components/FileUploadDialog.vue'
 import RecycleDrawer from './components/RecycleDrawer.vue'
-
-defineOptions({ name: 'File' })
+import { formatFileSize, linkDownload } from '@/utils/file'
+import FileUploadDialog from './components/FileUploadDialog.vue'
+import type { File, ProSearchItem, ProTableColumn } from '@/types'
 
 const list = ref<File.Item[]>([])
 const multipleSelection = ref<File.Item[]>([])

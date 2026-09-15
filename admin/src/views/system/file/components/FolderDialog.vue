@@ -14,11 +14,10 @@
 </template>
 
 <script setup lang="ts">
+defineOptions({ name: 'FolderDialog' })
 import { TipModal } from '@/utils'
 import type { File } from '@/types'
 import { FileRequest } from '@/api/system/file.request'
-
-defineOptions({ name: 'FolderDialog' })
 
 const emit = defineEmits<{ success: [] }>()
 

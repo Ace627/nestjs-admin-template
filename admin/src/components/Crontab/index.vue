@@ -28,10 +28,10 @@
 <script setup lang="ts">
 defineOptions({ name: 'CrontabDialog' })
 import dayjs from 'dayjs'
-import { CronExpressionParser } from 'cron-parser'
 import cronstrue from 'cronstrue'
-import 'cronstrue/locales/zh_CN.js' // 侧效注册 zh_CN locale（避免 i18n 全量 84 语言打包）
+import 'cronstrue/locales/zh_CN.js'
 import Crontab from './generator.vue'
+import { CronExpressionParser } from 'cron-parser'
 
 /** 表达式各段的展示标签与含义说明 */
 const SEGMENT_META = [

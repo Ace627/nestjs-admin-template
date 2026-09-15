@@ -47,11 +47,10 @@
 </template>
 
 <script setup lang="ts">
+defineOptions({ name: 'FolderTree' })
 import type { TreeNodeData } from 'element-plus'
 import type { File } from '@/types'
 import { FileRequest } from '@/api/system/file.request'
-
-defineOptions({ name: 'FolderTree' })
 
 /** 根节点虚拟 ID（与后端 DEFAULT_PARENT_ID 一致），仅作为回根目录的事件值 */
 const ROOT_ID = '0'

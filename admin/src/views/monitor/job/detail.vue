@@ -27,9 +27,8 @@
 </template>
 
 <script setup lang="ts">
-import type { JobLog } from '@/types'
-
 defineOptions({ name: 'JobLogDetailDialog' })
+import type { JobLog } from '@/types'
 
 const appStore = useAppStore()
 

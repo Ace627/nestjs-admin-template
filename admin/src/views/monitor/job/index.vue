@@ -43,12 +43,10 @@
 
 <script setup lang="ts">
 import { TipModal } from '@/utils'
-import type { Job } from '@/types'
-import type { ProSearchItem } from '@/components/ProSearch/types.ts'
-import type { ProTableColumn } from '@/components/ProTable/types.ts'
-import { JobRequest } from '@/api/monitor/job.request'
 import { useDict } from '@/hooks/useDict'
 import JobDialog from './components/JobDialog.vue'
+import { JobRequest } from '@/api/monitor/job.request'
+import type { Job, ProSearchItem, ProTableColumn } from '@/types'
 
 const { sys_common_status, sys_job_group } = useDict('sys_common_status', 'sys_job_group')
 const router = useRouter()

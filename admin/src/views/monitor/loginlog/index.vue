@@ -31,12 +31,10 @@
 </template>
 
 <script setup lang="ts">
-import { linkDownload, TipModal } from '@/utils'
-import type { Loginlog } from '@/types'
-import { LoginlogRequest } from '@/api/monitor/loginlog.request'
 import { useDict } from '@/hooks/useDict'
-import type { ProSearchItem } from '@/components/ProSearch/types'
-import type { ProTableColumn } from '@/components/ProTable/types'
+import { linkDownload, TipModal } from '@/utils'
+import { LoginlogRequest } from '@/api/monitor/loginlog.request'
+import type { ProTableColumn, ProSearchItem, Loginlog } from '@/types'
 
 const { sys_common_status } = useDict('sys_common_status')
 const list = ref<Loginlog.Item[]>([])

@@ -110,7 +110,7 @@
 </template>
 
 <script setup lang="ts">
-import type { ProTableColumn } from '@/components/ProTable/types'
+import type { ProTableColumn } from '@/types'
 
 const VITE_APP_TITLE = import.meta.env.VITE_APP_TITLE
 

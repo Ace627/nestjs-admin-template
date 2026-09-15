@@ -33,12 +33,10 @@
 
 <script setup lang="ts">
 import { TipModal } from '@/utils'
-import type { Dept } from '@/types'
-import { DeptRequest } from '@/api/system/dept.request'
 import { useDict } from '@/hooks/useDict'
 import DeptDialog from './components/DeptDialog.vue'
-import type { ProSearchItem } from '@/components/ProSearch/types.ts'
-import type { ProTableColumn } from '@/components/ProTable/types.ts'
+import { DeptRequest } from '@/api/system/dept.request'
+import type { Dept, ProSearchItem, ProTableColumn } from '@/types'
 
 const deptDialogRef = useTemplateRef('deptDialogRef')
 const list = ref<Dept.DeptItem[]>([])

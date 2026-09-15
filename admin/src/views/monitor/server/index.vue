@@ -63,7 +63,7 @@
 import { TipModal } from '@/utils'
 import type { Server } from '@/types'
 import { ServerRequest } from '@/api/monitor/server.request'
-import type { ProTableColumn } from '@/components/ProTable/types'
+import type { ProTableColumn } from '@/types'
 
 const cpus = ref<{ label: string; value: any }[]>([])
 const memorys = ref<{ label: string; value: any }[]>([])

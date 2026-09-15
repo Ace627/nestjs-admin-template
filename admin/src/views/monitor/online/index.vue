@@ -16,8 +16,7 @@
 import { TipModal } from '@/utils'
 import type { Online } from '@/types'
 import { OnlineRequest } from '@/api/monitor/online.request'
-import type { ProTableColumn } from '@/components/ProTable/types'
-import type { ProSearchItem } from '@/components/ProSearch/types'
+import type { ProTableColumn, ProSearchItem } from '@/types'
 
 const list = ref<Online.Item[]>([])
 const total = ref<number>(0)

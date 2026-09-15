@@ -74,11 +74,9 @@
 
 <script setup lang="ts">
 import { TipModal } from '@/utils'
-import type { Dict } from '@/types'
-import { DictRequest } from '@/api/system/dict.request'
 import { useDict } from '@/hooks/useDict'
-import type { ProSearchItem } from '@/components/ProSearch/types.ts'
-import type { ProTableColumn } from '@/components/ProTable/types.ts'
+import { DictRequest } from '@/api/system/dict.request'
+import type { Dict, ProSearchItem, ProTableColumn } from '@/types'
 
 const route = useRoute()
 const router = useRouter()

@@ -41,12 +41,10 @@
 
 <script setup lang="ts">
 import { TipModal } from '@/utils'
-import type { Menu } from '@/types'
-import { MenuRequest } from '@/api/system/menu.request'
 import { useDict } from '@/hooks/useDict'
 import MenuDialog from './components/MenuDialog.vue'
-import type { ProSearchItem } from '@/components/ProSearch/types.ts'
-import type { ProTableColumn } from '@/components/ProTable/types.ts'
+import { MenuRequest } from '@/api/system/menu.request'
+import type { Menu, ProSearchItem, ProTableColumn } from '@/types'
 
 const menuDialogRef = useTemplateRef('menuDialogRef')
 const list = ref<Menu.MenuItem[]>([])
