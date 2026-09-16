@@ -5,8 +5,8 @@
   --loading-glow-a: rgb(0 101 204 / 22%);
   --loading-glow-b: rgb(0 101 204 / 18%);
   --loading-title: rgb(0 0 0 / 85%);
-  --loading-track: rgb(0 0 0 / 8%);
   --loading-bar: #0065cc;
+  --loading-bar-light: #7fb3e8;
 
   position: fixed;
   left: 0;
@@ -17,11 +17,8 @@
   justify-content: center;
   align-items: center;
   background:
-    linear-gradient(var(--loading-grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--loading-grid) 1px, transparent 1px),
-    radial-gradient(circle 480px at 12% 8%, var(--loading-glow-a), transparent 70%),
-    radial-gradient(circle 560px at 88% 92%, var(--loading-glow-b), transparent 70%),
-    var(--loading-bg);
+    linear-gradient(var(--loading-grid) 1px, transparent 1px), linear-gradient(90deg, var(--loading-grid) 1px, transparent 1px), radial-gradient(circle 480px at 12% 8%, var(--loading-glow-a), transparent 70%),
+    radial-gradient(circle 560px at 88% 92%, var(--loading-glow-b), transparent 70%), var(--loading-bg);
   background-size:
     40px 40px,
     40px 40px,
@@ -37,8 +34,8 @@ html.dark .app-loading {
   --loading-glow-a: rgb(0 101 204 / 35%);
   --loading-glow-b: rgb(0 101 204 / 28%);
   --loading-title: rgb(255 255 255 / 88%);
-  --loading-track: rgb(255 255 255 / 10%);
   --loading-bar: #4d9fff;
+  --loading-bar-light: #8ec4ff;
 }
 
 .app-loading .app-loading-wrap {
@@ -46,7 +43,6 @@ html.dark .app-loading {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  animation: loading-fade-in 0.6s ease both;
 }
 
 .app-loading .app-loading-logo {
@@ -56,24 +52,35 @@ html.dark .app-loading {
   animation: logo-float 2.4s ease-in-out infinite;
 }
 
-.app-loading .app-loading-progress {
+.app-loading .app-loading-item {
   position: relative;
-  width: 220px;
-  height: 4px;
+  width: 60px;
+  height: 60px;
   margin-top: 32px;
-  overflow: hidden;
-  border-radius: 9999px;
-  background-color: var(--loading-track);
 }
 
-.app-loading .app-loading-progress i {
+.app-loading .app-loading-outter {
   position: absolute;
-  left: -40%;
-  width: 40%;
+  width: 100%;
   height: 100%;
-  border-radius: 9999px;
-  background: linear-gradient(90deg, transparent, var(--loading-bar));
-  animation: progress-slide 1.2s ease-in-out infinite;
+  border: 4px solid var(--loading-bar);
+  border-bottom: 0;
+  border-left-color: transparent;
+  border-radius: 50%;
+  animation: loader-outter 1s cubic-bezier(0.42, 0.61, 0.58, 0.41) infinite;
+}
+
+.app-loading .app-loading-inner {
+  position: absolute;
+  top: calc(50% - 20px);
+  left: calc(50% - 20px);
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--loading-bar-light);
+  border-right: 0;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: loader-inner 1s cubic-bezier(0.42, 0.61, 0.58, 0.41) infinite;
 }
 
 .app-loading .app-loading-title {
@@ -94,19 +101,14 @@ html.dark .app-loading {
   }
 }
 
-@keyframes progress-slide {
+@keyframes loader-outter {
   to {
-    left: 100%;
+    transform: rotate(360deg);
   }
 }
 
-@keyframes loading-fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
+@keyframes loader-inner {
   to {
-    opacity: 1;
-    transform: translateY(0);
+    transform: rotate(-360deg);
   }
 }

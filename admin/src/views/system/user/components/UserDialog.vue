@@ -38,7 +38,7 @@
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="年龄" prop="age">
+          <el-form-item label="用户年龄" prop="age">
             <el-input-number v-model="form.age" :min="1" :max="120" controls-position="right" placeholder="请输入年龄" style="width: 100%" />
           </el-form-item>
         </el-col>
@@ -51,16 +51,7 @@
         </el-col>
         <el-col :span="12">
           <el-form-item label="归属部门" prop="deptId">
-            <el-tree-select
-              v-model="form.deptId"
-              :data="deptTree"
-              check-strictly
-              node-key="id"
-              :props="{ label: 'deptName' }"
-              placeholder="请选择归属部门"
-              clearable
-              style="width: 100%"
-            />
+            <el-tree-select v-model="form.deptId" :data="deptTree" check-strictly node-key="id" :props="{ label: 'deptName' }" placeholder="请选择归属部门" clearable style="width: 100%" />
           </el-form-item>
         </el-col>
         <el-col :span="24">
@@ -81,14 +72,12 @@
 <script setup lang="ts">
 defineOptions({ name: 'UserDialog' })
 import { TipModal } from '@/utils'
-import type { User } from '@/types'
+import { useDict } from '@/hooks/useDict'
+import type { FormRules } from 'element-plus'
+import type { User, Dept, Role } from '@/types'
 import { UserRequest } from '@/api/system/user.request'
 import { RoleRequest } from '@/api/system/role.request'
 import { DeptRequest } from '@/api/system/dept.request'
-import { useDict } from '@/hooks/useDict'
-import type { Role } from '@/types'
-import type { Dept } from '@/types'
-import type { FormRules } from 'element-plus'
 
 const emits = defineEmits<{ getList: [] }>()
 
@@ -119,6 +108,7 @@ const rules: FormRules<User.UserForm> = {
   nickname: [{ required: true, message: '用户昵称不能为空', trigger: 'blur' }],
   phone: [{ pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号码', trigger: 'blur' }],
   email: [{ type: 'email', message: '请输入正确的邮箱格式', trigger: 'blur' }],
+  age: [{ required: true, message: '用户年龄不能为空', trigger: 'blur' }],
   roleIds: [{ required: true, message: '用户角色不能为空', trigger: 'change' }],
   status: [{ required: true, message: '状态不能为空', trigger: 'change' }],
   gender: [{ required: true, message: '性别不能为空', trigger: 'change' }],
@@ -138,7 +128,7 @@ async function resetForm(userId?: string) {
     const deptId = data.deptId && data.deptId !== '0' ? data.deptId : undefined
     form.value = { ...data, deptId, roleIds: (data.roles ?? []).map((item) => item.id) }
   } else {
-    form.value = { status: '1', gender: '2' }
+    form.value = { status: '1', gender: '2', password: '123456' }
   }
 }
 
@@ -185,4 +175,3 @@ async function handleSubmit() {
 
 defineExpose({ open })
 </script>
-
