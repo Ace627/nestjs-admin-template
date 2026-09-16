@@ -7,21 +7,24 @@
 
     <!-- 右侧文件列表 -->
     <div class="flex flex-col flex-1 min-w-0">
-      <ProSearch v-permissions="['system:file:query']" :items v-model="queryParams" @query="handleQuery" @reset="resetQuery" />
+      <ProSearch v-show="showSearch" v-permissions="['system:file:query']" :items v-model="queryParams" @query="handleQuery" @reset="resetQuery" />
 
-      <div class="mb-16px">
-        <el-button v-permissions="['system:file:create']" plain type="primary" @click="handleUpload">
-          <template #icon><SvgIcon name="Upload" /></template><span>上传文件</span>
-        </el-button>
-        <el-button v-permissions="['system:file:delete']" plain type="danger" @click="handleDelete()" :disabled="!isMultiple">
-          <template #icon><SvgIcon name="Delete" /></template><span>批量删除</span>
-        </el-button>
-        <el-button v-permissions="['system:file:recycle']" plain type="warning" @click="handleOpenRecycle">
-          <template #icon><SvgIcon name="Clear" /></template><span>回收站</span>
-        </el-button>
+      <div class="mb-16px flex items-center justify-between">
+        <div>
+          <el-button v-permissions="['system:file:create']" plain type="primary" @click="handleUpload">
+            <template #icon><SvgIcon name="Upload" /></template><span>上传文件</span>
+          </el-button>
+          <el-button v-permissions="['system:file:delete']" plain type="danger" @click="handleDelete()" :disabled="!isMultiple">
+            <template #icon><SvgIcon name="Delete" /></template><span>批量删除</span>
+          </el-button>
+          <el-button v-permissions="['system:file:recycle']" plain type="warning" @click="handleOpenRecycle">
+            <template #icon><SvgIcon name="Clear" /></template><span>回收站</span>
+          </el-button>
+        </div>
+        <RightToolbar v-model:show-search="showSearch" v-model:hidden-column-keys="hiddenColumnKeys" :columns="columns" storage-key="system:file" @refresh="getList" />
       </div>
 
-      <ProTable ref="tableRef" v-loading="loading" :data="list" :columns="columns" @selection-change="handleSelectionChange">
+      <ProTable ref="tableRef" v-loading="loading" :data="list" :columns="columns" :hidden-column-keys="hiddenColumnKeys" @selection-change="handleSelectionChange">
         <template #fileName="{ row }">
           <div class="flex items-center justify-center gap-4px">
             <SvgIcon :name="row.fileType === FILE_TYPE.FOLDER ? 'Resource' : 'Markdown'" class="shrink-0" />
@@ -74,6 +77,11 @@ const fileUploadDialogRef = useTemplateRef('fileUploadDialogRef')
 const recycleDrawerRef = useTemplateRef('recycleDrawerRef')
 const queryParams = ref<File.Query>({ pageNo: 1, pageSize: 10, parentId: '0' })
 const appStore = useAppStore()
+
+/** 搜索区域显隐（RightToolbar v-model 控制） */
+const showSearch = ref(true)
+/** 隐藏列 key 数组（RightToolbar v-model 控制） */
+const hiddenColumnKeys = ref<string[]>([])
 
 const items = computed<ProSearchItem[]>(() => [{ type: 'input', prop: 'fileName', label: '文件名称' }])
 

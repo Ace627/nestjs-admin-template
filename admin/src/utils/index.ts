@@ -12,5 +12,6 @@ export * from './cache/tags-view.cache'
 export * from './cache/login-params.cache'
 export * from './cache/sidebar-status.cache'
 export * from './cache/system-setting.cache'
+export * from './cache/column-hidden.cache'
 
 export { default as echarts } from './libs/echarts'

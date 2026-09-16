@@ -1,17 +1,20 @@
 <template>
   <div class="app-content flex flex-col h-full">
-    <ProSearch v-permissions="['system:role:query']" :items="items" v-model="queryParams" @query="handleQuery" @reset="resetQuery" />
+    <ProSearch v-show="showSearch" v-permissions="['system:role:query']" :items="items" v-model="queryParams" @query="handleQuery" @reset="resetQuery" />
 
-    <div class="mb-16px">
-      <el-button v-permissions="['system:role:create']" plain type="primary" @click="handleCreate">
-        <template #icon><SvgIcon name="Plus" /></template><span>新增</span>
-      </el-button>
-      <el-button v-permissions="['system:role:delete']" plain type="danger" @click="handleDelete()" :disabled="!isMultiple">
-        <template #icon><SvgIcon name="Delete" /></template><span>批量删除</span>
-      </el-button>
+    <div class="mb-16px flex items-center justify-between">
+      <div>
+        <el-button v-permissions="['system:role:create']" plain type="primary" @click="handleCreate">
+          <template #icon><SvgIcon name="Plus" /></template><span>新增</span>
+        </el-button>
+        <el-button v-permissions="['system:role:delete']" plain type="danger" @click="handleDelete()" :disabled="!isMultiple">
+          <template #icon><SvgIcon name="Delete" /></template><span>批量删除</span>
+        </el-button>
+      </div>
+      <RightToolbar v-model:show-search="showSearch" v-model:hidden-column-keys="hiddenColumnKeys" :columns="columns" storage-key="system:role" @refresh="getList" />
     </div>
 
-    <ProTable ref="tableRef" v-loading="loading" :data="list" :columns="columns" @selection-change="handleSelectionChange">
+    <ProTable ref="tableRef" v-loading="loading" :data="list" :columns="columns" :hidden-column-keys="hiddenColumnKeys" @selection-change="handleSelectionChange">
       <template #status="{ row }">
         <template v-if="row.roleCode !== 'admin' && ['0', '1'].includes(row.status)">
           <el-switch v-permissions="['system:role:update']" v-model="row.status" size="small" inline-prompt active-value="1" inactive-value="0" @click="handleChangeStatus(row)" />
@@ -56,6 +59,11 @@ const roleDialogRef = useTemplateRef('roleDialogRef')
 const authPermissionRef = useTemplateRef('authPermissionRef')
 const dataScopeDialogRef = useTemplateRef('dataScopeDialogRef')
 const queryParams = ref<Role.RoleQuery>({ pageNo: 1, pageSize: 10 })
+
+/** 搜索区域显隐（RightToolbar v-model 控制） */
+const showSearch = ref(true)
+/** 隐藏列 key 数组（RightToolbar v-model 控制） */
+const hiddenColumnKeys = ref<string[]>([])
 
 const { sys_normal_disable } = useDict('sys_normal_disable')
 

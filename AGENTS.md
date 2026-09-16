@@ -2,7 +2,6 @@
 
 ## 基本约定
 
-- 智能体的数据存放目录为 `.codebuddy`
 - 全程使用简体中文回复
 - 每次回复前，用固定称呼「主人」开头
 
@@ -25,7 +24,8 @@
 
 ## 前端代码
 
-- 图标仅允许使用 `SvgIcon` 图标
+- 界面图标一律用 `SvgIcon` 组件（`src/assets/svg-icons` 下的 svg），禁止 Element Plus 图标、图标字体、图片和 emoji
+- localStorage 须经 `src/utils/cache/*.cache.ts` 封装并在 `src/utils/index.ts` 统一导出，禁止裸调
 
 ## 技术规则
 

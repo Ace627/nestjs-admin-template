@@ -1,24 +1,27 @@
 <template>
   <div class="app-content flex flex-col h-full">
-    <ProSearch v-permissions="['monitor:job:query']" :items="items" v-model="queryParams" @query="handleQuery" @reset="resetQuery" />
+    <ProSearch v-show="showSearch" v-permissions="['monitor:job:query']" :items="items" v-model="queryParams" @query="handleQuery" @reset="resetQuery" />
 
-    <div class="mb-16px">
-      <el-button v-permissions="['monitor:job:delete']" plain type="danger" @click="handleDelete()" :disabled="!isMultiple">
-        <template #icon><SvgIcon name="Delete" /></template><span>批量删除</span>
-      </el-button>
-      <el-button v-permissions="['monitor:job:delete']" plain type="danger" @click="handleClear">
-        <template #icon><SvgIcon name="Delete" /></template><span>清空</span>
-      </el-button>
-      <el-button v-permissions="['monitor:job:export']" plain type="warning" :loading="exportLoading" @click="handleExport">
-        <template #icon><SvgIcon name="Download" /></template><span>导出</span>
-      </el-button>
-      <el-button plain type="info" @click="handleClose">
-        <span>关闭</span>
-        <template #icon><SvgIcon name="Close" /></template>
-      </el-button>
+    <div class="mb-16px flex items-center justify-between">
+      <div>
+        <el-button v-permissions="['monitor:job:delete']" plain type="danger" @click="handleDelete()" :disabled="!isMultiple">
+          <template #icon><SvgIcon name="Delete" /></template><span>批量删除</span>
+        </el-button>
+        <el-button v-permissions="['monitor:job:delete']" plain type="danger" @click="handleClear">
+          <template #icon><SvgIcon name="Delete" /></template><span>清空</span>
+        </el-button>
+        <el-button v-permissions="['monitor:job:export']" plain type="warning" :loading="exportLoading" @click="handleExport">
+          <template #icon><SvgIcon name="Download" /></template><span>导出</span>
+        </el-button>
+        <el-button plain type="info" @click="handleClose">
+          <span>关闭</span>
+          <template #icon><SvgIcon name="Close" /></template>
+        </el-button>
+      </div>
+      <RightToolbar v-model:show-search="showSearch" v-model:hidden-column-keys="hiddenColumnKeys" :columns="columns" storage-key="monitor:job-log" @refresh="getList" />
     </div>
 
-    <ProTable ref="tableRef" v-loading="loading" :data="list" :columns="columns" @selection-change="handleSelectionChange">
+    <ProTable ref="tableRef" v-loading="loading" :data="list" :columns="columns" :hidden-column-keys="hiddenColumnKeys" @selection-change="handleSelectionChange">
       <template #status="{ row }">
         <DictTag :options="sys_common_status" :value="row.status" />
       </template>
@@ -55,6 +58,11 @@ const isMultiple = computed(() => multipleSelection.value.length > 0)
 const tableRef = useTemplateRef('tableRef')
 const jobLogDetailDialogRef = useTemplateRef('jobLogDetailDialogRef')
 const queryParams = ref<JobLog.QueryParams>({ pageNo: 1, pageSize: 10 })
+
+/** 搜索区域显隐（RightToolbar v-model 控制） */
+const showSearch = ref(true)
+/** 隐藏列 key 数组（RightToolbar v-model 控制） */
+const hiddenColumnKeys = ref<string[]>([])
 
 const items: ProSearchItem[] = [
   { type: 'input', prop: 'jobName', label: '任务名称' },

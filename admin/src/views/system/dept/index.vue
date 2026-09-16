@@ -1,19 +1,25 @@
 <template>
   <div class="app-content flex flex-col h-full">
-    <ProSearch v-permissions="['system:dept:query']" :items="items" v-model="queryParams" @query="handleQuery" @reset="resetQuery" />
+    <ProSearch v-show="showSearch" v-permissions="['system:dept:query']" :items="items" v-model="queryParams" @query="handleQuery" @reset="resetQuery" />
 
-    <div class="mb-16px">
-      <el-button v-permissions="['system:dept:create']" plain type="primary" @click="handleCreate()">
-        <template #icon><SvgIcon name="Plus" /></template><span>新增</span>
-      </el-button>
-      <el-button plain type="info" @click="toggleExpandAll">
-        <template #icon><SvgIcon name="Sort" /></template><span>{{ isExpandAll ? '折叠' : '展开' }}</span>
-      </el-button>
+    <div class="mb-16px flex items-center justify-between">
+      <div>
+        <el-button v-permissions="['system:dept:create']" plain type="primary" @click="handleCreate()">
+          <template #icon><SvgIcon name="Plus" /></template><span>新增</span>
+        </el-button>
+        <el-button plain type="info" @click="toggleExpandAll">
+          <template #icon><SvgIcon name="Sort" /></template><span>{{ isExpandAll ? '折叠' : '展开' }}</span>
+        </el-button>
+      </div>
+      <RightToolbar v-model:show-search="showSearch" v-model:hidden-column-keys="hiddenColumnKeys" :columns="columns" storage-key="system:dept" @refresh="getList" />
     </div>
 
-    <ProTable v-if="refreshTable" v-loading="loading" :data="list" :columns="columns" row-key="id" :default-expand-all="isExpandAll">
+    <ProTable v-if="refreshTable" v-loading="loading" :data="list" :columns="columns" :hidden-column-keys="hiddenColumnKeys" row-key="id" :default-expand-all="isExpandAll">
       <template #deptName="{ row }">
-        <span>{{ row.deptName }}</span>
+        <span class="dept-name">
+          <SvgIcon :name="row.children?.length ? 'Company' : 'Dept'" :class="row.children?.length ? 'dept-name__icon' : 'dept-name__icon--leaf'" />
+          <span>{{ row.deptName }}</span>
+        </span>
         <DictTag v-if="row.status === '0'" :options="sys_normal_disable" :value="row.status" class="ml-6px" />
       </template>
       <template #status="{ row }">
@@ -46,6 +52,11 @@ const isExpandAll = ref(false)
 const refreshTable = ref(true)
 /** 部门树查询参数（树表不分页） */
 const queryParams = ref<Dept.DeptQuery>({})
+
+/** 搜索区域显隐（RightToolbar v-model 控制） */
+const showSearch = ref(true)
+/** 隐藏列 key 数组（RightToolbar v-model 控制） */
+const hiddenColumnKeys = ref<string[]>([])
 
 const { sys_normal_disable } = useDict('sys_normal_disable')
 
@@ -117,4 +128,23 @@ function toggleExpandAll() {
 onMounted(getList)
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.dept-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  vertical-align: middle;
+
+  &__icon {
+    flex-shrink: 0;
+    font-size: 15px;
+    color: var(--el-color-warning);
+  }
+
+  &__icon--leaf {
+    flex-shrink: 0;
+    font-size: 15px;
+    color: var(--el-color-info);
+  }
+}
+</style>

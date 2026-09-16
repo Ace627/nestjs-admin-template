@@ -8,6 +8,7 @@ import ProPagination from '@/components/ProPagination/index.vue'
 import DictTag from '@/components/DictTag/index.vue'
 import IconSelect from '@/components/IconSelect/index.vue'
 import CrontabDialog from '@/components/Crontab/index.vue'
+import RightToolbar from '@/components/RightToolbar/index.vue'
 
 export function registerGlobalComponent(app: App<any>) {
   app.component('SvgIcon', SvgIcon)
@@ -19,4 +20,5 @@ export function registerGlobalComponent(app: App<any>) {
   app.component('DictTag', DictTag)
   app.component('IconSelect', IconSelect)
   app.component('CrontabDialog', CrontabDialog)
+  app.component('RightToolbar', RightToolbar)
 }

@@ -114,6 +114,7 @@ function getPlaceholder(item: ProSearchItem) {
   }
   .filter-toggle {
     color: var(--el-color-primary);
+    font-size: var(--el-font-size-base);
     transition: color var(--el-transition-duration-fast);
     &:hover {
       color: var(--el-color-primary-light-3);

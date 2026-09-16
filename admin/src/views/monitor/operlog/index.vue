@@ -1,23 +1,26 @@
 <template>
   <div class="app-content flex flex-col h-full">
-    <ProSearch v-permissions="['monitor:operlog:query']" :items="items" v-model="queryParams" @query="handleQuery" @reset="resetQuery" />
+    <ProSearch v-show="showSearch" v-permissions="['monitor:operlog:query']" :items="items" v-model="queryParams" @query="handleQuery" @reset="resetQuery" />
 
-    <div class="mb-16px">
-      <el-button v-permissions="['monitor:operlog:delete']" :loading type="danger" plain @click="handleDelete()" :disabled="!isMultiple">
-        <template #icon> <SvgIcon name="Delete" /> </template>
-        <span>批量删除</span>
-      </el-button>
-      <el-button v-permissions="['monitor:operlog:clear']" :loading type="danger" plain @click="handleClear">
-        <template #icon> <SvgIcon name="Delete" /> </template>
-        <span>清空</span>
-      </el-button>
-      <el-button v-permissions="['monitor:operlog:export']" :loading="exportLoading" type="warning" plain @click="handleExport">
-        <template #icon> <SvgIcon name="Download" /> </template>
-        <span>导出</span>
-      </el-button>
+    <div class="mb-16px flex items-center justify-between">
+      <div>
+        <el-button v-permissions="['monitor:operlog:delete']" :loading type="danger" plain @click="handleDelete()" :disabled="!isMultiple">
+          <template #icon> <SvgIcon name="Delete" /> </template>
+          <span>批量删除</span>
+        </el-button>
+        <el-button v-permissions="['monitor:operlog:clear']" :loading type="danger" plain @click="handleClear">
+          <template #icon> <SvgIcon name="Delete" /> </template>
+          <span>清空</span>
+        </el-button>
+        <el-button v-permissions="['monitor:operlog:export']" :loading="exportLoading" type="warning" plain @click="handleExport">
+          <template #icon> <SvgIcon name="Download" /> </template>
+          <span>导出</span>
+        </el-button>
+      </div>
+      <RightToolbar v-model:show-search="showSearch" v-model:hidden-column-keys="hiddenColumnKeys" :columns="columns" storage-key="monitor:operlog" @refresh="getList" />
     </div>
 
-    <ProTable ref="tableRef" v-loading="loading" :data="list" :columns="columns" @selection-change="handleSelectionChange">
+    <ProTable ref="tableRef" v-loading="loading" :data="list" :columns="columns" :hidden-column-keys="hiddenColumnKeys" @selection-change="handleSelectionChange">
       <template #businessType="{ row }">
         <DictTag :options="sys_oper_type" :value="row.businessType" />
       </template>
@@ -57,6 +60,11 @@ const isMultiple = computed(() => multipleSelection.value.length > 0)
 const tableRef = useTemplateRef('tableRef')
 const queryParams = ref<Operlog.QueryParams>({ pageNo: 1, pageSize: 10 })
 const operateDetailDialogRef = useTemplateRef('operateDetailDialogRef')
+
+/** 搜索区域显隐（RightToolbar v-model 控制） */
+const showSearch = ref(true)
+/** 隐藏列 key 数组（RightToolbar v-model 控制） */
+const hiddenColumnKeys = ref<string[]>([])
 
 const items = computed<ProSearchItem[]>(() => [
   { type: 'input', prop: 'title', label: '系统模块' },

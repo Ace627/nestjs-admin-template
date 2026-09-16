@@ -13,5 +13,6 @@ declare module 'vue' {
     DictTag: (typeof import('../components/DictTag/index.vue'))['default']
     IconSelect: (typeof import('../components/IconSelect/index.vue'))['default']
     CrontabDialog: (typeof import('../components/Crontab/index.vue'))['default']
+    RightToolbar: (typeof import('../components/RightToolbar/index.vue'))['default']
   }
 }

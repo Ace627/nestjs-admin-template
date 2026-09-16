@@ -1,20 +1,23 @@
 <template>
   <div class="app-content flex flex-col h-full">
-    <ProSearch v-permissions="['system:dict:query']" :items="items" v-model="queryParams" @query="handleQuery" @reset="resetQuery" />
+    <ProSearch v-show="showSearch" v-permissions="['system:dict:query']" :items="items" v-model="queryParams" @query="handleQuery" @reset="resetQuery" />
 
-    <div class="mb-16px">
-      <el-button v-permissions="['system:dict:create']" plain type="primary" @click="handleCreate">
-        <template #icon><SvgIcon name="Plus" /></template><span>新增</span>
-      </el-button>
-      <el-button v-permissions="['system:dict:delete']" plain type="danger" @click="handleDelete()" :disabled="!isMultiple">
-        <template #icon><SvgIcon name="Delete" /></template><span>批量删除</span>
-      </el-button>
-      <el-button v-permissions="['system:dict:refresh']" plain type="warning" :loading="refreshLoading" @click="handleClearCache">
-        <template #icon><SvgIcon name="Refresh" /></template><span>刷新缓存</span>
-      </el-button>
+    <div class="mb-16px flex items-center justify-between">
+      <div>
+        <el-button v-permissions="['system:dict:create']" plain type="primary" @click="handleCreate">
+          <template #icon><SvgIcon name="Plus" /></template><span>新增</span>
+        </el-button>
+        <el-button v-permissions="['system:dict:delete']" plain type="danger" @click="handleDelete()" :disabled="!isMultiple">
+          <template #icon><SvgIcon name="Delete" /></template><span>批量删除</span>
+        </el-button>
+        <el-button v-permissions="['system:dict:refresh']" plain type="warning" :loading="refreshLoading" @click="handleClearCache">
+          <template #icon><SvgIcon name="Refresh" /></template><span>刷新缓存</span>
+        </el-button>
+      </div>
+      <RightToolbar v-model:show-search="showSearch" v-model:hidden-column-keys="hiddenColumnKeys" :columns="columns" storage-key="system:dict" @refresh="getList" />
     </div>
 
-    <ProTable ref="tableRef" v-loading="loading" :data="list" :columns="columns" @selection-change="handleSelectionChange">
+    <ProTable ref="tableRef" v-loading="loading" :data="list" :columns="columns" :hidden-column-keys="hiddenColumnKeys" @selection-change="handleSelectionChange">
       <template #status="{ row }">
         <DictTag :options="sys_normal_disable" :value="row.status" />
       </template>
@@ -66,6 +69,11 @@ const loading = ref(true)
 const isMultiple = computed(() => multipleSelection.value.length > 0)
 const tableRef = useTemplateRef('tableRef')
 const queryParams = ref<Dict.TypeQuery>({ pageNo: 1, pageSize: 10 })
+
+/** 搜索区域显隐（RightToolbar v-model 控制） */
+const showSearch = ref(true)
+/** 隐藏列 key 数组（RightToolbar v-model 控制） */
+const hiddenColumnKeys = ref<string[]>([])
 
 const visible = ref(false)
 const dialogTitle = ref('新增字典')

@@ -1,17 +1,20 @@
 <template>
   <div class="app-content flex flex-col h-full">
-    <ProSearch v-permissions="['system:menu:query']" :items="items" v-model="queryParams" @query="handleQuery" @reset="resetQuery" />
+    <ProSearch v-show="showSearch" v-permissions="['system:menu:query']" :items="items" v-model="queryParams" @query="handleQuery" @reset="resetQuery" />
 
-    <div class="mb-16px">
-      <el-button v-permissions="['system:menu:create']" plain type="primary" @click="handleCreate()">
-        <template #icon><SvgIcon name="Plus" /></template><span>新增</span>
-      </el-button>
-      <el-button plain type="info" @click="toggleExpandAll">
-        <template #icon><SvgIcon name="Sort" /></template><span>{{ isExpandAll ? '折叠' : '展开' }}</span>
-      </el-button>
+    <div class="mb-16px flex items-center justify-between">
+      <div>
+        <el-button v-permissions="['system:menu:create']" plain type="primary" @click="handleCreate()">
+          <template #icon><SvgIcon name="Plus" /></template><span>新增</span>
+        </el-button>
+        <el-button plain type="info" @click="toggleExpandAll">
+          <template #icon><SvgIcon name="Sort" /></template><span>{{ isExpandAll ? '折叠' : '展开' }}</span>
+        </el-button>
+      </div>
+      <RightToolbar v-model:show-search="showSearch" v-model:hidden-column-keys="hiddenColumnKeys" :columns="columns" storage-key="system:menu" @refresh="getList" />
     </div>
 
-    <ProTable v-if="refreshTable" v-loading="loading" :data="list" :columns="columns" row-key="id" :default-expand-all="isExpandAll">
+    <ProTable v-if="refreshTable" v-loading="loading" :data="list" :columns="columns" :hidden-column-keys="hiddenColumnKeys" row-key="id" :default-expand-all="isExpandAll">
       <template #menuName="{ row }">
         <SvgIcon v-if="row.icon" :name="row.icon" class="mr-4px" />
         <span>{{ row.menuName }}</span>
@@ -54,6 +57,11 @@ const isExpandAll = ref(false)
 const refreshTable = ref(true)
 /** 菜单树查询参数（树表不分页） */
 const queryParams = ref<Menu.MenuQuery>({})
+
+/** 搜索区域显隐（RightToolbar v-model 控制） */
+const showSearch = ref(true)
+/** 隐藏列 key 数组（RightToolbar v-model 控制） */
+const hiddenColumnKeys = ref<string[]>([])
 
 const menuTypeOptions = [
   { label: '目录', value: 'M' },
