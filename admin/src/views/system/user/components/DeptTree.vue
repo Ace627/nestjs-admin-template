@@ -19,7 +19,7 @@
     </el-input>
     <el-tree
       ref="treeRef"
-      class="mt-12px flex-1 overflow-auto"
+      class="dept-tree mt-12px flex-1 overflow-auto"
       :data="treeData"
       :props="{ label: 'deptName', children: 'children' }"
       node-key="id"
@@ -28,7 +28,14 @@
       :expand-on-click-node="false"
       :filter-node-method="filterNode"
       @node-click="handleNodeClick"
-    />
+    >
+      <template #default="{ node, data }">
+        <span class="dept-node">
+          <SvgIcon :name="data.children?.length ? 'Company' : 'Dept'" :class="data.children?.length ? 'dept-node__icon' : 'dept-node__icon--leaf'" />
+          <span class="dept-node__label">{{ node.label }}</span>
+        </span>
+      </template>
+    </el-tree>
   </div>
 </template>
 
@@ -101,3 +108,50 @@ onMounted(getTree)
 
 defineExpose({ clearSelected })
 </script>
+
+<style lang="scss" scoped>
+.dept-tree {
+  --el-tree-node-content-height: 32px;
+  --el-tree-node-hover-bg-color: var(--el-color-primary-light-9);
+
+  :deep(.el-tree-node__content) {
+    border-radius: 6px;
+    margin-bottom: 2px;
+  }
+
+  :deep(.el-tree-node.is-current > .el-tree-node__content) {
+    background-color: var(--el-color-primary-light-9);
+
+    .dept-node__label {
+      color: var(--el-color-primary);
+      font-weight: 600;
+    }
+  }
+}
+
+.dept-node {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
+
+  &__icon {
+    flex-shrink: 0;
+    font-size: 15px;
+    color: var(--el-color-warning);
+  }
+
+  &__icon--leaf {
+    flex-shrink: 0;
+    font-size: 15px;
+    color: var(--el-color-info);
+  }
+
+  &__label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 14px;
+  }
+}
+</style>

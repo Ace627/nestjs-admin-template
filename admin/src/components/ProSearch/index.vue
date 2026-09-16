@@ -19,25 +19,23 @@
             </slot>
           </el-form-item>
         </el-col>
-
-        <el-col :xs="24" :sm="24" :md="span" :lg="span" :xl="span" class="action-column">
-          <el-form-item class="el-form-item--action">
-            <el-button plain type="primary" @click="handleQuery">
-              <template #icon> <SvgIcon name="Search" /> </template>
-              <span>{{ searchButtonText }}</span>
-            </el-button>
-            <el-button plain type="danger" @click="resetQuery">
-              <template #icon> <SvgIcon name="Refresh" /> </template>
-              <span>{{ resetButtonText }}</span>
-            </el-button>
-            <div @click="toggleExpand" class="filter-toggle cursor-pointer select-none" v-if="shouldShowExpandToggle">
-              <span>{{ isExpanded ? '收起' : '展开' }}</span>
-              <SvgIcon :name="isExpanded ? 'ArrowUp' : 'ArrowDown'" />
-            </div>
-          </el-form-item>
-        </el-col>
       </el-row>
     </el-form>
+
+    <div class="search-actions">
+      <el-button plain type="primary" @click="handleQuery">
+        <template #icon> <SvgIcon name="Search" /> </template>
+        <span>{{ searchButtonText }}</span>
+      </el-button>
+      <el-button plain type="danger" @click="resetQuery">
+        <template #icon> <SvgIcon name="Refresh" /> </template>
+        <span>{{ resetButtonText }}</span>
+      </el-button>
+      <div @click="toggleExpand" class="filter-toggle cursor-pointer select-none" v-if="shouldShowExpandToggle">
+        <span>{{ isExpanded ? '收起' : '展开' }}</span>
+        <SvgIcon :name="isExpanded ? 'ArrowUp' : 'ArrowDown'" />
+      </div>
+    </div>
   </section>
 </template>
 
@@ -48,7 +46,7 @@ import type { ProSearchItem, ProSearchProps } from './types'
 
 const props = withDefaults(defineProps<ProSearchProps>(), {
   span: 6,
-  gutter: 16,
+  gutter: 8,
   defaultExpanded: false,
   searchButtonText: '查询',
   resetButtonText: '重置',
@@ -91,6 +89,9 @@ function getPlaceholder(item: ProSearchItem) {
 <style lang="scss" scoped>
 .pro-search {
   --search-item-gap: 16px;
+  // 按钮组宽度，收起态在右侧预留，保证按钮与首行输入项同排不折行
+  --search-actions-width: 232px;
+  position: relative;
 }
 
 // 强制统一表单项的默认下边距
@@ -101,36 +102,49 @@ function getPlaceholder(item: ProSearchItem) {
   }
 }
 
-// 操作表单项
-.el-form-item--action {
+// 操作按钮组：默认（展开态/窄屏）文档流，独占一行右对齐
+.search-actions {
   display: flex;
   align-items: center;
-  &.el-form-item--label-top {
-    height: 100%;
-    margin-top: 6px;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-bottom: var(--search-item-gap);
+  .el-button {
+    margin-left: 0;
+  }
+  .filter-toggle {
+    color: var(--el-color-primary);
+    transition: color var(--el-transition-duration-fast);
+    &:hover {
+      color: var(--el-color-primary-light-3);
+    }
   }
 }
 
-:deep() .action-column {
-  flex: 1;
-  max-width: 100%;
-  .el-form-item--action .el-form-item__content {
-    display: flex;
-    flex-wrap: nowrap; // 查询/重置/展开始终同行，容器再窄也不折行
-    align-items: center;
-    justify-content: flex-end;
-    margin-left: auto !important; // 防止 label-width 影响对齐
-    white-space: nowrap;
-    gap: 8px;
-    .el-button {
-      margin-left: 0;
-    }
-    .filter-toggle {
-      color: var(--el-color-primary);
-      transition: color var(--el-transition-duration-fast);
-    }
-    .filter-toggle:hover {
-      color: var(--el-color-primary-light-3);
+.label-position--top:not(.is-expanded) .search-actions {
+  top: 30px;
+}
+
+// 收起态：按钮组绝对定位右上角，与第一行输入项同排，右侧预留按钮宽度
+.pro-search:not(.is-expanded) {
+  padding-right: var(--search-actions-width);
+  .search-actions {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 32px;
+    margin-bottom: 0;
+  }
+}
+
+// 窄屏一律回到文档流
+@media (max-width: 991px) {
+  .pro-search:not(.is-expanded) {
+    padding-right: 0;
+    .search-actions {
+      position: static;
+      height: auto;
+      margin-bottom: var(--search-item-gap);
     }
   }
 }
