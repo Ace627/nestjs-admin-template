@@ -6,6 +6,7 @@ import { defineConfig, presetAttributify, presetWind3 } from 'unocss'
  */
 export default defineConfig({
   content: {
+    filesystem: ['src/**/*.{vue,ts,tsx}'], // 启动即全量收集 token，冷启动不再缺规则
     pipeline: {
       exclude: ['node_modules', 'dist', '.git', '.vscode', 'public', 'build', 'config', '.github', 'types'],
     },
