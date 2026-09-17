@@ -72,7 +72,6 @@
 <script setup lang="ts">
 defineOptions({ name: 'UserDialog' })
 import { TipModal } from '@/utils'
-import { useDict } from '@/hooks/useDict'
 import type { FormRules } from 'element-plus'
 import type { User, Dept, Role } from '@/types'
 import { UserRequest } from '@/api/system/user.request'
@@ -121,6 +120,9 @@ async function open(record?: User.SysUser) {
   await Promise.all([resetForm(record?.id), loadSelectData()])
 }
 
+/** 新增用户默认初始密码（参数 sys.user.initPassword；缺失/无权限回退 123456） */
+const initPassword = useConfig('sys.user.initPassword', '123456')
+
 /** 编辑时回填详情并将关联角色映射为 roleIds；新增时恢复默认值（deptId=0 视为未分配） */
 async function resetForm(userId?: string) {
   if (userId) {
@@ -128,7 +130,7 @@ async function resetForm(userId?: string) {
     const deptId = data.deptId && data.deptId !== '0' ? data.deptId : undefined
     form.value = { ...data, deptId, roleIds: (data.roles ?? []).map((item) => item.id) }
   } else {
-    form.value = { status: '1', gender: '2', password: '123456' }
+    form.value = { status: '1', gender: '2', password: initPassword.value }
   }
 }
 

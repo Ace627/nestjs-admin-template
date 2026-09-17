@@ -19,7 +19,7 @@
         </el-input>
       </el-form-item>
 
-      <el-form-item prop="captcha">
+      <el-form-item v-if="captchaEnabled" prop="captcha">
         <div class="flex items-center w-full">
           <el-input v-model.trim="loginForm.captcha" placeholder="请输入验证码" @keydown.enter="handleLogin" clearable>
             <template #prefix>
@@ -65,6 +65,9 @@ const appTitle = import.meta.env.VITE_APP_TITLE
 /** 是否记住密码 */
 const rememberMe = ref<boolean>(false)
 
+/** 验证码开关（由后端参数 sys.account.captchaEnabled 控制） */
+const captchaEnabled = ref<boolean>(true)
+
 /** 验证码图片地址 */
 const captchaURL = ref<string>(defaultCaptcha)
 
@@ -87,6 +90,7 @@ const loginRules: FormRules<Auth.LoginParams> = {
 /** 请求验证码数据 */
 async function getCaptcha() {
   const data = await AuthRequest.getCaptcha()
+  captchaEnabled.value = data.enabled
   captchaURL.value = data.captcha
   loginForm.value.uuid = data.uuid
 }

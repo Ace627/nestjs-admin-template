@@ -9,6 +9,7 @@ import { LoginLockService } from '@/shared/login-lock.service'
 import { UserService } from '../system/user/user.service'
 import { MenuService } from '../system/menu/menu.service'
 import { RoleService } from '../system/role/role.service'
+import { ConfigService as SysConfigService } from '../system/config/config.service'
 import { HttpStatus, Injectable, Logger } from '@nestjs/common'
 import { verifyPassword, formatTime, randomUUID } from '@/utils'
 import { CommonConstant, BusinessException, RedisConstant, ConfigConstant, RbacConstant } from '@/common'
@@ -27,11 +28,14 @@ export class AuthService {
     private readonly configService: ConfigService,
     private readonly captchaService: CaptchaService,
     private readonly loginLockService: LoginLockService,
+    private readonly sysConfigService: SysConfigService,
   ) {}
 
-  /** 获取验证码 */
+  /** 获取验证码（实时读取参数开关，缺失默认开启；关闭时不生成图片，仅返回 enabled 标识） */
   public async getCaptcha() {
-    return this.captchaService.create()
+    const enabled = await this.sysConfigService.getBooleanConfig(CommonConstant.CAPTCHA_ENABLED_CONFIG_KEY, true)
+    if (!enabled) return { enabled, uuid: '', captcha: '' }
+    return { enabled, ...(await this.captchaService.create()) }
   }
 
   /** 用户登录 */
@@ -40,8 +44,9 @@ export class AuthService {
       const { username, password, uuid, captcha } = loginDto
       // 1. 账号锁定校验（锁定中直接拒绝，不再消耗验证码校验）
       await this.loginLockService.assertNotLocked(username)
-      // 2. 校验验证码是否正确
-      await this.captchaService.validate(uuid, captcha)
+      // 2. 校验验证码是否正确（参数开关关闭时跳过；开关状态与登录页读同一参数，缺失默认开启）
+      const captchaEnabled = await this.sysConfigService.getBooleanConfig(CommonConstant.CAPTCHA_ENABLED_CONFIG_KEY, true)
+      if (captchaEnabled) await this.captchaService.validate(uuid, captcha)
       // 3. 查询用户
       const user = await this.userService.getRepository().findOneBy({ username, status: CommonConstant.STATUS_NORMAL })
       if (!user) throw new BusinessException(`该账号不存在或已停用`)

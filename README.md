@@ -55,7 +55,7 @@
 
 <table>
   <tr>
-    <td><img src="https://cdn.phototourl.com/free/2026-09-14-d594be42-41db-4de5-be32-559a7b32935a.png" /></td>
+    <td><img src="https://cdn.phototourl.com/free/2026-09-17-940bcfe0-6949-4f6e-95f0-3c14b821057b.png" /></td>
     <td><img src="https://cdn.phototourl.com/free/2026-09-14-712fbe3f-93ab-4c56-b2ae-341acb8feed0.png" /></td>
   </tr>
   <tr>

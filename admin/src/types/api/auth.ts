@@ -2,9 +2,11 @@ import type { SysUser } from '@/types/api/system/user'
 
 /** 验证码响应数据 */
 export interface CaptchaResult {
-  /** 验证码唯一标识 */
+  /** 验证码开关（false 时登录页隐藏验证码输入框） */
+  enabled: boolean
+  /** 验证码唯一标识（关闭时为空字符串） */
   uuid: string
-  /** 验证码图片 */
+  /** 验证码图片（关闭时为空字符串） */
   captcha: string
 }
 

@@ -76,4 +76,22 @@ export const CommonConstant = {
    * 所有业务表的 status 字段通用，值为 '0'
    */
   STATUS_DISABLE: '0',
+
+  /**
+   * 参数系统内置标识
+   * sys_config.config_type 为 Y 表示代码引用的内置参数，禁止删除与修改键名
+   */
+  CONFIG_TYPE_BUILTIN: 'Y',
+
+  /**
+   * 参数非内置标识
+   * sys_config.config_type 为 N 表示业务自定义参数，可自由增删改
+   */
+  CONFIG_TYPE_CUSTOM: 'N',
+
+  /**
+   * 验证码开关参数键名
+   * sys_config 内置参数，控制登录页是否显示与校验图形验证码；参数缺失时后端默认开启（fail-safe）
+   */
+  CAPTCHA_ENABLED_CONFIG_KEY: 'sys.account.captchaEnabled',
 }

@@ -6,9 +6,10 @@ import { UserModule } from '../system/user/user.module'
 import { MenuModule } from '../system/menu/menu.module'
 import { RoleModule } from '../system/role/role.module'
 import { LogModule } from '../monitor/log/log.module'
+import { ConfigModule } from '../system/config/config.module'
 
 @Module({
-  imports: [UserModule, MenuModule, RoleModule, LogModule],
+  imports: [UserModule, MenuModule, RoleModule, LogModule, ConfigModule],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],
 })

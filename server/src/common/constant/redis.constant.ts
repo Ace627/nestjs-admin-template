@@ -59,6 +59,12 @@ export const RedisConstant = {
   SYS_DEPT_TREE: 'sys:dept:tree',
 
   /**
+   * 系统参数缓存键前缀（参数管理）
+   * 拼接参数键名形成唯一缓存 Key，格式为「sys:config:configKey」，键值为参数键值字符串
+   */
+  SYS_CONFIG_KEY: 'sys:config',
+
+  /**
    * 防重复提交缓存键前缀
    * 用于存储防重复提交信息的 Redis 键前缀，值为 'repeat:submit'
    */
