@@ -1,11 +1,11 @@
 export { AjaxResult } from './class/ajax-result.class'
 
 export { ExcelType } from './constant/excel.constant'
+export { BullConstant } from './constant/bull.constant'
 export { RedisConstant } from './constant/redis.constant'
 export { ConfigConstant } from './constant/config.constant'
 export { CommonConstant } from './constant/common.constant'
 export { BusinessType } from './constant/business-type.constant'
-export { BullConstant } from './constant/bull.constant'
 export { DecoratorConstant } from './constant/decorator.constant'
 export { MenuType, DataScopeType, RbacConstant } from './constant/rbac.constant'
 

@@ -6,6 +6,9 @@
     <Breadcrumb v-if="!appStore.isMobile && settingStore.showBreadcrumb" />
 
     <div class="navbar__right h-full ml-auto flex-center">
+      <!-- 菜单搜索 -->
+      <HeaderSearch />
+
       <!-- 设置入口 -->
       <el-tooltip content="系统设置" effect="dark" placement="bottom">
         <span class="navbar-item hover-effect" @click="settingStore.showSetting = true">
@@ -31,6 +34,7 @@
 
 <script setup lang="ts">
 defineOptions({ name: 'Navbar' })
+import HeaderSearch from './HeaderSearch.vue'
 import Hamburger from './Hamburger.vue'
 import Screenfull from './Screenfull.vue'
 import Breadcrumb from './Breadcrumb.vue'

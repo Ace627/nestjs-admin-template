@@ -1,4 +1,4 @@
-import type { RbacType } from '@/types'
+import type { AuthType } from '@/types'
 import { BusinessException, CommonConstant, DataScopeCondition, FileEntity, RedisConstant, RoleEntity, RbacConstant, UserEntity } from '@/common'
 import { RedisService } from '@/shared/redis.service'
 import { encryptPassword, verifyPassword } from '@/utils'
@@ -204,15 +204,15 @@ export class UserService {
    * 读取用户角色缓存（AuthService.getInfo / 守卫链路使用）
    * 缓存缺失时回源重建（仅正常状态角色）
    */
-  public async getUserRoles(userId: string): Promise<RbacType.UserRoleCache[] | null> {
+  public async getUserRoles(userId: string): Promise<AuthType.UserRoleCache[] | null> {
     const cacheKey = `${RedisConstant.ADMIN_USER_ROLES}:${userId}`
     const jsonStr = await this.redisService.get(cacheKey)
-    if (jsonStr) return JSON.parse(jsonStr) as RbacType.UserRoleCache[]
+    if (jsonStr) return JSON.parse(jsonStr) as AuthType.UserRoleCache[]
 
     const user = await this.userRepository.findOne({ where: { id: Equal(userId) }, relations: { roles: true } })
     if (!user) return null
     const roles = (user.roles ?? []).filter((role) => role.status === CommonConstant.STATUS_NORMAL)
-    const cache: RbacType.UserRoleCache[] = roles.map((role) => ({ id: role.id, roleCode: role.roleCode }))
+    const cache: AuthType.UserRoleCache[] = roles.map((role) => ({ id: role.id, roleCode: role.roleCode }))
     await this.redisService.set(cacheKey, JSON.stringify(cache))
     return cache
   }

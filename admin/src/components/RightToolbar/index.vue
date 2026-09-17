@@ -1,30 +1,36 @@
 <template>
   <div class="right-toolbar flex items-center">
     <!-- 隐藏/显示搜索区域 -->
-    <el-button v-if="search" circle title="隐藏/显示搜索" @click="emit('update:showSearch', !showSearch)">
-      <template #icon><SvgIcon name="Search" /></template>
-    </el-button>
-    <!-- 刷新列表 -->
-    <el-button circle title="刷新" @click="emit('refresh')">
-      <template #icon><SvgIcon name="Refresh" /></template>
-    </el-button>
-    <!-- 配置展示列 -->
-    <el-dropdown v-if="selectableColumns.length" trigger="click" :hide-on-click="false">
-      <el-button circle title="列设置">
-        <template #icon><SvgIcon name="Menu" /></template>
+    <ProTooltip v-if="search" :content="showSearch ? '隐藏搜索' : '显示搜索'">
+      <el-button circle @click="emit('update:showSearch', !showSearch)">
+        <template #icon><SvgIcon name="Search" /></template>
       </el-button>
-      <template #dropdown>
-        <el-dropdown-menu>
-          <div class="column-setting">
-            <el-checkbox v-model="checkAll" :indeterminate="isIndeterminate">列展示</el-checkbox>
-            <el-divider class="!my-4px" />
-            <el-checkbox-group v-model="checkedColumnKeys" class="flex flex-col" @change="commit">
-              <el-checkbox v-for="column in selectableColumns" :key="column.key" :value="column.key">{{ column.label }}</el-checkbox>
-            </el-checkbox-group>
-          </div>
-        </el-dropdown-menu>
-      </template>
-    </el-dropdown>
+    </ProTooltip>
+    <!-- 刷新列表 -->
+    <ProTooltip content="刷新列表">
+      <el-button circle @click="emit('refresh')">
+        <template #icon><SvgIcon name="Refresh" /></template>
+      </el-button>
+    </ProTooltip>
+    <!-- 配置展示列（ProTooltip 须包在 el-dropdown 外侧：el-dropdown 根节点是单一 div，事件/ref 才能透传） -->
+    <ProTooltip v-if="selectableColumns.length" content="各列显隐">
+      <el-dropdown trigger="click" :hide-on-click="false">
+        <el-button circle>
+          <template #icon><SvgIcon name="Menu" /></template>
+        </el-button>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <div class="column-setting">
+              <el-checkbox v-model="checkAll" :indeterminate="isIndeterminate">列展示</el-checkbox>
+              <el-divider />
+              <el-checkbox-group v-model="checkedColumnKeys" class="flex flex-col" @change="commit">
+                <el-checkbox v-for="column in selectableColumns" :key="column.key" :value="column.key">{{ column.label }}</el-checkbox>
+              </el-checkbox-group>
+            </div>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
+    </ProTooltip>
   </div>
 </template>
 
@@ -122,6 +128,10 @@ function commit() {
 .column-setting {
   padding: 4px 12px 8px;
   min-width: 140px;
+
+  :deep(.el-divider) {
+    margin: 4px 0;
+  }
 
   :deep(.el-checkbox) {
     display: flex;

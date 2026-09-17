@@ -1,4 +1,4 @@
-import type { RbacType } from '@/types'
+import type { AuthType } from '@/types'
 import { Injectable } from '@nestjs/common'
 import { MenuService } from '../menu/menu.service'
 import { RedisService } from '@/shared/redis.service'
@@ -149,17 +149,17 @@ export class RoleService {
    * 缓存缺失时回源重建并写回（带 TTL，与用户级缓存同生命周期；角色被删返回 null，由调用方 fail-closed）
    * @param force 跳过读缓存直接重算并覆盖写回（单写者场景：数据范围设置后的立即生效重建用）
    */
-  public async getRoleScopeCache(roleId: string, force = false): Promise<RbacType.RoleScopeCache | null> {
+  public async getRoleScopeCache(roleId: string, force = false): Promise<AuthType.RoleScopeCache | null> {
     const cacheKey = `${RedisConstant.ROLE_DATA_SCOPE}:${roleId}`
     if (!force) {
       const jsonStr = await this.redisService.get(cacheKey)
-      if (jsonStr) return JSON.parse(jsonStr) as RbacType.RoleScopeCache
+      if (jsonStr) return JSON.parse(jsonStr) as AuthType.RoleScopeCache
     }
 
     const role = await this.roleRepository.findOneBy({ id: Equal(roleId) })
     if (!role) return null
     const roleDepts = await this.roleDeptRepository.findBy({ roleId: Equal(roleId) })
-    const cache: RbacType.RoleScopeCache = { dataScope: role.dataScope, deptIds: roleDepts.map((item) => item.deptId) }
+    const cache: AuthType.RoleScopeCache = { dataScope: role.dataScope, deptIds: roleDepts.map((item) => item.deptId) }
     await this.redisService.set(cacheKey, JSON.stringify(cache), 'EX', this.expiresIn)
     return cache
   }

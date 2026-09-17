@@ -25,3 +25,25 @@
   opacity: 0;
   transform: translate3d(100%, 0, 0) skewX(-45deg);
 }
+
+/* breadcrumb transition: fade-slide */
+.breadcrumb-enter-active,
+.breadcrumb-leave-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.breadcrumb-enter-from,
+.breadcrumb-leave-to {
+  opacity: 0;
+}
+.breadcrumb-enter-from {
+  transform: translateX(-20px);
+}
+.breadcrumb-leave-to {
+  transform: translateX(20px);
+}
+.breadcrumb-move {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.breadcrumb-leave-active {
+  position: absolute;
+}

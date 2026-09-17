@@ -21,8 +21,8 @@ const props = defineProps({
   width: { type: [String, Number], default: 320 },
   /** 透传 el-tooltip 的 content 属性，兼容原生用法 */
   content: { type: String, default: '' },
-  /** 显示最大字数（超出自动...） */
-  length: { type: Number, default: 8 },
+  /** 触发文字最大显示字数（超出自动...），0 表示不截断 */
+  length: { type: Number, default: 0 },
   /** 省略符号 */
   ellipsis: { type: String, default: '...' },
 })
@@ -30,12 +30,16 @@ const props = defineProps({
 // 计算：显示的截取文字
 const displayText = computed(() => {
   const text = props.content || ''
-  if (text.length <= props.length) return text
+  if (!props.length || text.length <= props.length) return text
   return text.slice(0, props.length) + props.ellipsis
 })
 
-/** 是否禁用提示框 */
-const disabled = computed(() => (props.content || '').length <= props.length)
+/** 是否禁用提示框：无 content 或截断场景下文字未超限时禁用 */
+const disabled = computed(() => {
+  const text = props.content || ''
+  if (!text) return true
+  return props.length > 0 && text.length <= props.length
+})
 
 const contentMaxWidth = computed(() => {
   return typeof props.width === 'number' ? `${props.width}px` : props.width
