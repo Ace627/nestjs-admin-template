@@ -1,7 +1,7 @@
 import { request } from '@/utils/request'
 import type { JobLog } from '@/types'
 
-export class JobLogRequest {
+export class JoblogRequest {
   /** 分页查询定时任务日志 */
   static findList(params: JobLog.QueryParams): PaginationResult<JobLog.Item> {
     return request.get('/monitor/job/log/list', { params })

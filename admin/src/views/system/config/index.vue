@@ -210,8 +210,7 @@ async function handleDelete(row?: Config.Item) {
 
 async function handleSubmit() {
   try {
-    const valid = await formRef.value?.validate()
-    if (!valid) return
+    await formRef.value?.validate()
     if (isEdit.value) await ConfigRequest.update(form.value)
     else await ConfigRequest.create(form.value)
     closeDialog()

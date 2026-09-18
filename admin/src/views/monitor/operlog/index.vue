@@ -46,7 +46,7 @@
 import { useDict } from '@/hooks/useDict'
 import OperateDetailDialog from './detail.vue'
 import { linkDownload, TipModal } from '@/utils'
-import { OperateinfoRequest } from '@/api/monitor/operlog.request'
+import { OperlogRequest } from '@/api/monitor/operlog.request'
 import type { Operlog, ProTableColumn, ProSearchItem } from '@/types'
 
 const { sys_common_status, sys_oper_type } = useDict('sys_common_status', 'sys_oper_type')
@@ -91,12 +91,12 @@ const columns: ProTableColumn<Operlog.Item>[] = [
 async function getList() {
   try {
     loading.value = true
-    const data = await OperateinfoRequest.findList(queryParams.value)
+    const data = await OperlogRequest.findList(queryParams.value)
     list.value = data.records
     total.value = data.total
     loading.value = false
   } catch (error: any) {
-    console.log('OperateinfoRequest getList error: ', error)
+    console.log('OperlogRequest getList error: ', error)
     loading.value = false
     return Promise.reject(error)
   }
@@ -111,7 +111,7 @@ async function handleDelete(record?: Operlog.Item) {
     const { cancel } = await TipModal.confirm(`确定要删除选中的数据吗？`)
     if (cancel) return TipModal.msg(`操作取消`)
     const ids = record ? record.id : multipleSelection.value.map((item) => item.id).join(',')
-    await OperateinfoRequest.delete({ ids })
+    await OperlogRequest.delete({ ids })
     if (list.value.length <= 1) queryParams.value.pageNo = queryParams.value.pageNo > 1 ? queryParams.value.pageNo - 1 : 1
     await getList()
     TipModal.msgSuccess(`删除成功`)
@@ -131,7 +131,7 @@ function handleView(record: Operlog.Item) {
 async function handleClear() {
   const { cancel } = await TipModal.confirm(`确定要清空所有的数据吗？`)
   if (cancel) return TipModal.msg(`操作取消`)
-  const msg = await OperateinfoRequest.clear()
+  const msg = await OperlogRequest.clear()
   await getList()
   TipModal.msgSuccess(msg || `数据清空成功`)
 }
@@ -139,7 +139,7 @@ async function handleClear() {
 async function handleExport() {
   try {
     exportLoading.value = true
-    const response = await OperateinfoRequest.export(queryParams.value)
+    const response = await OperlogRequest.export(queryParams.value)
     const filenameMatch = response.headers['content-disposition'].match(/filename\*=UTF-8''(.*)/i)
     const filename = decodeURIComponent(filenameMatch[1])
     linkDownload(response.data, filename)

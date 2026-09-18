@@ -201,8 +201,7 @@ async function handleDelete(row?: Dict.TypeItem) {
 
 async function handleSubmit() {
   try {
-    const valid = await formRef.value?.validate()
-    if (!valid) return
+    await formRef.value?.validate()
     if (isEdit.value) await DictRequest.updateType(form.value)
     else await DictRequest.createType(form.value)
     closeDialog()
@@ -222,22 +221,3 @@ function closeDialog() {
 
 onMounted(getList)
 </script>
-
-<style lang="scss" scoped>
-/** 表单 label 问号提示（参考若依 QuestionFilled 模式，纯 CSS 圆圈实现） */
-.label-tip {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 14px;
-  height: 14px;
-  margin-left: 4px;
-  border-radius: 50%;
-  background-color: var(--el-text-color-placeholder);
-  color: var(--el-color-white);
-  font-size: 12px;
-  line-height: 1;
-  cursor: help;
-  transform: translateY(-1px);
-}
-</style>

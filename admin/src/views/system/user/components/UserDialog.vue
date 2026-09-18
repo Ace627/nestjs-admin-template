@@ -154,8 +154,7 @@ function closeDialog() {
 
 async function handleSubmit() {
   try {
-    const valid = await formRef.value?.validate()
-    if (!valid) return
+    await formRef.value?.validate()
     submitting.value = true
     if (isEdit.value) {
       const { username: _u, password: _p, ...updateForm } = form.value

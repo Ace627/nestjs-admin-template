@@ -3,7 +3,7 @@ import { ConfigRequest } from '@/api/system/config.request'
 /**
  * 系统参数读取 hook：`const initPassword = useConfig('sys.user.initPassword', '123456')`
  * - 返回响应式参数值：初始为默认值，参数加载成功后自动替换
- * - 不做前端缓存，缓存职责在后端 Redis（对齐若依 getConfigKey 的做法）
+ * - 不做前端缓存，缓存职责在后端 Redis
  * - 参数缺失、接口报错或无权限时保持默认值（默认值即 fail-safe 兜底，静默回退不抛错）
  */
 export function useConfig(configKey: string, defaultValue: string): Ref<string> {

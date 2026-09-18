@@ -63,8 +63,7 @@ function closeDialog() {
 
 async function handleSubmit() {
   try {
-    const valid = await formRef.value?.validate()
-    if (!valid) return
+    await formRef.value?.validate()
     const { cancel } = await TipModal.confirm(`重置后「${form.value.username}」的登录状态将全部失效，确定要重置密码吗？`)
     if (cancel) return TipModal.msg('操作取消')
     submitting.value = true

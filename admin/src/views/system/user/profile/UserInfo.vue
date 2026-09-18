@@ -60,8 +60,7 @@ watch(
 /** 保存个人信息 */
 async function handleSubmit() {
   try {
-    const valid = await formRef.value?.validate()
-    if (!valid) return
+    await formRef.value?.validate()
     submitting.value = true
     const message = await UserRequest.updateProfile(form.value)
     TipModal.msgSuccess(message || '修改成功')

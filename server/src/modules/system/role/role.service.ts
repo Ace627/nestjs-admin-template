@@ -48,7 +48,7 @@ export class RoleService {
     }
     Object.assign(record, updateDto)
     await this.roleRepository.save(record)
-    // 角色状态/编码变更对角色级缓存的影响延迟至缓存过期或重新登录生效（TTL 惰性重建，对齐若依语义）
+    // 角色状态/编码变更对角色级缓存的影响延迟至缓存过期或重新登录生效（TTL 惰性重建）
     return '修改成功'
   }
 

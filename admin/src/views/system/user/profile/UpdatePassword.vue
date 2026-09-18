@@ -45,8 +45,7 @@ function validateParams() {
 /** 修改密码成功后强制重新登录 */
 async function handleSubmit() {
   try {
-    const valid = await formRef.value?.validate()
-    if (!valid) return
+    await formRef.value?.validate()
     const errMsg = validateParams()
     if (errMsg) return TipModal.msgError(errMsg)
     submitting.value = true

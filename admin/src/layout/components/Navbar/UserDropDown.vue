@@ -16,7 +16,7 @@
 
 <script setup lang="ts">
 defineOptions({ name: 'UserDropDown' })
-import { TipModal } from '@/utils'
+import { StorageCache, TipModal } from '@/utils'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -36,7 +36,7 @@ const items = [
 async function clearCache() {
   const { cancel } = await TipModal.confirm(`确定清空所有本地缓存并重启系统吗？`)
   if (cancel) return TipModal.msg('操作取消')
-  localStorage.clear()
+  StorageCache.clear()
   sessionStorage.clear()
   window.location.reload()
 }

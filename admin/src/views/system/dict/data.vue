@@ -106,7 +106,7 @@ const isEdit = computed(() => !!form.value.id)
 
 const dialogWidth = computed(() => (appStore.isDesktop ? '600px' : 'calc(100% - 32px)'))
 
-// 数据标签回显样式（对齐若依/云禾）
+// 数据标签回显样式（对齐云禾）
 const listClassOptions = [
   { value: 'primary', label: '主要' },
   { value: 'success', label: '成功' },
@@ -236,8 +236,7 @@ async function handleDelete(row?: Dict.DataItem) {
 
 async function handleSubmit() {
   try {
-    const valid = await formRef.value?.validate()
-    if (!valid) return
+    await formRef.value?.validate()
     if (isEdit.value) await DictRequest.updateData(form.value)
     else await DictRequest.createData(form.value)
     closeDialog()

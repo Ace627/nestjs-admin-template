@@ -1,7 +1,7 @@
 import { request } from '@/utils/request'
 import type { Operlog } from '@/types'
 
-export class OperateinfoRequest {
+export class OperlogRequest {
   /** 查询操作日志列表 */
   static findList(params: Operlog.QueryParams): PaginationResult<Operlog.Item> {
     return request.get(`/monitor/log/operlog/list`, { params })

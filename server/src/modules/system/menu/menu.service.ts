@@ -53,7 +53,7 @@ export class MenuService {
     Object.assign(entity, updateDto, { parentId: targetParentId })
     this.cleanFields(entity, targetType)
     await this.menuRepository.save(entity)
-    // 菜单（权限标识/状态）变更对角色权限缓存的影响延迟至缓存过期或重新登录生效（TTL 惰性重建，对齐若依语义）
+    // 菜单（权限标识/状态）变更对角色权限缓存的影响延迟至缓存过期或重新登录生效（TTL 惰性重建）
     return '修改成功'
   }
 

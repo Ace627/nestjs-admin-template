@@ -41,8 +41,7 @@ function open(mode: 'create' | 'rename', parentId?: string, node?: File.TreeItem
 
 async function handleSubmit() {
   try {
-    const valid = await formRef.value?.validate()
-    if (!valid) return
+    await formRef.value?.validate()
     if (isEdit.value) await FileRequest.updateFolder(form.value)
     else await FileRequest.createFolder(form.value)
     closeDialog()

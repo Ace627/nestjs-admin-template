@@ -42,7 +42,7 @@
 import { useDict } from '@/hooks/useDict'
 import JobLogDetailDialog from './detail.vue'
 import { linkDownload, TipModal } from '@/utils'
-import { JobLogRequest } from '@/api/monitor/job-log.request'
+import { JoblogRequest } from '@/api/monitor/job-log.request'
 import type { JobLog, ProSearchItem, ProTableColumn } from '@/types'
 
 const { sys_common_status } = useDict('sys_common_status')
@@ -84,7 +84,7 @@ const columns: ProTableColumn<JobLog.Item>[] = [
 async function getList() {
   try {
     loading.value = true
-    const data = await JobLogRequest.findList(queryParams.value)
+    const data = await JoblogRequest.findList(queryParams.value)
     list.value = data.records
     total.value = data.total
   } catch (error: unknown) {
@@ -123,7 +123,7 @@ function handleView(row: JobLog.Item) {
 async function handleExport() {
   try {
     exportLoading.value = true
-    const response = await JobLogRequest.export(queryParams.value)
+    const response = await JoblogRequest.export(queryParams.value)
     const filenameMatch = response.headers['content-disposition'].match(/filename\*=UTF-8''(.*)/i)
     const filename = decodeURIComponent(filenameMatch[1])
     linkDownload(response.data, filename)
@@ -142,7 +142,7 @@ async function handleDelete(row?: JobLog.Item) {
     const { cancel } = await TipModal.confirm('确定要删除选中的数据吗？')
     if (cancel) return TipModal.msg('操作取消')
     const ids = row ? row.id : multipleSelection.value.map((item) => item.id).join(',')
-    await JobLogRequest.delete({ ids })
+    await JoblogRequest.delete({ ids })
     // 处理页码回退：当前页只有1条数据时，删除后返回上一页（避免空页）
     if (list.value.length <= 1) queryParams.value.pageNo = queryParams.value.pageNo > 1 ? queryParams.value.pageNo - 1 : 1
     await getList()
@@ -162,7 +162,7 @@ async function handleClear() {
   try {
     const { cancel } = await TipModal.confirm('确定要清空所有的数据吗？')
     if (cancel) return TipModal.msg('操作取消')
-    const message = await JobLogRequest.clear()
+    const message = await JoblogRequest.clear()
     await getList()
     TipModal.msgSuccess(message || '数据清空成功')
   } catch (error: unknown) {
