@@ -27,7 +27,7 @@
 
 ## 📖 简介
 
-一套开箱可用的中后台模板：前端 **Vue 3 + TypeScript + Element Plus + Vite 8**，后端 **NestJS 11 + TypeORM + MySQL + Redis + BullMQ**。除登录鉴权外，还完整实现了用户、角色、菜单、部门、字典、日志、缓存、定时任务、在线用户等中后台标配功能。
+一套开箱可用的中后台模板：前端 **Vue 3 + TypeScript + Element Plus + Vite 8**，后端 **NestJS 11 + TypeORM + MySQL + Redis + BullMQ**。除登录鉴权外，还完整实现了用户、角色、菜单、部门、字典、参数、日志、缓存、定时任务、在线用户等中后台标配功能。
 
 前后端放在**同一个仓库的两个独立工程**中（`admin/` 与 `server/`），**不是 monorepo**——根目录没有 `package.json`，两个工程各自 `pnpm install`，互不干扰，可以单独构建、单独部署。
 
@@ -39,6 +39,7 @@
 - **菜单管理** — 目录 / 菜单 / 按钮三级粒度，支持外链、内嵌 iframe
 - **字典管理** — 字典类型 + 字典数据两级结构，Redis 缓存主动失效，全局 `useDict()` Hook 封装
 - **参数设置** — 全局系统参数在线维护，Redis 缓存实时生效，全局 `useConfig()` Hook 取值
+- **登录防护** — 连续登录失败自动锁定账号，失败次数与锁定时长在参数设置中配置
 - **文件管理** — 目录树管理文件，回收站还原，支持秒传、分片上传、断点续传，按引用计数彻底删除
 - **服务监控** — 实时 CPU 使用率、内存占用、磁盘空间、服务器运行信息与数据库连接池状态
 - **缓存监控** — Redis 实例信息、内存使用量、Key 数量，分类浏览与在线可视化管理
@@ -47,10 +48,65 @@
 - **定时任务** — BullMQ 动态调度，支持手动执行 / 暂停 / 恢复，含执行日志
 - **操作日志** — 全接口自动记录，IP 归属地解析，支持条件查询与导出
 - **登录日志** — 登录成功 / 失败全量记录，支持条件查询与导出
+- **菜单搜索** — 导航栏关键词搜索菜单，快速跳转页面
+- **列表工具栏** — 各列表页支持搜索区显隐、刷新与列显隐配置
 - **暗黑模式** — 一键切换明暗主题，CSS 变量全局控制
 - **多标签页** — 类浏览器 Tab 交互，支持刷新 / 关闭 / 右键菜单
 - **响应式布局** — 适配 PC / Pad / Mobile，侧边栏自动折叠
 - **布局设置** — 侧边栏 Logo、面包屑、标签页、动态标题均可自定义开关
+
+## 🚀 快速开始
+
+> 环境要求：Node.js ≥ 20 · pnpm 10 · MySQL 8 · Redis 7
+
+```bash
+# 1. 克隆仓库
+git clone https://github.com/ace627/nestjs-admin-template.git
+cd nestjs-admin-template
+
+# 2. 安装依赖（前后端独立工程，各自安装）
+cd server && pnpm install && cd ..
+cd admin  && pnpm install && cd ..
+
+# 3. 初始化数据库：创建 nestdemo 库（utf8mb4），导入根目录 init.sql
+mysql -uroot -p -e "CREATE DATABASE nestdemo DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+mysql -uroot -p nestdemo < init.sql
+
+# 4. 配置后端环境变量：复制模板后按需修改连接信息与 JWT_SECRET
+cp server/.env.example server/.env
+
+# 5. 启动
+cd server && pnpm start:dev   # 后端 http://localhost:3000/api
+cd admin  && pnpm dev         # 前端 http://localhost:5173（开发代理已指向 3000）
+```
+
+启动完成后使用默认账号登录：**admin / 123456**（超级管理员，建议登录后修改密码）。
+
+## 🐳 Docker 部署
+
+后端三件套（NestJS 服务 + MySQL 8 + Redis 7）一键编排，MySQL 首次启动自动导入 `init.sql`，数据持久化在命名卷中：
+
+```bash
+# 先在仓库根目录创建 .env 并写入：
+#   MYSQL_PASSWORD=your-strong-password
+#   JWT_SECRET=your-random-secret
+docker compose up -d --build
+```
+
+服务启动后监听 `3000` 端口，健康探针为 `/api/monitor/health/live`；前端需另行 `pnpm build` 后部署静态产物。
+
+## 📂 目录结构
+
+```
+├── admin/               # 前端工程（Vue 3 + TypeScript + Vite）
+├── server/              # 后端工程（NestJS + TypeORM）
+│   └── .env.example     # 环境变量模板
+├── docs/                # 本地文档
+├── init.sql             # 数据库初始化脚本（建表 + 种子数据）
+├── docker-compose.yml   # 后端一键编排（server + MySQL + Redis）
+├── Dockerfile.server    # 后端镜像构建文件
+└── AGENTS.md            # 开发协作约定
+```
 
 ## 🖼️ 演示图
 
