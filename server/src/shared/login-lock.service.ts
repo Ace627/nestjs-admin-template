@@ -1,15 +1,24 @@
 import { Injectable } from '@nestjs/common'
 import { RedisService } from './redis.service'
-import { BusinessException, RedisConstant } from '@/common'
+import { BusinessException, CommonConstant, RedisConstant } from '@/common'
+import { ConfigService } from '@/modules/system/config/config.service'
 
 @Injectable()
 export class LoginLockService {
-  /** 最大密码失败次数，达到即锁定 */
-  private readonly MAX_FAIL_COUNT = 5
-  /** 失败计数窗口与锁定时长（秒）：30 分钟 */
-  private readonly LOCK_SECONDS = 30 * 60
+  constructor(
+    private readonly redisService: RedisService,
+    private readonly configService: ConfigService,
+  ) {}
 
-  constructor(private readonly redisService: RedisService) {}
+  /** 锁定阈值（参数 sys.account.maxFailCount，缺失或非法时默认 5 次） */
+  private async getMaxFailCount(): Promise<number> {
+    return this.configService.getNumberConfig(CommonConstant.MAX_FAIL_COUNT_CONFIG_KEY, 5)
+  }
+
+  /** 锁定时长秒数（参数 sys.account.lockSeconds，缺失或非法时默认 30 分钟） */
+  private async getLockSeconds(): Promise<number> {
+    return this.configService.getNumberConfig(CommonConstant.LOCK_SECONDS_CONFIG_KEY, 30 * 60)
+  }
 
   /**
    * 校验账号是否处于锁定状态（单键设计：失败次数达到阈值即视同锁定）
@@ -19,7 +28,9 @@ export class LoginLockService {
   public async assertNotLocked(username: string): Promise<void> {
     const failKey = this.getFailKey(username)
     const count = await this.redisService.get(failKey)
-    if (!count || Number(count) < this.MAX_FAIL_COUNT) return
+    if (!count) return
+    const maxFailCount = await this.getMaxFailCount()
+    if (Number(count) < maxFailCount) return
     const ttl = await this.redisService.ttl(failKey)
     if (ttl > 0) throw new BusinessException(`密码错误次数过多，账号已锁定，请 ${Math.ceil(ttl / 60)} 分钟后重试`)
   }
@@ -31,11 +42,12 @@ export class LoginLockService {
    * @throws {BusinessException} 失败次数达到阈值时抛出异常（键保留至窗口结束，期间视同锁定）
    */
   public async recordFailure(username: string): Promise<number> {
+    const [maxFailCount, lockSeconds] = await Promise.all([this.getMaxFailCount(), this.getLockSeconds()])
     const failKey = this.getFailKey(username)
     const count = await this.redisService.incr(failKey)
-    await this.redisService.expire(failKey, this.LOCK_SECONDS)
-    if (count < this.MAX_FAIL_COUNT) return this.MAX_FAIL_COUNT - count
-    throw new BusinessException(`密码错误次数过多，账号已锁定 ${Math.round(this.LOCK_SECONDS / 60)} 分钟`)
+    await this.redisService.expire(failKey, lockSeconds)
+    if (count < maxFailCount) return maxFailCount - count
+    throw new BusinessException(`密码错误次数过多，账号已锁定 ${Math.round(lockSeconds / 60)} 分钟`)
   }
 
   /** 登录成功后清除失败计数 */

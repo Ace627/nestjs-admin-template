@@ -94,4 +94,10 @@ export const CommonConstant = {
    * sys_config 内置参数，控制登录页是否显示与校验图形验证码；参数缺失时后端默认开启（fail-safe）
    */
   CAPTCHA_ENABLED_CONFIG_KEY: 'sys.account.captchaEnabled',
+
+  /** 登录失败锁定阈值参数键名（默认 5 次） */
+  MAX_FAIL_COUNT_CONFIG_KEY: 'sys.account.maxFailCount',
+
+  /** 账号锁定时长参数键名，单位秒（默认 1800） */
+  LOCK_SECONDS_CONFIG_KEY: 'sys.account.lockSeconds',
 }
