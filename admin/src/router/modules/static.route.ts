@@ -25,12 +25,6 @@ export const STATIC_ROUTE_LIST: RouteRecordRaw[] = [
     children: [{ path: '', component: () => import('@/views/system/user/profile/index.vue'), name: 'Profile', meta: { title: '个人中心', icon: 'User' } }],
   },
   {
-    path: '/system/dict/data',
-    component: Layout,
-    meta: { hidden: true },
-    children: [{ path: '', component: () => import('@/views/system/dict/data.vue'), name: 'DictData', meta: { title: '字典数据', icon: 'Dict', activeMenu: '/system/dict' } }],
-  },
-  {
     path: '/monitor/job/log',
     component: Layout,
     meta: { hidden: true },

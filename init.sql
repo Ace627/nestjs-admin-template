@@ -11,7 +11,7 @@
  Target Server Version : 80046
  File Encoding         : 65001
 
- Date: 18/09/2026 00:20:45
+ Date: 19/09/2026 11:46:27
 */
 
 SET NAMES utf8mb4;
@@ -40,8 +40,8 @@ CREATE TABLE `sys_config`  (
 -- ----------------------------
 -- Records of sys_config
 -- ----------------------------
-INSERT INTO `sys_config` VALUES ('2026-09-17 22:56:18', '2026-09-17 23:31:24', NULL, 'admin', 'admin', '076189e6-d54f-4d00-93c8-9a17cba9608f', '账号自助-验证码开关', 'sys.account.captchaEnabled', 'true', 'Y', '是否开启验证码功能（true开启，false关闭）');
-INSERT INTO `sys_config` VALUES ('2026-09-17 23:31:56', '2026-09-18 00:19:51', NULL, 'admin', 'admin', '52700ffd-f68f-4233-abcf-cf93273a7ca0', '用户管理-账号初始密码', 'sys.user.initPassword', '123456', 'Y', '初始化密码 123456');
+INSERT INTO `sys_config` VALUES ('2026-09-17 22:56:18', '2026-09-19 11:11:54', NULL, 'admin', 'admin', '076189e6-d54f-4d00-93c8-9a17cba9608f', '登录验证码开关', 'sys.account.captchaEnabled', 'true', 'Y', '是否开启验证码功能（true开启，false关闭）');
+INSERT INTO `sys_config` VALUES ('2026-09-17 23:31:56', '2026-09-19 11:11:42', NULL, 'admin', 'admin', '52700ffd-f68f-4233-abcf-cf93273a7ca0', '新账号初始密码', 'sys.user.initPassword', '123456', 'Y', '初始化密码 123456');
 
 -- ----------------------------
 -- Table structure for sys_dept
@@ -266,8 +266,10 @@ INSERT INTO `sys_login_log` VALUES ('958d8831-62ea-4317-9517-e69f5e91b21e', 'adm
 INSERT INTO `sys_login_log` VALUES ('aa993343-5900-47e6-9fc2-5be42d705b11', 'admin', '127.0.0.1', '内网IP', 'Chrome134.0.0.0', 'Windows10', '1', '登录成功', '2026-09-16 16:31:48', 'ae74dee5-5d17-48eb-b9dd-5d80be564da2', '866b0232-507b-42a4-bdc1-47fc4a83616a');
 INSERT INTO `sys_login_log` VALUES ('ac7d2bc3-2b79-4a36-a319-08196502d245', 'admin1', '127.0.0.1', '内网IP', 'Chrome134.0.0.0', 'Windows10', '0', '该账号不存在或已停用', '2026-09-16 10:04:19', '7a6f5878-e212-43dc-8161-a1804bc60b6a', NULL);
 INSERT INTO `sys_login_log` VALUES ('b5e021bf-a840-4bfd-91d0-d97a67963d5e', 'admin1', '127.0.0.1', '内网IP', 'Chrome134.0.0.0', 'Windows10', '0', '该账号不存在或已停用', '2026-09-16 10:04:16', '80325e6d-9f93-4cfd-9e30-42974f77ee6c', NULL);
+INSERT INTO `sys_login_log` VALUES ('bb51e2da-bac4-4740-9fca-c771cc2219bc', 'admin', '127.0.0.1', '内网IP', 'Chrome134.0.0.0', 'Windows10', '1', '登录成功', '2026-09-19 11:08:43', 'b33f13d3-c656-47df-bde8-59e974564de7', '866b0232-507b-42a4-bdc1-47fc4a83616a');
 INSERT INTO `sys_login_log` VALUES ('c97f3a46-4991-4ac8-a8bb-a972512f3d1b', 'admin', '127.0.0.1', '内网IP', 'Chrome134.0.0.0', 'Windows10', '1', '登录成功', '2026-09-16 21:45:42', '29faf120-c6e7-4d92-9bf5-03cac4154ebe', '866b0232-507b-42a4-bdc1-47fc4a83616a');
 INSERT INTO `sys_login_log` VALUES ('cc5b9689-c4b8-46fb-aabb-ab0ce894494c', 'admin', '127.0.0.1', '内网IP', 'Chrome134.0.0.0', 'Windows10', '1', '登录成功', '2026-09-16 09:24:24', 'efe3cff6-b885-41d0-ae2e-4c16ca794756', '866b0232-507b-42a4-bdc1-47fc4a83616a');
+INSERT INTO `sys_login_log` VALUES ('d6ace0bb-abc2-4a71-a3d2-1958d77c7c2d', 'admin', '127.0.0.1', '内网IP', 'Chrome134.0.0.0', 'Windows10', '1', '登录成功', '2026-09-18 07:29:59', 'e787dd20-6310-40f7-9db8-334a2af6fbb1', '866b0232-507b-42a4-bdc1-47fc4a83616a');
 INSERT INTO `sys_login_log` VALUES ('da951825-2629-4b1a-aa11-ec7b0b66a8d4', 'admin', '127.0.0.1', '内网IP', 'Chrome134.0.0.0', 'Windows10', '1', '登录成功', '2026-09-17 23:29:05', '3da7a3f6-81a7-4318-9fdb-f26ff22eb3fc', '866b0232-507b-42a4-bdc1-47fc4a83616a');
 INSERT INTO `sys_login_log` VALUES ('e229a4fa-6347-4270-a8e0-1692c10c256c', 'admin', '127.0.0.1', '内网IP', 'Chrome134.0.0.0', 'Windows10', '0', '账号或密码错误，还可尝试 1 次', '2026-09-16 10:08:35', '536604f6-5510-4cbf-8abd-d55b695038b5', NULL);
 INSERT INTO `sys_login_log` VALUES ('f1f7da1c-75e9-4c7a-aefc-e4f50d635cbb', 'admin1', '127.0.0.1', '内网IP', 'Chrome134.0.0.0', 'Windows10', '0', '该账号不存在或已停用', '2026-09-16 10:04:00', '03266eed-babc-4aed-a3a8-4667f53f4c91', NULL);
@@ -312,7 +314,7 @@ INSERT INTO `sys_menu` VALUES ('2026-09-13 21:36:54', '2026-09-16 22:02:57', NUL
 INSERT INTO `sys_menu` VALUES ('2026-09-04 19:20:44', '2026-09-04 19:20:44', NULL, 'admin', 'admin', '0f88a474-ad08-4fd5-a797-df15caed5661', '072089b6-7900-4778-9558-7f7e5e212a58', NULL, NULL, 'F', NULL, '部门新增', '1', 'system:dept:create', '1', 2, '0');
 INSERT INTO `sys_menu` VALUES ('2026-09-13 11:11:42', '2026-09-13 11:11:42', NULL, 'admin', 'admin', '117de56b-e395-4556-b1a7-1f745c281064', 'ce940b28-31f7-45f2-b1ce-59af70c2dd58', NULL, NULL, 'F', NULL, '文件查询', '1', 'system:file:query', '1', 1, '0');
 INSERT INTO `sys_menu` VALUES ('2026-09-04 19:19:04', '2026-09-04 19:19:04', NULL, 'admin', 'admin', '1472f10a-d5ca-464e-aca6-05cff9e62616', '1f575ab8-fa15-428d-b91d-5aae8470e141', NULL, NULL, 'F', NULL, '菜单编辑', '1', 'system:menu:update', '1', 3, '0');
-INSERT INTO `sys_menu` VALUES ('2026-09-17 22:50:51', '2026-09-17 22:50:51', NULL, 'admin', 'admin', '149bc63f-a824-4bcc-b1b5-dd204671521e', 'c0e187f4-9550-4d69-ac3b-f9f0b1db46f3', 'config', 'system/config/index', 'C', 'ChatGPT', '参数设置', '1', NULL, '1', 6, '0');
+INSERT INTO `sys_menu` VALUES ('2026-09-17 22:50:51', '2026-09-19 11:14:03', NULL, 'admin', 'admin', '149bc63f-a824-4bcc-b1b5-dd204671521e', 'c0e187f4-9550-4d69-ac3b-f9f0b1db46f3', 'config', 'system/config/index', 'C', 'ConfigSetting', '参数设置', '1', NULL, '1', 6, '0');
 INSERT INTO `sys_menu` VALUES ('2026-09-04 19:16:08', '2026-09-04 19:16:08', NULL, 'admin', 'admin', '15752f04-6c88-4bce-a073-d138d863585f', '8762a399-1606-496c-98ee-1fed23bcedc7', NULL, NULL, 'F', NULL, '用户删除', '1', 'system:user:delete', '1', 4, '0');
 INSERT INTO `sys_menu` VALUES ('2026-09-04 19:25:16', '2026-09-04 19:25:16', NULL, 'admin', 'admin', '1aefdd00-7052-4397-8969-94ec7c5d2068', '963bbd9d-0ef9-46a3-8e92-81cf1a1a8dd8', NULL, NULL, 'F', NULL, '在线用户强退', '1', 'monitor:online:forceLogout', '1', 2, '0');
 INSERT INTO `sys_menu` VALUES ('2026-09-04 19:20:32', '2026-09-04 19:20:32', NULL, 'admin', 'admin', '1cf51c82-ecd8-41a9-8384-fb1133e567b2', '072089b6-7900-4778-9558-7f7e5e212a58', NULL, NULL, 'F', NULL, '部门查询', '1', 'system:dept:query', '1', 1, '0');
@@ -406,7 +408,10 @@ CREATE TABLE `sys_oper_log`  (
 -- ----------------------------
 -- Records of sys_oper_log
 -- ----------------------------
+INSERT INTO `sys_oper_log` VALUES ('34d2ce2e-cb41-4979-af55-0752d30085be', '参数管理', 'admin', 'ConfigController.update', 'PUT', '{\n  \"query\": {},\n  \"body\": {\n    \"createTime\": \"2026-09-17 22:56:18\",\n    \"updateTime\": \"2026-09-17 23:31:24\",\n    \"deleteTime\": null,\n    \"createBy\": \"admin\",\n    \"updateBy\": \"admin\",\n    \"id\": \"076189e6-d54f-4d00-93c8-9a17cba9608f\",\n    \"configName\": \"登录验证码开关\",\n    \"configKey\": \"sys.account.captchaEnabled\",\n    \"configValue\": \"true\",\n    \"configType\": \"Y\",\n    \"remark\": \"是否开启验证码功能（true开启，false关闭）\"\n  }\n}', '/api/system/config/update', '127.0.0.1', '内网IP', '2', '1', '2026-09-19 11:11:54', '9795657b-401e-45a7-8f18-49d87bc4734f', 31, '866b0232-507b-42a4-bdc1-47fc4a83616a');
+INSERT INTO `sys_oper_log` VALUES ('7ae6e812-4078-41b7-b993-8ec0bf12161d', '参数管理', 'admin', 'ConfigController.update', 'PUT', '{\n  \"query\": {},\n  \"body\": {\n    \"createTime\": \"2026-09-17 23:31:56\",\n    \"updateTime\": \"2026-09-18 00:19:51\",\n    \"deleteTime\": null,\n    \"createBy\": \"admin\",\n    \"updateBy\": \"admin\",\n    \"id\": \"52700ffd-f68f-4233-abcf-cf93273a7ca0\",\n    \"configName\": \"新账号初始密码\",\n    \"configKey\": \"sys.user.initPassword\",\n    \"configValue\": \"123456\",\n    \"configType\": \"Y\",\n    \"remark\": \"初始化密码 123456\"\n  }\n}', '/api/system/config/update', '127.0.0.1', '内网IP', '2', '1', '2026-09-19 11:11:42', '907507c0-bbe3-4dbf-a6f3-f66f1d3f659f', 24, '866b0232-507b-42a4-bdc1-47fc4a83616a');
 INSERT INTO `sys_oper_log` VALUES ('c842aca9-45f3-4522-8cfa-7765d4b60593', '操作日志', 'admin', 'LogController.clearOperinfo', 'DELETE', '{\n  \"query\": {}\n}', '/api/monitor/log/operlog/clear', '127.0.0.1', '内网IP', '4', '1', '2026-09-18 00:20:07', '4d249ad7-4223-45d1-a50b-90b1012e731d', 76, '866b0232-507b-42a4-bdc1-47fc4a83616a');
+INSERT INTO `sys_oper_log` VALUES ('ea29e921-6698-40ac-be5a-ab2661876b84', '菜单管理', 'admin', 'MenuController.update', 'PUT', '{\n  \"query\": {},\n  \"body\": {\n    \"createTime\": \"2026-09-17 22:50:51\",\n    \"updateTime\": \"2026-09-17 22:50:51\",\n    \"deleteTime\": null,\n    \"createBy\": \"admin\",\n    \"updateBy\": \"admin\",\n    \"id\": \"149bc63f-a824-4bcc-b1b5-dd204671521e\",\n    \"parentId\": \"c0e187f4-9550-4d69-ac3b-f9f0b1db46f3\",\n    \"path\": \"config\",\n    \"component\": \"system/config/index\",\n    \"menuType\": \"C\",\n    \"icon\": \"ConfigSetting\",\n    \"menuName\": \"参数设置\",\n    \"visible\": \"1\",\n    \"permission\": null,\n    \"status\": \"1\",\n    \"menuSort\": 6,\n    \"isCache\": \"0\"\n  }\n}', '/api/system/menu/update', '127.0.0.1', '内网IP', '2', '1', '2026-09-19 11:14:03', '691d1be7-86cd-49c5-ba6d-f52e26ad871c', 37, '866b0232-507b-42a4-bdc1-47fc4a83616a');
 
 -- ----------------------------
 -- Table structure for sys_role
@@ -498,7 +503,7 @@ CREATE TABLE `sys_user`  (
 -- Records of sys_user
 -- ----------------------------
 INSERT INTO `sys_user` VALUES ('2026-09-12 13:26:23', '2026-09-12 13:27:00', 'admin', 'admin', '13cd4e88-0ef4-4a8d-9a26-69fa62faf744', 'test', '$argon2id$v=19$m=65536,p=4,t=3$ggPJloEbge6hlfK3ecKusA$kfKp/5uPfkxHCpqUGYuU/eY7dt5GgD/KduJylD1dTqg', '18888888881', '测试人员', '18888888881@163.com', '1', '2', 18, '11', NULL, '2026-09-12 13:27:00', 'bb93a81a-039e-4cc3-a90d-9dce0857dde1', NULL);
-INSERT INTO `sys_user` VALUES ('2026-08-29 22:01:32', '2026-09-17 23:29:05', 'admin', 'admin', '866b0232-507b-42a4-bdc1-47fc4a83616a', 'admin', '$argon2id$v=19$m=65536,p=4,t=3$9TpqdrZbWIjXxG3RWFla0w$VA9fL3QvLvB6yQxTzic9or9lbKAtq+IMm0CC8X6JhaQ', '16688889999', '天道', 'yunhe@163.com', '1', '1', 18, NULL, '2026-09-17 23:29:05', NULL, 'bb93a81a-039e-4cc3-a90d-9dce0857dde1', '');
+INSERT INTO `sys_user` VALUES ('2026-08-29 22:01:32', '2026-09-19 11:08:43', 'admin', 'admin', '866b0232-507b-42a4-bdc1-47fc4a83616a', 'admin', '$argon2id$v=19$m=65536,p=4,t=3$9TpqdrZbWIjXxG3RWFla0w$VA9fL3QvLvB6yQxTzic9or9lbKAtq+IMm0CC8X6JhaQ', '16688889999', '天道', 'yunhe@163.com', '1', '1', 18, NULL, '2026-09-19 11:08:43', NULL, 'bb93a81a-039e-4cc3-a90d-9dce0857dde1', '');
 
 -- ----------------------------
 -- Table structure for sys_user_role
