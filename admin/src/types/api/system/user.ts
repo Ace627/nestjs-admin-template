@@ -13,6 +13,8 @@ export interface SysUser extends BaseEntity {
   roles?: { id: string; roleCode: string; roleName: string }[]
   /** 用户昵称 */
   nickname?: string
+  /** 真实姓名 */
+  realname?: string
   /** 年龄 */
   age?: number
   /** 用户邮箱 */
@@ -56,6 +58,8 @@ export interface UpdatePasswordParams {
 export interface UserProfile {
   /** 用户昵称 */
   nickname?: string
+  /** 真实姓名 */
+  realname?: string
   /** 年龄 */
   age?: number
   /** 手机号码 */

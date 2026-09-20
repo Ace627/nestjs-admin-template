@@ -1,0 +1,6 @@
+{
+  "scripts": {
+    "dev:server": "cd ./server && pnpm start:dev",
+    "dev:admin": "cd ./admin && pnpm dev"
+  }
+}

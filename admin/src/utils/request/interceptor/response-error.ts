@@ -21,10 +21,11 @@ let isHandlingUnauthorized = false
 
 export function responseErrorInterceptor(instance: AxiosInstance) {
   instance.interceptors.response.use(undefined, async (error: AxiosError<ApiResponse>) => {
-    let { message = '网络连接异常，请检查服务或网络是否正常' } = error
+    let { message } = error
     let status = error.response?.status ?? -1
     if (message.includes('Request failed with status code')) status = parseInt(message.slice(-3))
     if (message.includes('timeout')) status = HttpStatusCode.RequestTimeout
+    if (message.includes('Network Error')) message = '网络连接异常，请检查服务或网络是否正常'
 
     // 提取错误信息（优先级：后端返回 > 本地映射）
     message = ErrorMessageMap[status.toString()] || message

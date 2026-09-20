@@ -157,6 +157,7 @@ export class UserService {
     queryBuilder.leftJoin('user.roles', 'role')
     queryBuilder.where('user.id = :id', { id })
     queryBuilder.select('user.nickname')
+    queryBuilder.addSelect('user.realname')
     queryBuilder.addSelect('user.phone')
     queryBuilder.addSelect('user.email')
     queryBuilder.addSelect('user.age')

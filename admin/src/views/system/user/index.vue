@@ -90,6 +90,7 @@ const columns: ProTableColumn<User.SysUser>[] = [
   { align: 'center', type: 'index', label: '序号', width: 64 },
   { align: 'center', prop: 'username', label: '用户账号', showOverflowTooltip: true, minWidth: 100 },
   { align: 'center', prop: 'nickname', label: '用户昵称', showOverflowTooltip: true, minWidth: 90 },
+  { align: 'center', prop: 'realname', label: '真实姓名', showOverflowTooltip: true, minWidth: 90 },
   { align: 'center', prop: 'phone', label: '手机号码', showOverflowTooltip: true, minWidth: 120 },
   { align: 'center', prop: 'email', label: '用户邮箱', showOverflowTooltip: true, minWidth: 170 },
   { align: 'center', prop: 'gender', label: '性别', slot: 'gender', width: 80 },
@@ -139,7 +140,7 @@ function handleDeptClick(deptId: string) {
 }
 
 function handleCreate() {
-  userDialogRef.value?.open()
+  userDialogRef.value?.open(undefined, queryParams.value.deptId)
 }
 
 function handleEdit(row: User.SysUser) {

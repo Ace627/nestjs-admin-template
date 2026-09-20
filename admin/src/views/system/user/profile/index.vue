@@ -11,6 +11,7 @@
           </div>
           <el-descriptions :column="1">
             <el-descriptions-item label="用户昵称">{{ profile.nickname }}</el-descriptions-item>
+            <el-descriptions-item label="真实姓名">{{ profile.realname }}</el-descriptions-item>
             <el-descriptions-item label="手机号码">{{ profile.phone }}</el-descriptions-item>
             <el-descriptions-item label="用户邮箱">{{ profile.email }}</el-descriptions-item>
             <el-descriptions-item label="所属角色">{{ profile.roleGroup?.join(' / ') }}</el-descriptions-item>

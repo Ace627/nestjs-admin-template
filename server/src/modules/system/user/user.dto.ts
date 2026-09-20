@@ -24,6 +24,9 @@ export class CreateUserDto {
   nickname: string
 
   @IsOptional()
+  realname: string
+
+  @IsOptional()
   age: number
 
   @IsOptional()
@@ -97,6 +100,9 @@ export class ResetUserPwdDto extends PickType(CreateUserDto, ['username', 'passw
 export class UpdateProfileDto {
   @IsOptional()
   nickname: string
+
+  @IsOptional()
+  realname: string
 
   @IsOptional()
   phone: string

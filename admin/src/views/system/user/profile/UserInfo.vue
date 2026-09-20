@@ -3,6 +3,9 @@
     <el-form-item label="用户昵称" prop="nickname">
       <el-input v-model="form.nickname" maxlength="20" />
     </el-form-item>
+    <el-form-item label="真实姓名" prop="realname">
+      <el-input v-model="form.realname" maxlength="20" />
+    </el-form-item>
     <el-form-item label="用户年龄" prop="age">
       <el-input-number v-model="form.age" :min="1" :max="120" controls-position="right" placeholder="请输入年龄" style="width: 100%" />
     </el-form-item>
@@ -39,6 +42,7 @@ const form = ref<User.UserProfile>({})
 const submitting = ref(false)
 
 const rules: FormRules<User.UserProfile> = {
+  realname: [{ required: true, message: '真实姓名不能为空', trigger: 'blur' }],
   nickname: [{ required: true, message: '用户昵称不能为空', trigger: 'blur' }],
   age: [{ required: true, message: '年龄不能为空', trigger: 'blur' }],
   email: [

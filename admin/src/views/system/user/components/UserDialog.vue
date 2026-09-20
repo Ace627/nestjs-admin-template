@@ -18,6 +18,11 @@
           </el-form-item>
         </el-col>
         <el-col :span="12">
+          <el-form-item label="真实姓名" prop="realname">
+            <el-input v-model.trim="form.realname" placeholder="请输入真实姓名" maxlength="20" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
           <el-form-item label="手机号码" prop="phone">
             <el-input v-model.trim="form.phone" placeholder="请输入手机号码" maxlength="11" />
           </el-form-item>
@@ -104,9 +109,16 @@ const rules: FormRules<User.UserForm> = {
     { required: true, message: '登录密码不能为空', trigger: 'blur' },
     { min: 5, max: 20, message: '密码长度为 5~20 位', trigger: 'blur' },
   ],
+  realname: [{ required: true, message: '真实姓名不能为空', trigger: 'blur' }],
   nickname: [{ required: true, message: '用户昵称不能为空', trigger: 'blur' }],
-  phone: [{ pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号码', trigger: 'blur' }],
-  email: [{ type: 'email', message: '请输入正确的邮箱格式', trigger: 'blur' }],
+  phone: [
+    { required: true, message: '手机号码不能为空', trigger: 'blur' },
+    { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号码', trigger: 'blur' },
+  ],
+  email: [
+    { required: true, message: '用户邮箱不能为空', trigger: 'blur' },
+    { type: 'email', message: '请输入正确的邮箱格式', trigger: 'blur' },
+  ],
   age: [{ required: true, message: '用户年龄不能为空', trigger: 'blur' }],
   roleIds: [{ required: true, message: '用户角色不能为空', trigger: 'change' }],
   status: [{ required: true, message: '状态不能为空', trigger: 'change' }],
@@ -114,23 +126,23 @@ const rules: FormRules<User.UserForm> = {
   deptId: [{ required: true, message: '归属部门不能为空', trigger: 'change' }],
 }
 
-/** 打开弹窗（传 record 为编辑模式，不传为新增模式） */
-async function open(record?: User.SysUser) {
+/** 打开弹窗（传 record 为编辑模式，不传为新增模式；defaultDeptId 为新增时的默认归属部门） */
+async function open(record?: User.SysUser, defaultDeptId?: string) {
   visible.value = true
-  await Promise.all([resetForm(record?.id), loadSelectData()])
+  await Promise.all([resetForm(record?.id, defaultDeptId), loadSelectData()])
 }
 
 /** 新增用户默认初始密码（参数 sys.user.initPassword；缺失/无权限回退 123456） */
 const initPassword = useConfig('sys.user.initPassword', '123456')
 
 /** 编辑时回填详情并将关联角色映射为 roleIds；新增时恢复默认值（deptId=0 视为未分配） */
-async function resetForm(userId?: string) {
+async function resetForm(userId?: string, defaultDeptId?: string) {
   if (userId) {
     const data = await UserRequest.findDetail({ id: userId })
     const deptId = data.deptId && data.deptId !== '0' ? data.deptId : undefined
     form.value = { ...data, deptId, roleIds: (data.roles ?? []).map((item) => item.id) }
   } else {
-    form.value = { status: '1', gender: '2', password: initPassword.value }
+    form.value = { status: '1', gender: '2', password: initPassword.value, deptId: defaultDeptId }
   }
 }
 

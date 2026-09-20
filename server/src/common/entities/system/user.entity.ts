@@ -20,6 +20,9 @@ export class UserEntity extends BaseEntity {
   @Column({ length: 20, comment: '昵称', nullable: true, type: 'varchar' })
   nickname: string
 
+  @Column({ length: 20, comment: '姓名', nullable: true, type: 'varchar' })
+  realname: string
+
   @Column({ length: 50, comment: '邮箱', nullable: true, type: 'varchar' })
   email: string
 

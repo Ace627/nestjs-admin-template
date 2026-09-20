@@ -4,7 +4,7 @@
       <div class="fw-bold tracking-widest mb-16px">角色权限分配</div>
 
       <div class="flex items-center mb-12px">
-        <el-checkbox v-model="checkStrictly">父子联动</el-checkbox>
+        <el-checkbox v-model="isLinkage">父子联动</el-checkbox>
         <el-checkbox v-model="isExpandAll" @change="handleExpandAll">全部展开</el-checkbox>
       </div>
 
@@ -43,6 +43,17 @@ const visible = ref(false)
 const submitting = ref(false)
 /** 父子联动开关：回显时必须先关闭（check-strictly），否则勾选会被联动污染 */
 const checkStrictly = ref(true)
+/** 父子联动开关：勾选=联动；回显阶段必须关闭联动（checkStrictly=true），否则勾选会被联动污染 */
+const isLinkage = computed({
+  get: () => !checkStrictly.value,
+  set: (checked: boolean) => (checkStrictly.value = !checked),
+})
+
+/** 切到联动时重放一次勾选，让父节点半选状态立即重算 */
+watch(isLinkage, (checked) => {
+  if (checked) nextTick(() => menuTreeRef.value?.setCheckedKeys(defaultCheckedKeys.value))
+})
+
 const isExpandAll = ref(false)
 /** 回显勾选的菜单 ID 集合 */
 const defaultCheckedKeys = ref<string[]>([])
@@ -93,16 +104,44 @@ function handleCancel() {
   visible.value = false
 }
 
-/** 提交角色授权（半选父节点必须一并提交，否则目录/菜单会丢） */
+/** 查找勾选节点缺失的祖先菜单名（严格模式下 el-tree 不算半选，缺父级会提交孤儿权限） */
+function findMissingParentNames(ids: string[]): string[] {
+  const parentMap = new Map<string, string>()
+  const nameMap = new Map<string, string>()
+  const walk = (nodes: Menu.MenuItem[], parentId?: string) => {
+    nodes.forEach((node) => {
+      if (parentId) parentMap.set(node.id, parentId)
+      nameMap.set(node.id, node.menuName ?? '')
+      if (node.children?.length) walk(node.children, node.id)
+    })
+  }
+  walk(treeList.value)
+
+  const selectedIds = new Set(ids)
+  const missingIds = new Set<string>()
+  ids.forEach((id) => {
+    let parentId = parentMap.get(id)
+    while (parentId) {
+      if (!selectedIds.has(parentId)) missingIds.add(parentId)
+      parentId = parentMap.get(parentId)
+    }
+  })
+  return [...missingIds].map((id) => nameMap.get(id) ?? id)
+}
+
+/** 提交角色授权（父级菜单必须一并勾选，否则目录/菜单会丢） */
 async function handleSubmit() {
   try {
     const checkedIds = (menuTreeRef.value?.getCheckedKeys() ?? []) as string[]
     const halfCheckedIds = (menuTreeRef.value?.getHalfCheckedKeys() ?? []) as string[]
     if (!checkedIds.length && !halfCheckedIds.length) return TipModal.msgWarning('请至少勾选一个菜单权限')
+    const selectedIds = [...halfCheckedIds, ...checkedIds]
+    const missingParentNames = findMissingParentNames(selectedIds)
+    if (missingParentNames.length) return TipModal.msgWarning(`请先勾选父级菜单：${missingParentNames.join('、')}`)
     const { cancel } = await TipModal.confirm(`确定要保存「${role.value?.roleName}」的权限分配吗？`)
     if (cancel) return TipModal.msg('操作取消')
     submitting.value = true
-    await RoleRequest.authPermission({ roleId: role.value!.id, menuIds: [...halfCheckedIds, ...checkedIds] })
+    await RoleRequest.authPermission({ roleId: role.value!.id, menuIds: selectedIds })
     TipModal.msgSuccess('授权成功')
     visible.value = false
     emits('getList')
