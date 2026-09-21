@@ -6,31 +6,31 @@ import { defaultDbFile, newWithFileOnly } from 'ip2region-ts'
 const searcher = newWithFileOnly(defaultDbFile)
 
 /**
- * 企业级标准：获取客户端真实 IP
- * - 兼容 Nginx / Caddy / 阿里云 / 腾讯云 / K8s 等反向代理环境
+ * 获取客户端真实 IP
+ * - 以 TCP 直连对端为准：对端非内网（可信代理）时转发头一律不可信，直接采信 TCP 层地址，
+ *   防止公网客户端伪造 X-Forwarded-For / X-Real-IP 绕过限流与登录锁定
+ * - 可信代理（Nginx 覆盖式转发）场景下读转发头：优先 X-Real-IP，其次 X-Forwarded-For
+ *   取最后一个元素（代理追加的真实客户端 IP，兼容追加式转发链）
+ * - 已知取舍：内网客户端直连时同样命中可信判定，可伪造头骗过，风险面收窄到内网可接受
  * @param {ExpressRequest} request - Express 请求对象
  * @returns {string} 客户端真实 IP 地址
- * @example
- * // 正常请求
- * getRequestIp(req) // 返回客户端 IP
- * // 反向代理请求
- * getRequestIp(req) // 返回原始客户端 IP
  */
 export function getRequestIp(request: ExpressRequest): string {
-  const xForwardedFor = request.headers['x-forwarded-for']
+  const remoteIp = (request.socket.remoteAddress || '').trim().replace(/^::ffff:/, '')
+  const normalizedRemoteIp = remoteIp === '::1' ? '127.0.0.1' : remoteIp
+  if (!isInternalIp(normalizedRemoteIp)) return normalizedRemoteIp
   const xRealIp = request.headers['x-real-ip']
-  const remoteIp = request.socket.remoteAddress
-  let ip = ''
-  if (xForwardedFor) {
-    ip = Array.isArray(xForwardedFor) ? xForwardedFor[0] : xForwardedFor
-    ip = ip.split(',')[0]?.trim() || ''
-  } else if (xRealIp) {
-    ip = Array.isArray(xRealIp) ? xRealIp[0] : xRealIp
-    ip = ip.trim()
-  } else if (remoteIp) {
-    ip = remoteIp
+  if (xRealIp) {
+    const ip = (Array.isArray(xRealIp) ? xRealIp[0] : xRealIp).trim().replace(/^::ffff:/, '')
+    return ip === '::1' ? '127.0.0.1' : ip
   }
-  return ip.replace('::ffff:', '').replace('::1', '127.0.0.1').trim()
+  const xForwardedFor = request.headers['x-forwarded-for']
+  if (xForwardedFor) {
+    const forwarded = Array.isArray(xForwardedFor) ? xForwardedFor[0] : xForwardedFor
+    const ip = (forwarded.split(',').pop()?.trim() || '').replace(/^::ffff:/, '')
+    return ip === '::1' ? '127.0.0.1' : ip
+  }
+  return normalizedRemoteIp
 }
 
 /**

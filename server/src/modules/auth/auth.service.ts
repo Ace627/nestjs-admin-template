@@ -11,7 +11,7 @@ import { MenuService } from '../system/menu/menu.service'
 import { RoleService } from '../system/role/role.service'
 import { ConfigService as SysConfigService } from '../system/config/config.service'
 import { HttpStatus, Injectable, Logger } from '@nestjs/common'
-import { verifyPassword, formatTime, randomUUID } from '@/utils'
+import { verifyPassword, formatTime, randomUUID, getRequestIp } from '@/utils'
 import { CommonConstant, BusinessException, RedisConstant, ConfigConstant, RbacConstant } from '@/common'
 
 @Injectable()
@@ -42,8 +42,9 @@ export class AuthService {
   public async login(loginDto: LoginDto, request: ExpressRequest) {
     try {
       const { username, password, uuid, captcha } = loginDto
+      const ip = getRequestIp(request)
       // 1. 账号锁定校验（锁定中直接拒绝，不再消耗验证码校验）
-      await this.loginLockService.assertNotLocked(username)
+      await this.loginLockService.assertNotLocked(username, ip)
       // 2. 校验验证码是否正确（参数开关关闭时跳过；开关状态与登录页读同一参数，缺失默认开启）
       const captchaEnabled = await this.sysConfigService.getBooleanConfig(CommonConstant.CAPTCHA_ENABLED_CONFIG_KEY, true)
       if (captchaEnabled) await this.captchaService.validate(uuid, captcha)
@@ -53,10 +54,10 @@ export class AuthService {
       const { id: userId, password: hashPassword } = user
       // 4. 校验密码是否正确（错误计入失败次数，达阈值锁定账号）
       if (!(await verifyPassword(password, hashPassword))) {
-        const remainingCount = await this.loginLockService.recordFailure(username)
+        const remainingCount = await this.loginLockService.recordFailure(username, ip)
         throw new BusinessException(`账号或密码错误，还可尝试 ${remainingCount} 次`)
       }
-      await this.loginLockService.clearFailCount(username)
+      await this.loginLockService.clearFailCount(username, ip)
       // 5. 生成 Token
       const { accessTokenKey, accessToken } = await this.generateAccessToken(user)
       // 6. 更新登录时间

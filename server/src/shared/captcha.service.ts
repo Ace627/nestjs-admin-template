@@ -40,17 +40,16 @@ export class CaptchaService {
   public async validate(uuid: string, captcha: string): Promise<boolean> {
     // 1. 参数校验
     if (!uuid || !captcha) throw new BusinessException('验证码校验参数不完整')
-    // 2. 获取缓存的验证码答案
+    // 2. 获取缓存答案并立即作废（无论本次校验对错，同一 uuid 只允许校验一次）
     const key = this.getCacheKey(uuid)
     const cachedValue = await this.redisService.get(key)
-    // 3. 验证码已过期或不存在
+    await this.redisService.del(key)
+    // 3. 验证码已过期或不存在（含已被使用过的情况）
     if (!cachedValue) throw new BusinessException('验证码已过期，请刷新后重试')
     // 4. 验证码匹配校验（不区分大小写）
     const isValid = cachedValue.toLowerCase() === captcha.toLowerCase()
     if (!isValid) throw new BusinessException('验证码错误，请刷新后重试')
-    // 5. 校验通过，立即删除缓存，防止重复使用
-    await this.redisService.del(key)
-    // 6. 返回校验成功标识
+    // 5. 返回校验成功标识
     return true
   }
 

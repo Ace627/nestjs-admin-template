@@ -95,7 +95,7 @@ export const CommonConstant = {
    */
   CAPTCHA_ENABLED_CONFIG_KEY: 'sys.account.captchaEnabled',
 
-  /** 登录失败锁定阈值参数键名（默认 5 次） */
+  /** 登录失败锁定阈值参数键名（账号+IP 维度，默认 5 次） */
   MAX_FAIL_COUNT_CONFIG_KEY: 'sys.account.maxFailCount',
 
   /** 账号锁定时长参数键名，单位秒（默认 1800） */

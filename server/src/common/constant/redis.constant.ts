@@ -83,9 +83,9 @@ export const RedisConstant = {
   THROTTLE_LIMIT: 'throttle:limit',
 
   /**
-   * 登录失败计数键前缀
-   * 拼接用户名形成唯一缓存 Key，格式为「login:fail:username」，键值为窗口期内密码错误次数，
-   * 次数达到阈值即视同账号锁定，TTL 到期自动解锁
+   * 登录失败计数键前缀（账号+IP 维度）
+   * 拼接用户名与客户端 IP 形成唯一缓存 Key，格式为「login:fail:{username}:{ip}」，
+   * 键值为窗口期内密码错误次数，达到阈值即锁定该账号在该 IP 的登录，TTL 到期自动解锁
    */
   LOGIN_FAIL_COUNT: 'login:fail',
 }

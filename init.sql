@@ -11,7 +11,7 @@
  Target Server Version : 80046
  File Encoding         : 65001
 
- Date: 20/09/2026 22:27:15
+ Date: 21/09/2026 21:40:56
 */
 
 SET NAMES utf8mb4;
@@ -122,6 +122,7 @@ INSERT INTO `sys_dict_data` VALUES ('2026-09-04 12:02:43', '2026-09-04 12:02:49'
 INSERT INTO `sys_dict_data` VALUES ('2026-09-04 11:24:52', '2026-09-04 11:50:02', NULL, 'admin', 'admin', '96fd1a45-a280-4588-82b4-8e36e688cb79', 1, NULL, '1', '男', '0', 'sys_user_sex', '性别男');
 INSERT INTO `sys_dict_data` VALUES ('2026-09-04 12:01:11', '2026-09-04 12:01:11', NULL, 'admin', 'admin', '9c7cb3ea-6418-4f54-b81b-0790f8411fe8', 1, 'info', '1', '新增', '1', 'sys_oper_type', '新增操作');
 INSERT INTO `sys_dict_data` VALUES ('2026-09-05 00:54:06', '2026-09-05 00:54:06', NULL, 'admin', 'admin', 'a09eae84-711e-4582-8559-f84edc6f0cf0', 2, 'danger', '1', '隐藏', '0', 'sys_menu_visible', '菜单侧栏隐藏');
+INSERT INTO `sys_dict_data` VALUES ('2026-09-21 21:38:27', '2026-09-21 21:38:35', NULL, 'admin', 'admin', 'e19a1224-833d-4f23-93f3-67080a384639', 8, 'success', '1', '解锁', '8', 'sys_oper_type', '解锁操作');
 INSERT INTO `sys_dict_data` VALUES ('2026-09-04 12:01:53', '2026-09-04 12:01:53', NULL, 'admin', 'admin', 'e4a48565-1dae-42d9-9ea5-4de71dffed5d', 3, 'danger', '1', '删除', '3', 'sys_oper_type', '删除操作');
 INSERT INTO `sys_dict_data` VALUES ('2026-09-04 11:58:19', '2026-09-04 11:59:23', NULL, 'admin', 'admin', 'eaed69dc-a0ef-410c-ab93-dbe4d85e4c05', 2, 'danger', '1', '失败', '0', 'sys_common_status', '失败状态');
 INSERT INTO `sys_dict_data` VALUES ('2026-09-05 00:53:46', '2026-09-05 00:53:46', NULL, 'admin', 'admin', 'f5b7bacd-b92d-4bf8-b1ca-e84b2c2aad42', 1, 'primary', '1', '显示', '1', 'sys_menu_visible', '菜单侧栏显示');
@@ -299,14 +300,16 @@ INSERT INTO `sys_menu` VALUES ('2026-09-04 19:22:28', '2026-09-04 19:22:28', NUL
 INSERT INTO `sys_menu` VALUES ('2026-09-04 19:20:53', '2026-09-04 19:20:53', NULL, 'admin', 'admin', '2695904c-a686-4c12-84b7-6134ab666cbc', '072089b6-7900-4778-9558-7f7e5e212a58', NULL, NULL, 'F', NULL, '部门编辑', '1', 'system:dept:update', '1', 3, '0');
 INSERT INTO `sys_menu` VALUES ('2026-09-04 19:28:39', '2026-09-04 19:28:39', NULL, 'admin', 'admin', '2894c7f0-dc07-443f-b812-d2f17f600329', 'df37b091-b128-45a0-9666-137748fb36f0', NULL, NULL, 'F', NULL, '操作日志删除', '1', 'monitor:operlog:delete', '1', 2, '0');
 INSERT INTO `sys_menu` VALUES ('2026-09-04 19:17:24', '2026-09-04 19:17:24', NULL, 'admin', 'admin', '2c3caeb6-26b6-4f33-a07b-671e30263aba', '90ccc73f-9508-42d4-8f5e-f1d0c1da97c4', NULL, NULL, 'F', NULL, '角色新增', '1', 'system:role:create', '1', 2, '0');
+INSERT INTO `sys_menu` VALUES ('2026-09-21 21:21:21', '2026-09-21 21:21:21', NULL, 'admin', 'admin', '34c04ada-5f12-4b47-9859-4cf7d374cb2c', '50795299-dc72-4b65-8a73-9b8f6e5902bd', NULL, NULL, 'F', NULL, '登录锁定解锁', '1', 'monitor:loginlock:unlock', '1', 2, '0');
 INSERT INTO `sys_menu` VALUES ('2026-09-17 22:53:20', '2026-09-17 22:53:20', NULL, 'admin', 'admin', '35b1f827-eec9-4ac3-802a-44220e134e8b', '149bc63f-a824-4bcc-b1b5-dd204671521e', NULL, NULL, 'F', NULL, '参数刷新', '1', 'system:config:refresh', '1', 5, '0');
 INSERT INTO `sys_menu` VALUES ('2026-09-04 19:17:49', '2026-09-04 19:17:49', NULL, 'admin', 'admin', '360de6d6-3e66-469c-a2c4-f81acdd7b473', '90ccc73f-9508-42d4-8f5e-f1d0c1da97c4', NULL, NULL, 'F', NULL, '角色删除', '1', 'system:role:delete', '1', 4, '0');
 INSERT INTO `sys_menu` VALUES ('2026-09-13 21:49:06', '2026-09-16 22:02:52', NULL, 'admin', 'admin', '39a3b5a3-7e03-42dc-aa69-85d998cad25b', '1e0c60bb-d20f-478b-b8a3-2ece6802238e', 'upload', 'example/upload/index', 'C', 'Resource', '大文件上传', '1', NULL, '1', 55, '0');
-INSERT INTO `sys_menu` VALUES ('2026-09-04 19:29:39', '2026-09-06 13:22:31', NULL, 'admin', 'admin', '41a045fd-5077-4694-ae65-78e4f7120a7f', '760c23de-73fa-4d69-8d1c-674a235d3799', 'loginlog', 'monitor/loginlog/index', 'C', 'Loginlog', '登录日志', '1', NULL, '1', 7, '0');
+INSERT INTO `sys_menu` VALUES ('2026-09-04 19:29:39', '2026-09-21 21:19:25', NULL, 'admin', 'admin', '41a045fd-5077-4694-ae65-78e4f7120a7f', '760c23de-73fa-4d69-8d1c-674a235d3799', 'loginlog', 'monitor/loginlog/index', 'C', 'Loginlog', '登录日志', '1', NULL, '1', 12, '0');
 INSERT INTO `sys_menu` VALUES ('2026-09-05 23:39:57', '2026-09-05 23:39:57', NULL, 'admin', 'admin', '43aeefe8-3704-471b-a494-bf0b1c4a6446', '41a045fd-5077-4694-ae65-78e4f7120a7f', NULL, NULL, 'F', NULL, '登录日志导入', '1', 'monitor:loginlog:import', '1', 4, '0');
 INSERT INTO `sys_menu` VALUES ('2026-09-05 15:11:14', '2026-09-05 15:52:38', NULL, 'admin', 'admin', '4534a44e-8baa-4ed2-8545-1ae11fde5538', '656742cc-c81b-4d5d-8a33-524469e84cfc', NULL, NULL, 'F', NULL, '缓存删除', '1', 'monitor:cache:delete', '1', 2, '0');
 INSERT INTO `sys_menu` VALUES ('2026-09-04 19:15:34', '2026-09-04 19:15:34', NULL, 'admin', 'admin', '4bf51da7-9633-432b-8fab-5f40051dd4eb', '8762a399-1606-496c-98ee-1fed23bcedc7', NULL, NULL, 'F', NULL, '用户查询', '1', 'system:user:query', '1', 1, '0');
 INSERT INTO `sys_menu` VALUES ('2026-09-04 19:31:11', '2026-09-05 23:39:48', NULL, 'admin', 'admin', '5017e6d1-6b6d-4e7e-890c-e8d22fe43dd7', '41a045fd-5077-4694-ae65-78e4f7120a7f', NULL, NULL, 'F', NULL, '登录日志导出', '1', 'monitor:loginlog:export', '1', 5, '0');
+INSERT INTO `sys_menu` VALUES ('2026-09-21 21:20:50', '2026-09-21 21:20:50', NULL, 'admin', 'admin', '50795299-dc72-4b65-8a73-9b8f6e5902bd', '760c23de-73fa-4d69-8d1c-674a235d3799', 'loginlock', 'monitor/loginlock/index', 'C', 'Lock', '登录锁定', '1', NULL, '1', 6, '0');
 INSERT INTO `sys_menu` VALUES ('2026-09-13 21:37:42', '2026-09-13 21:46:29', NULL, 'admin', 'admin', '542222c7-5206-4a44-8386-6abd30376c71', '1e0c60bb-d20f-478b-b8a3-2ece6802238e', 'price', 'example/price/index', 'C', 'Resource', '定价卡片', '1', NULL, '1', 2, '0');
 INSERT INTO `sys_menu` VALUES ('2026-09-13 11:12:10', '2026-09-13 11:12:10', NULL, 'admin', 'admin', '5fa5e798-f1bd-4518-9531-b6e1c442a8af', 'ce940b28-31f7-45f2-b1ce-59af70c2dd58', NULL, NULL, 'F', NULL, '文件编辑', '1', 'system:file:update', '1', 3, '0');
 INSERT INTO `sys_menu` VALUES ('2026-09-04 19:30:30', '2026-09-04 19:30:30', NULL, 'admin', 'admin', '6012fb93-4997-4a55-9e83-ff32b18f7ae4', '41a045fd-5077-4694-ae65-78e4f7120a7f', NULL, NULL, 'F', NULL, '登录日志查询', '1', 'monitor:loginlog:query', '1', 1, '0');
@@ -322,6 +325,7 @@ INSERT INTO `sys_menu` VALUES ('2026-09-04 19:23:55', '2026-09-04 19:23:55', NUL
 INSERT INTO `sys_menu` VALUES ('2026-09-04 19:23:21', '2026-09-13 11:09:31', NULL, 'admin', 'admin', '78cb1bc1-41b6-47e5-ad47-448708d2cc31', 'c0e187f4-9550-4d69-ac3b-f9f0b1db46f3', 'icon', 'system/icon/index', 'C', 'Image', '系统图标', '1', NULL, '1', 16, '0');
 INSERT INTO `sys_menu` VALUES ('2026-09-04 19:31:00', '2026-09-04 19:31:00', NULL, 'admin', 'admin', '7c623ede-4cc9-45ba-acc2-0760c79f6de8', '41a045fd-5077-4694-ae65-78e4f7120a7f', NULL, NULL, 'F', NULL, '登录日志清空', '1', 'monitor:loginlog:clear', '1', 3, '0');
 INSERT INTO `sys_menu` VALUES ('2026-09-06 13:24:10', '2026-09-06 13:24:10', NULL, 'admin', 'admin', '7f912b4d-6ece-4514-b1f0-185190554a33', 'd50c6827-b234-4549-9f98-ea029eb42d56', NULL, NULL, 'F', NULL, '定时任务新增', '1', 'monitor:job:create', '1', 2, '0');
+INSERT INTO `sys_menu` VALUES ('2026-09-21 21:21:05', '2026-09-21 21:21:05', NULL, 'admin', 'admin', '835d5e27-e597-4308-bb59-308959931733', '50795299-dc72-4b65-8a73-9b8f6e5902bd', NULL, NULL, 'F', NULL, '登录锁定查询', '1', 'monitor:loginlock:query', '1', 1, '0');
 INSERT INTO `sys_menu` VALUES ('2026-09-05 15:12:36', '2026-09-05 15:52:46', NULL, 'admin', 'admin', '862277c2-39c6-439a-9999-6e5ec37e5693', '656742cc-c81b-4d5d-8a33-524469e84cfc', NULL, NULL, 'F', NULL, '缓存清空', '1', 'monitor:cache:clear', '1', 3, '0');
 INSERT INTO `sys_menu` VALUES ('2026-09-04 19:15:15', '2026-09-04 19:15:15', NULL, 'admin', 'admin', '8762a399-1606-496c-98ee-1fed23bcedc7', 'c0e187f4-9550-4d69-ac3b-f9f0b1db46f3', 'user', 'system/user/index', 'C', 'User', '用户管理', '1', NULL, '1', 1, '0');
 INSERT INTO `sys_menu` VALUES ('2026-09-04 19:30:44', '2026-09-04 19:30:44', NULL, 'admin', 'admin', '876c8c7c-2b95-463d-af59-b94a794c6603', '41a045fd-5077-4694-ae65-78e4f7120a7f', NULL, NULL, 'F', NULL, '登录日志删除', '1', 'monitor:loginlog:delete', '1', 2, '0');
@@ -346,7 +350,7 @@ INSERT INTO `sys_menu` VALUES ('2026-09-13 11:10:05', '2026-09-17 22:45:29', NUL
 INSERT INTO `sys_menu` VALUES ('2026-09-13 21:38:50', '2026-09-13 21:46:32', NULL, 'admin', 'admin', 'd3696afb-07da-43b6-9d98-48063649202d', '1e0c60bb-d20f-478b-b8a3-2ece6802238e', 'charts', 'example/charts/index', 'C', 'Resource', '图表效果', '1', NULL, '1', 3, '0');
 INSERT INTO `sys_menu` VALUES ('2026-09-06 13:23:41', '2026-09-06 13:23:41', NULL, 'admin', 'admin', 'd50c6827-b234-4549-9f98-ea029eb42d56', '760c23de-73fa-4d69-8d1c-674a235d3799', 'job', 'monitor/job/index', 'C', 'Schedule', '定时任务', '1', NULL, '1', 2, '0');
 INSERT INTO `sys_menu` VALUES ('2026-09-05 17:44:03', '2026-09-05 17:44:03', NULL, 'admin', 'admin', 'd8b682e4-dabf-4d24-939d-881c551de2f7', 'c4057b22-024f-450e-a9fe-4a4799416dca', NULL, NULL, 'F', NULL, '服务监控查询', '1', 'monitor:server:query', '1', 1, '0');
-INSERT INTO `sys_menu` VALUES ('2026-09-04 19:27:43', '2026-09-06 13:22:36', NULL, 'admin', 'admin', 'df37b091-b128-45a0-9666-137748fb36f0', '760c23de-73fa-4d69-8d1c-674a235d3799', 'operlog', 'monitor/operlog/index', 'C', 'Operation', '操作日志', '1', NULL, '1', 6, '0');
+INSERT INTO `sys_menu` VALUES ('2026-09-04 19:27:43', '2026-09-21 21:19:29', NULL, 'admin', 'admin', 'df37b091-b128-45a0-9666-137748fb36f0', '760c23de-73fa-4d69-8d1c-674a235d3799', 'operlog', 'monitor/operlog/index', 'C', 'Operation', '操作日志', '1', NULL, '1', 11, '0');
 INSERT INTO `sys_menu` VALUES ('2026-09-17 22:52:04', '2026-09-17 22:52:04', NULL, 'admin', 'admin', 'e0c4e87c-8e2f-4f28-b646-493f2d8bd201', '149bc63f-a824-4bcc-b1b5-dd204671521e', NULL, NULL, 'F', NULL, '参数查询', '1', 'system:config:query', '1', 1, '0');
 INSERT INTO `sys_menu` VALUES ('2026-09-05 15:53:02', '2026-09-05 15:53:02', NULL, 'admin', 'admin', 'e1a5e5dc-3db6-450f-bab4-20d551d44d81', '656742cc-c81b-4d5d-8a33-524469e84cfc', NULL, NULL, 'F', NULL, '缓存查询', '1', 'monitor:cache:query', '1', 1, '0');
 INSERT INTO `sys_menu` VALUES ('2026-09-13 21:33:54', '2026-09-13 21:33:54', NULL, 'admin', 'admin', 'e5f6c690-eec4-4cfc-8088-aab59f17241c', '1e0c60bb-d20f-478b-b8a3-2ece6802238e', 'watermark', 'example/watermark/index', 'C', 'Resource', '水印效果', '1', NULL, '1', 1, '0');
@@ -382,7 +386,7 @@ CREATE TABLE `sys_oper_log`  (
 -- ----------------------------
 -- Records of sys_oper_log
 -- ----------------------------
-INSERT INTO `sys_oper_log` VALUES ('141d09d8-228a-418d-9119-bcf288827c0c', '操作日志', 'admin', 'LogController.clearOperinfo', 'DELETE', '{\n  \"query\": {}\n}', '/api/monitor/log/operlog/clear', '127.0.0.1', '内网IP', '4', '1', '2026-09-20 22:26:59', 'b42cbed8-743b-4f6a-9336-44cd6f8d95cd', 40, '866b0232-507b-42a4-bdc1-47fc4a83616a');
+INSERT INTO `sys_oper_log` VALUES ('be37d730-963f-45e0-a80d-27589b515dbd', '操作日志', 'admin', 'LogController.clearOperinfo', 'DELETE', '{\n  \"query\": {}\n}', '/api/monitor/log/operlog/clear', '127.0.0.1', '内网IP', '4', '1', '2026-09-21 21:40:39', '98717ad8-4144-4960-b987-5ea3548d8048', 41, '866b0232-507b-42a4-bdc1-47fc4a83616a');
 
 -- ----------------------------
 -- Table structure for sys_role
@@ -534,8 +538,8 @@ CREATE TABLE `sys_user`  (
 -- ----------------------------
 -- Records of sys_user
 -- ----------------------------
-INSERT INTO `sys_user` VALUES ('2026-09-12 13:26:23', '2026-09-12 13:27:00', 'admin', 'admin', '13cd4e88-0ef4-4a8d-9a26-69fa62faf744', 'test', '$argon2id$v=19$m=65536,p=4,t=3$ggPJloEbge6hlfK3ecKusA$kfKp/5uPfkxHCpqUGYuU/eY7dt5GgD/KduJylD1dTqg', '18888888881', '测试人员', '18888888881@163.com', '1', '2', 18, '11', NULL, '2026-09-12 13:27:00', 'bb93a81a-039e-4cc3-a90d-9dce0857dde1', NULL, NULL);
-INSERT INTO `sys_user` VALUES ('2026-08-29 22:01:32', '2026-09-20 21:40:04', 'admin', 'admin', '866b0232-507b-42a4-bdc1-47fc4a83616a', 'admin', '$argon2id$v=19$m=65536,p=4,t=3$9TpqdrZbWIjXxG3RWFla0w$VA9fL3QvLvB6yQxTzic9or9lbKAtq+IMm0CC8X6JhaQ', '16688889999', '天道', 'yunhe@163.com', '1', '1', 18, NULL, '2026-09-20 21:40:04', NULL, 'bb93a81a-039e-4cc3-a90d-9dce0857dde1', '', NULL);
+INSERT INTO `sys_user` VALUES ('2026-09-21 21:22:21', '2026-09-21 21:22:21', 'admin', 'admin', '30bb5fcd-b6d0-45b4-979c-796a8d993cbf', 'test', '$argon2id$v=19$m=65536,p=4,t=3$XpZEKTRJkkmcDRHO4PpJSQ$QrR0JD1zHei7coSTLXdMeYFM/V77g0f+AHWZdcuDtQI', '13344445555', '测试', '13344445555@163.com', '1', '2', 18, NULL, NULL, NULL, 'bb93a81a-039e-4cc3-a90d-9dce0857dde1', NULL, '测试');
+INSERT INTO `sys_user` VALUES ('2026-08-29 22:01:32', '2026-09-21 21:31:41', 'admin', 'admin', '866b0232-507b-42a4-bdc1-47fc4a83616a', 'admin', '$argon2id$v=19$m=65536,p=4,t=3$9TpqdrZbWIjXxG3RWFla0w$VA9fL3QvLvB6yQxTzic9or9lbKAtq+IMm0CC8X6JhaQ', '16688889999', '天道', 'yunhe@163.com', '1', '1', 18, NULL, '2026-09-21 21:31:41', NULL, 'bb93a81a-039e-4cc3-a90d-9dce0857dde1', '', NULL);
 
 -- ----------------------------
 -- Table structure for sys_user_role
@@ -554,6 +558,7 @@ CREATE TABLE `sys_user_role`  (
 -- ----------------------------
 -- Records of sys_user_role
 -- ----------------------------
+INSERT INTO `sys_user_role` VALUES ('30bb5fcd-b6d0-45b4-979c-796a8d993cbf', '5e2db9ff-0913-4b92-91bc-ef329619842a');
 INSERT INTO `sys_user_role` VALUES ('866b0232-507b-42a4-bdc1-47fc4a83616a', '0138f9e4-666c-4a0b-8c38-dba80e875774');
 
 SET FOREIGN_KEY_CHECKS = 1;

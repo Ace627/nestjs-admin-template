@@ -5,9 +5,10 @@ import { ServerModule } from './server/server.module'
 import { CacheModule } from './cache/cache.module'
 import { JobModule } from './job/job.module'
 import { HealthModule } from './health/health.module';
+import { LoginlockModule } from './loginlock/loginlock.module';
 
 @Module({
-  imports: [LogModule, OnlineModule, ServerModule, CacheModule, JobModule, HealthModule],
+  imports: [LogModule, OnlineModule, ServerModule, CacheModule, JobModule, HealthModule, LoginlockModule],
   exports: [LogModule],
 })
 export class MonitorModule {}

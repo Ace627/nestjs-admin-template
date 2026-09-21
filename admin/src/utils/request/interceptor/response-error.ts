@@ -21,8 +21,9 @@ let isHandlingUnauthorized = false
 
 export function responseErrorInterceptor(instance: AxiosInstance) {
   instance.interceptors.response.use(undefined, async (error: AxiosError<ApiResponse>) => {
-    let { message } = error
-    let status = error.response?.status ?? -1
+    // 业务错误由响应转换拦截器以普通对象 reject（无 message 字段），此处须兜底防 TypeError 中断提示链路
+    let message = error?.message ?? ''
+    let status = error?.response?.status ?? -1
     if (message.includes('Request failed with status code')) status = parseInt(message.slice(-3))
     if (message.includes('timeout')) status = HttpStatusCode.RequestTimeout
     if (message.includes('Network Error')) message = '网络连接异常，请检查服务或网络是否正常'
