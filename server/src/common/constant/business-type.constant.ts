@@ -17,12 +17,12 @@ export class BusinessType {
   /** 强退 */
   static FORCE_LOGOUT = '5'
 
-  /** 解锁 */
-  static UNLOCK = '8'
-
   /** 导入 */
   static IMPORT = '6'
 
   /** 导出 */
   static EXPORT = '7'
+
+  /** 解锁 */
+  static UNLOCK = '8'
 }

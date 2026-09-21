@@ -11,7 +11,7 @@
  Target Server Version : 80046
  File Encoding         : 65001
 
- Date: 21/09/2026 21:40:56
+ Date: 21/09/2026 22:02:47
 */
 
 SET NAMES utf8mb4;
@@ -251,6 +251,12 @@ CREATE TABLE `sys_login_log`  (
 -- ----------------------------
 -- Records of sys_login_log
 -- ----------------------------
+INSERT INTO `sys_login_log` VALUES ('18c82dbc-a44f-498c-9c16-0a6ee1302a4d', 'test', '127.0.0.1', '内网IP', 'Edge122.0.0.0', 'Windows10', '0', '账号或密码错误，还可尝试 2 次', '2026-09-21 21:48:37', 'b3af8d99-e966-44b6-98f4-130de3e00de9', NULL);
+INSERT INTO `sys_login_log` VALUES ('2f76033e-ac30-4cee-9ede-f2eed2c76f83', 'test', '127.0.0.1', '内网IP', 'Edge122.0.0.0', 'Windows10', '0', '验证码已过期，请刷新后重试', '2026-09-21 21:48:32', 'a4c26174-e6b9-4b77-a90a-1c3223df8308', NULL);
+INSERT INTO `sys_login_log` VALUES ('512921fc-1977-4a4c-b060-8b919bb0a601', 'test', '127.0.0.1', '内网IP', 'Edge122.0.0.0', 'Windows10', '0', '账号或密码错误，还可尝试 1 次', '2026-09-21 21:48:39', '8266ac57-08e6-4153-ba86-a8da9fef97e4', NULL);
+INSERT INTO `sys_login_log` VALUES ('68de5302-c24b-4faf-a8db-14c6096106ee', 'test', '127.0.0.1', '内网IP', 'Edge122.0.0.0', 'Windows10', '0', '密码错误次数过多，账号已锁定 30 分钟', '2026-09-21 21:48:41', '0295d01c-e27a-479e-8e51-e2212e78b40f', NULL);
+INSERT INTO `sys_login_log` VALUES ('93f740d6-24fc-458d-9f76-1e3ee54f4b55', 'test', '127.0.0.1', '内网IP', 'Edge122.0.0.0', 'Windows10', '0', '账号或密码错误，还可尝试 4 次', '2026-09-21 21:48:34', '04cfb7d8-062a-4440-a7e5-1c660508a26c', NULL);
+INSERT INTO `sys_login_log` VALUES ('9addd903-6e39-4e44-bc40-a1756b8c3ee1', 'test', '127.0.0.1', '内网IP', 'Edge122.0.0.0', 'Windows10', '0', '账号或密码错误，还可尝试 3 次', '2026-09-21 21:48:35', 'ab485b0c-5992-4822-8227-d05672163764', NULL);
 
 -- ----------------------------
 -- Table structure for sys_menu
@@ -309,7 +315,7 @@ INSERT INTO `sys_menu` VALUES ('2026-09-05 23:39:57', '2026-09-05 23:39:57', NUL
 INSERT INTO `sys_menu` VALUES ('2026-09-05 15:11:14', '2026-09-05 15:52:38', NULL, 'admin', 'admin', '4534a44e-8baa-4ed2-8545-1ae11fde5538', '656742cc-c81b-4d5d-8a33-524469e84cfc', NULL, NULL, 'F', NULL, '缓存删除', '1', 'monitor:cache:delete', '1', 2, '0');
 INSERT INTO `sys_menu` VALUES ('2026-09-04 19:15:34', '2026-09-04 19:15:34', NULL, 'admin', 'admin', '4bf51da7-9633-432b-8fab-5f40051dd4eb', '8762a399-1606-496c-98ee-1fed23bcedc7', NULL, NULL, 'F', NULL, '用户查询', '1', 'system:user:query', '1', 1, '0');
 INSERT INTO `sys_menu` VALUES ('2026-09-04 19:31:11', '2026-09-05 23:39:48', NULL, 'admin', 'admin', '5017e6d1-6b6d-4e7e-890c-e8d22fe43dd7', '41a045fd-5077-4694-ae65-78e4f7120a7f', NULL, NULL, 'F', NULL, '登录日志导出', '1', 'monitor:loginlog:export', '1', 5, '0');
-INSERT INTO `sys_menu` VALUES ('2026-09-21 21:20:50', '2026-09-21 21:20:50', NULL, 'admin', 'admin', '50795299-dc72-4b65-8a73-9b8f6e5902bd', '760c23de-73fa-4d69-8d1c-674a235d3799', 'loginlock', 'monitor/loginlock/index', 'C', 'Lock', '登录锁定', '1', NULL, '1', 6, '0');
+INSERT INTO `sys_menu` VALUES ('2026-09-21 21:20:50', '2026-09-21 22:01:11', NULL, 'admin', 'admin', '50795299-dc72-4b65-8a73-9b8f6e5902bd', '760c23de-73fa-4d69-8d1c-674a235d3799', 'loginlock', 'monitor/loginlock/index', 'C', 'LoginLock', '登录锁定', '1', NULL, '1', 6, '0');
 INSERT INTO `sys_menu` VALUES ('2026-09-13 21:37:42', '2026-09-13 21:46:29', NULL, 'admin', 'admin', '542222c7-5206-4a44-8386-6abd30376c71', '1e0c60bb-d20f-478b-b8a3-2ece6802238e', 'price', 'example/price/index', 'C', 'Resource', '定价卡片', '1', NULL, '1', 2, '0');
 INSERT INTO `sys_menu` VALUES ('2026-09-13 11:12:10', '2026-09-13 11:12:10', NULL, 'admin', 'admin', '5fa5e798-f1bd-4518-9531-b6e1c442a8af', 'ce940b28-31f7-45f2-b1ce-59af70c2dd58', NULL, NULL, 'F', NULL, '文件编辑', '1', 'system:file:update', '1', 3, '0');
 INSERT INTO `sys_menu` VALUES ('2026-09-04 19:30:30', '2026-09-04 19:30:30', NULL, 'admin', 'admin', '6012fb93-4997-4a55-9e83-ff32b18f7ae4', '41a045fd-5077-4694-ae65-78e4f7120a7f', NULL, NULL, 'F', NULL, '登录日志查询', '1', 'monitor:loginlog:query', '1', 1, '0');
@@ -386,7 +392,10 @@ CREATE TABLE `sys_oper_log`  (
 -- ----------------------------
 -- Records of sys_oper_log
 -- ----------------------------
+INSERT INTO `sys_oper_log` VALUES ('46568dda-d400-4200-bf87-a497c838413c', '菜单管理', 'admin', 'MenuController.update', 'PUT', '{\n  \"query\": {},\n  \"body\": {\n    \"createTime\": \"2026-09-21 21:20:50\",\n    \"updateTime\": \"2026-09-21 21:20:50\",\n    \"deleteTime\": null,\n    \"createBy\": \"admin\",\n    \"updateBy\": \"admin\",\n    \"id\": \"50795299-dc72-4b65-8a73-9b8f6e5902bd\",\n    \"parentId\": \"760c23de-73fa-4d69-8d1c-674a235d3799\",\n    \"path\": \"loginlock\",\n    \"component\": \"monitor/loginlock/index\",\n    \"menuType\": \"C\",\n    \"icon\": \"LoginLock\",\n    \"menuName\": \"登录锁定\",\n    \"visible\": \"1\",\n    \"permission\": null,\n    \"status\": \"1\",\n    \"menuSort\": 6,\n    \"isCache\": \"0\"\n  }\n}', '/api/system/menu/update', '127.0.0.1', '内网IP', '2', '1', '2026-09-21 22:01:11', 'b4711481-f110-4090-a2a8-5bd0c106a70d', 34, '866b0232-507b-42a4-bdc1-47fc4a83616a');
+INSERT INTO `sys_oper_log` VALUES ('addeaf7c-1bbe-4c58-873c-7e21289bb713', '角色管理', 'admin', 'RoleController.authPermission', 'POST', '{\n  \"query\": {},\n  \"body\": {\n    \"roleId\": \"ad7cd9c0-e31e-4a9e-9cd8-6c0e40c5658c\",\n    \"menuIds\": [\n      \"760c23de-73fa-4d69-8d1c-674a235d3799\",\n      \"963bbd9d-0ef9-46a3-8e92-81cf1a1a8dd8\",\n      \"75c5788d-b06b-4b9c-b52e-21a3c82a57f0\",\n      \"1aefdd00-7052-4397-8969-94ec7c5d2068\",\n      \"d50c6827-b234-4549-9f98-ea029eb42d56\",\n      \"74b437d3-5665-4b37-9a9d-420f82dba5be\",\n      \"7f912b4d-6ece-4514-b1f0-185190554a33\",\n      \"bf804def-4636-4131-bf3f-22bd6f9d1f82\",\n      \"99f2d619-97c9-4d50-8128-e6adbe48c88a\",\n      \"8fc4ba91-3f37-4845-9cd8-952caab69ae2\",\n      \"ad696f4d-0a87-4644-9b2f-e6202e2f4d19\",\n      \"c4057b22-024f-450e-a9fe-4a4799416dca\",\n      \"d8b682e4-dabf-4d24-939d-881c551de2f7\",\n      \"02a449f1-db61-4f04-95e2-90fc1f36fefd\",\n      \"656742cc-c81b-4d5d-8a33-524469e84cfc\",\n      \"e1a5e5dc-3db6-450f-bab4-20d551d44d81\",\n      \"4534a44e-8baa-4ed2-8545-1ae11fde5538\",\n      \"862277c2-39c6-439a-9999-6e5ec37e5693\",\n      \"50795299-dc72-4b65-8a73-9b8f6e5902bd\",\n      \"835d5e27-e597-4308-bb59-308959931733\",\n      \"34c04ada-5f12-4b47-9859-4cf7d374cb2c\",\n      \"df37b091-b128-45a0-9666-137748fb36f0\",\n      \"61aeed28-36bd-4bbb-b012-4668061933ac\",\n      \"2894c7f0-dc07-443f-b812-d2f17f600329\",\n      \"b271b1db-4f09-43cc-aebd-b71be24b533d\",\n      \"91abb82b-fd3d-497f-a6ed-83aa3d03f866\",\n      \"41a045fd-5077-4694-ae65-78e4f7120a7f\",\n      \"6012fb93-4997-4a55-9e83-ff32b18f7ae4\",\n      \"876c8c7c-2b95-463d-af59-b94a794c6603\",\n      \"7c623ede-4cc9-45ba-acc2-0760c79f6de8\",\n      \"43aeefe8-3704-471b-a494-bf0b1c4a6446\",\n      \"5017e6d1-6b6d-4e7e-890c-e8d22fe43dd7\"\n    ]\n  }\n}', '/api/system/role/authPermission', '127.0.0.1', '内网IP', '2', '1', '2026-09-21 22:01:44', '34155f6e-218b-45a2-865e-34c78357387c', 29, '866b0232-507b-42a4-bdc1-47fc4a83616a');
 INSERT INTO `sys_oper_log` VALUES ('be37d730-963f-45e0-a80d-27589b515dbd', '操作日志', 'admin', 'LogController.clearOperinfo', 'DELETE', '{\n  \"query\": {}\n}', '/api/monitor/log/operlog/clear', '127.0.0.1', '内网IP', '4', '1', '2026-09-21 21:40:39', '98717ad8-4144-4960-b987-5ea3548d8048', 41, '866b0232-507b-42a4-bdc1-47fc4a83616a');
+INSERT INTO `sys_oper_log` VALUES ('d3759f45-c856-401f-80dd-f36821de39f8', '角色管理', 'admin', 'RoleController.authPermission', 'POST', '{\n  \"query\": {},\n  \"body\": {\n    \"roleId\": \"5e2db9ff-0913-4b92-91bc-ef329619842a\",\n    \"menuIds\": [\n      \"c0e187f4-9550-4d69-ac3b-f9f0b1db46f3\",\n      \"8762a399-1606-496c-98ee-1fed23bcedc7\",\n      \"4bf51da7-9633-432b-8fab-5f40051dd4eb\",\n      \"90ccc73f-9508-42d4-8f5e-f1d0c1da97c4\",\n      \"97d07e96-10f4-48d1-90e4-8e5c1adcce2d\",\n      \"1f575ab8-fa15-428d-b91d-5aae8470e141\",\n      \"0292f5fa-cf2f-45ba-90a3-92caeb8c535b\",\n      \"072089b6-7900-4778-9558-7f7e5e212a58\",\n      \"1cf51c82-ecd8-41a9-8384-fb1133e567b2\",\n      \"631474ec-7487-4039-aab3-fb120a627d90\",\n      \"a9fbcb95-4769-4217-a8ab-6b3330c02b68\",\n      \"149bc63f-a824-4bcc-b1b5-dd204671521e\",\n      \"e0c4e87c-8e2f-4f28-b646-493f2d8bd201\",\n      \"ce940b28-31f7-45f2-b1ce-59af70c2dd58\",\n      \"117de56b-e395-4556-b1a7-1f745c281064\",\n      \"78cb1bc1-41b6-47e5-ad47-448708d2cc31\",\n      \"760c23de-73fa-4d69-8d1c-674a235d3799\",\n      \"963bbd9d-0ef9-46a3-8e92-81cf1a1a8dd8\",\n      \"75c5788d-b06b-4b9c-b52e-21a3c82a57f0\",\n      \"d50c6827-b234-4549-9f98-ea029eb42d56\",\n      \"74b437d3-5665-4b37-9a9d-420f82dba5be\",\n      \"c4057b22-024f-450e-a9fe-4a4799416dca\",\n      \"d8b682e4-dabf-4d24-939d-881c551de2f7\",\n      \"02a449f1-db61-4f04-95e2-90fc1f36fefd\",\n      \"656742cc-c81b-4d5d-8a33-524469e84cfc\",\n      \"e1a5e5dc-3db6-450f-bab4-20d551d44d81\",\n      \"50795299-dc72-4b65-8a73-9b8f6e5902bd\",\n      \"835d5e27-e597-4308-bb59-308959931733\",\n      \"df37b091-b128-45a0-9666-137748fb36f0\",\n      \"61aeed28-36bd-4bbb-b012-4668061933ac\",\n      \"41a045fd-5077-4694-ae65-78e4f7120a7f\",\n      \"6012fb93-4997-4a55-9e83-ff32b18f7ae4\"\n    ]\n  }\n}', '/api/system/role/authPermission', '127.0.0.1', '内网IP', '2', '1', '2026-09-21 22:02:30', 'f7f54623-976a-4e30-9082-3579bf581190', 24, '866b0232-507b-42a4-bdc1-47fc4a83616a');
 
 -- ----------------------------
 -- Table structure for sys_role
@@ -456,6 +465,7 @@ INSERT INTO `sys_role_menu` VALUES ('5e2db9ff-0913-4b92-91bc-ef329619842a', '1cf
 INSERT INTO `sys_role_menu` VALUES ('5e2db9ff-0913-4b92-91bc-ef329619842a', '1f575ab8-fa15-428d-b91d-5aae8470e141');
 INSERT INTO `sys_role_menu` VALUES ('5e2db9ff-0913-4b92-91bc-ef329619842a', '41a045fd-5077-4694-ae65-78e4f7120a7f');
 INSERT INTO `sys_role_menu` VALUES ('5e2db9ff-0913-4b92-91bc-ef329619842a', '4bf51da7-9633-432b-8fab-5f40051dd4eb');
+INSERT INTO `sys_role_menu` VALUES ('5e2db9ff-0913-4b92-91bc-ef329619842a', '50795299-dc72-4b65-8a73-9b8f6e5902bd');
 INSERT INTO `sys_role_menu` VALUES ('5e2db9ff-0913-4b92-91bc-ef329619842a', '6012fb93-4997-4a55-9e83-ff32b18f7ae4');
 INSERT INTO `sys_role_menu` VALUES ('5e2db9ff-0913-4b92-91bc-ef329619842a', '61aeed28-36bd-4bbb-b012-4668061933ac');
 INSERT INTO `sys_role_menu` VALUES ('5e2db9ff-0913-4b92-91bc-ef329619842a', '631474ec-7487-4039-aab3-fb120a627d90');
@@ -464,6 +474,7 @@ INSERT INTO `sys_role_menu` VALUES ('5e2db9ff-0913-4b92-91bc-ef329619842a', '74b
 INSERT INTO `sys_role_menu` VALUES ('5e2db9ff-0913-4b92-91bc-ef329619842a', '75c5788d-b06b-4b9c-b52e-21a3c82a57f0');
 INSERT INTO `sys_role_menu` VALUES ('5e2db9ff-0913-4b92-91bc-ef329619842a', '760c23de-73fa-4d69-8d1c-674a235d3799');
 INSERT INTO `sys_role_menu` VALUES ('5e2db9ff-0913-4b92-91bc-ef329619842a', '78cb1bc1-41b6-47e5-ad47-448708d2cc31');
+INSERT INTO `sys_role_menu` VALUES ('5e2db9ff-0913-4b92-91bc-ef329619842a', '835d5e27-e597-4308-bb59-308959931733');
 INSERT INTO `sys_role_menu` VALUES ('5e2db9ff-0913-4b92-91bc-ef329619842a', '8762a399-1606-496c-98ee-1fed23bcedc7');
 INSERT INTO `sys_role_menu` VALUES ('5e2db9ff-0913-4b92-91bc-ef329619842a', '90ccc73f-9508-42d4-8f5e-f1d0c1da97c4');
 INSERT INTO `sys_role_menu` VALUES ('5e2db9ff-0913-4b92-91bc-ef329619842a', '963bbd9d-0ef9-46a3-8e92-81cf1a1a8dd8');
@@ -480,10 +491,12 @@ INSERT INTO `sys_role_menu` VALUES ('5e2db9ff-0913-4b92-91bc-ef329619842a', 'e1a
 INSERT INTO `sys_role_menu` VALUES ('ad7cd9c0-e31e-4a9e-9cd8-6c0e40c5658c', '02a449f1-db61-4f04-95e2-90fc1f36fefd');
 INSERT INTO `sys_role_menu` VALUES ('ad7cd9c0-e31e-4a9e-9cd8-6c0e40c5658c', '1aefdd00-7052-4397-8969-94ec7c5d2068');
 INSERT INTO `sys_role_menu` VALUES ('ad7cd9c0-e31e-4a9e-9cd8-6c0e40c5658c', '2894c7f0-dc07-443f-b812-d2f17f600329');
+INSERT INTO `sys_role_menu` VALUES ('ad7cd9c0-e31e-4a9e-9cd8-6c0e40c5658c', '34c04ada-5f12-4b47-9859-4cf7d374cb2c');
 INSERT INTO `sys_role_menu` VALUES ('ad7cd9c0-e31e-4a9e-9cd8-6c0e40c5658c', '41a045fd-5077-4694-ae65-78e4f7120a7f');
 INSERT INTO `sys_role_menu` VALUES ('ad7cd9c0-e31e-4a9e-9cd8-6c0e40c5658c', '43aeefe8-3704-471b-a494-bf0b1c4a6446');
 INSERT INTO `sys_role_menu` VALUES ('ad7cd9c0-e31e-4a9e-9cd8-6c0e40c5658c', '4534a44e-8baa-4ed2-8545-1ae11fde5538');
 INSERT INTO `sys_role_menu` VALUES ('ad7cd9c0-e31e-4a9e-9cd8-6c0e40c5658c', '5017e6d1-6b6d-4e7e-890c-e8d22fe43dd7');
+INSERT INTO `sys_role_menu` VALUES ('ad7cd9c0-e31e-4a9e-9cd8-6c0e40c5658c', '50795299-dc72-4b65-8a73-9b8f6e5902bd');
 INSERT INTO `sys_role_menu` VALUES ('ad7cd9c0-e31e-4a9e-9cd8-6c0e40c5658c', '6012fb93-4997-4a55-9e83-ff32b18f7ae4');
 INSERT INTO `sys_role_menu` VALUES ('ad7cd9c0-e31e-4a9e-9cd8-6c0e40c5658c', '61aeed28-36bd-4bbb-b012-4668061933ac');
 INSERT INTO `sys_role_menu` VALUES ('ad7cd9c0-e31e-4a9e-9cd8-6c0e40c5658c', '656742cc-c81b-4d5d-8a33-524469e84cfc');
@@ -492,6 +505,7 @@ INSERT INTO `sys_role_menu` VALUES ('ad7cd9c0-e31e-4a9e-9cd8-6c0e40c5658c', '75c
 INSERT INTO `sys_role_menu` VALUES ('ad7cd9c0-e31e-4a9e-9cd8-6c0e40c5658c', '760c23de-73fa-4d69-8d1c-674a235d3799');
 INSERT INTO `sys_role_menu` VALUES ('ad7cd9c0-e31e-4a9e-9cd8-6c0e40c5658c', '7c623ede-4cc9-45ba-acc2-0760c79f6de8');
 INSERT INTO `sys_role_menu` VALUES ('ad7cd9c0-e31e-4a9e-9cd8-6c0e40c5658c', '7f912b4d-6ece-4514-b1f0-185190554a33');
+INSERT INTO `sys_role_menu` VALUES ('ad7cd9c0-e31e-4a9e-9cd8-6c0e40c5658c', '835d5e27-e597-4308-bb59-308959931733');
 INSERT INTO `sys_role_menu` VALUES ('ad7cd9c0-e31e-4a9e-9cd8-6c0e40c5658c', '862277c2-39c6-439a-9999-6e5ec37e5693');
 INSERT INTO `sys_role_menu` VALUES ('ad7cd9c0-e31e-4a9e-9cd8-6c0e40c5658c', '876c8c7c-2b95-463d-af59-b94a794c6603');
 INSERT INTO `sys_role_menu` VALUES ('ad7cd9c0-e31e-4a9e-9cd8-6c0e40c5658c', '8fc4ba91-3f37-4845-9cd8-952caab69ae2');

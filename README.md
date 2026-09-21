@@ -39,7 +39,7 @@
 - **菜单管理** — 目录 / 菜单 / 按钮三级粒度，支持外链、内嵌 iframe
 - **字典管理** — 字典类型 + 字典数据两级结构，Redis 缓存主动失效，全局 `useDict()` Hook 封装
 - **参数设置** — 全局系统参数在线维护，Redis 缓存实时生效，全局 `useConfig()` Hook 取值
-- **登录防护** — 登录失败按账号与来源 IP 计数自动锁定，恶意锁号不影响正常登录，支持监控页查看与解锁，失败次数与锁定时长在参数设置中配置
+- **登录防护** — 登录失败按账号与来源 IP 计数锁定，阈值参数可配，监控页查看与解锁
 - **文件管理** — 目录树管理文件，回收站还原，支持秒传、分片上传、断点续传，按引用计数彻底删除
 - **服务监控** — 实时 CPU 使用率、内存占用、磁盘空间、服务器运行信息与数据库连接池状态
 - **缓存监控** — Redis 实例信息、内存使用量、Key 数量，分类浏览与在线可视化管理
@@ -114,6 +114,10 @@ docker compose up -d --build
   <tr>
     <td><img src="https://cdn.phototourl.com/free/2026-09-17-940bcfe0-6949-4f6e-95f0-3c14b821057b.png" /></td>
     <td><img src="https://cdn.phototourl.com/free/2026-09-14-712fbe3f-93ab-4c56-b2ae-341acb8feed0.png" /></td>
+  </tr>
+  <tr>
+    <td><img src="https://cdn.phototourl.com/free/2026-09-21-7e4b8283-7d7e-4444-85db-60eeb1ab6b13.png" /></td>
+    <td><img src="https://cdn.phototourl.com/free/2026-09-21-838f6a1d-da4a-47e5-b2d4-81c26f93122e.png" /></td>
   </tr>
   <tr>
     <td><img src="https://cdn.phototourl.com/free/2026-09-14-6e12e6b9-cbf3-455c-b40a-1ce15d538bfa.png" /></td>
