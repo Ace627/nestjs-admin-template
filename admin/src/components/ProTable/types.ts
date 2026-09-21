@@ -2,7 +2,7 @@ import type { ExtractPublicPropTypes } from 'vue'
 import type { TableColumnCtx, TableProps } from 'element-plus'
 
 export interface ProTableColumn<T = any> extends Partial<TableColumnCtx> {
-  /** 字段名（严格对应行数据 T 的属性名，杜绝手写错误） */
+  /** 字段名（严格对应行数据 T 的属性名，杜绝手写错误）；配置 slot 时内容由插槽渲染，无须再写 prop */
   prop?: string & keyof T
   /** 自定义插槽名称，用于自定义渲染列内容 */
   slot?: string

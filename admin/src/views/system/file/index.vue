@@ -88,9 +88,9 @@ const items = computed<ProSearchItem[]>(() => [{ type: 'input', prop: 'fileName'
 const columns: ProTableColumn<File.Item>[] = [
   { align: 'center', type: 'selection' },
   { align: 'center', type: 'index', label: '序号', width: 64 },
-  { align: 'center', prop: 'fileName', label: '名称', slot: 'fileName', showOverflowTooltip: true, minWidth: 220 },
-  { align: 'center', prop: 'fileType', label: '类型', slot: 'fileType', width: 90 },
-  { align: 'center', prop: 'fileSize', label: '大小', slot: 'fileSize', width: 110 },
+  { align: 'center', label: '名称', slot: 'fileName', showOverflowTooltip: true, minWidth: 220 },
+  { align: 'center', label: '类型', slot: 'fileType', width: 90 },
+  { align: 'center', label: '大小', slot: 'fileSize', width: 110 },
   { align: 'center', prop: 'createBy', label: '创建人', width: 120 },
   { align: 'center', prop: 'createTime', label: '创建时间', minWidth: 170 },
   { align: 'center', slot: 'action', label: '操作', fixed: 'right', width: 130 },

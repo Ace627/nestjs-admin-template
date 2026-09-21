@@ -123,7 +123,7 @@ const columns: ProTableColumn<Dict.DataItem>[] = [
   { align: 'center', slot: 'dictLabel', label: '字典标签', showOverflowTooltip: true },
   { align: 'center', prop: 'dictValue', label: '字典键值', showOverflowTooltip: true },
   { align: 'center', prop: 'dictSort', label: '排序' },
-  { align: 'center', prop: 'status', label: '状态', slot: 'status' },
+  { align: 'center', label: '状态', slot: 'status' },
   { align: 'center', prop: 'remark', label: '备注', showOverflowTooltip: true, width: 120 },
   { align: 'center', prop: 'createTime', label: '创建时间', width: 170 },
   { align: 'center', slot: 'action', label: '操作', fixed: 'right', minWidth: 120 },

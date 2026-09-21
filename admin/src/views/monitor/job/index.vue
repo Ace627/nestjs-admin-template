@@ -80,8 +80,8 @@ const columns: ProTableColumn<Job.Item>[] = [
   { align: 'center', prop: 'jobGroup', label: '任务组名', width: 100 },
   { align: 'center', prop: 'invokeTarget', label: '调用目标', showOverflowTooltip: true, minWidth: 200 },
   { align: 'center', prop: 'cronExpression', label: '执行表达式', showOverflowTooltip: true, width: 140 },
-  { align: 'center', prop: 'status', label: '任务状态', slot: 'status', width: 80 },
-  { align: 'center', prop: 'concurrent', label: '并发执行', slot: 'concurrent', width: 90 },
+  { align: 'center', label: '任务状态', slot: 'status', width: 80 },
+  { align: 'center', label: '并发执行', slot: 'concurrent', width: 90 },
   { align: 'center', prop: 'createTime', label: '创建时间', width: 170 },
   { align: 'center', slot: 'action', label: '操作', fixed: 'right', width: 220 },
 ]

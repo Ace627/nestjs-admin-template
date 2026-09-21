@@ -89,7 +89,7 @@ const nameColumns: ProTableColumn<Cache.Name>[] = [
 /** 缓存键名列表的展示列配置项 */
 const keyColumns: ProTableColumn<{ key: string }>[] = [
   { align: 'center', label: '序号', type: 'index', width: 64 },
-  { align: 'center', label: '缓存键名', prop: 'key', minWidth: 260, slot: 'key' },
+  { align: 'center', label: '缓存键名', minWidth: 260, slot: 'key' },
   { align: 'center', label: '操作', slot: 'action', fixed: 'right' },
 ]
 

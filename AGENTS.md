@@ -28,6 +28,7 @@
 - localStorage 须经 `src/utils/cache/*.cache.ts` 封装并在 `src/utils/index.ts` 统一导出，禁止裸调
 - 列表页的弹窗/抽屉一律拆分为 `components/XxxDialog.vue`、`components/XxxDrawer.vue` 子文件（参照 system/user 等既有范式），禁止内联在 index.vue 中；子组件通过 `defineExpose({ open })` 暴露打开方法，操作成功后 `emits('getList')` 刷新列表
 - 模板中 prop 名与变量名相同时使用同名简写（Vue 3.4+），如 `:columns` 而非 `:columns="columns"`；该简写仅适用于属性/prop，指令（v-loading 等）不适用
+- ProTable 列配置了 `slot` 就不要再写 `prop`
 
 ## 技术规则
 

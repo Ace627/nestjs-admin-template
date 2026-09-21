@@ -77,14 +77,14 @@ const columns: ProTableColumn<Operlog.Item>[] = [
   { align: 'center', type: 'index', label: '序号', width: 64 },
   { align: 'center', prop: 'requestId', label: '请求ID', showOverflowTooltip: true, width: 100 },
   { align: 'center', prop: 'title', label: '系统模块', showOverflowTooltip: true, width: 120 },
-  { align: 'center', prop: 'businessType', label: '操作类型', slot: 'businessType', width: 90 },
+  { align: 'center', label: '操作类型', slot: 'businessType', width: 90 },
   { align: 'center', prop: 'username', label: '操作人员', showOverflowTooltip: true },
   { align: 'center', prop: 'ip', label: '操作地址', showOverflowTooltip: true, width: 150 },
   { align: 'center', prop: 'location', label: '操作地点', showOverflowTooltip: true },
   { align: 'center', prop: 'requestMethod', label: '请求方法', width: 90 },
-  { align: 'center', prop: 'status', label: '操作状态', slot: 'status', width: 90 },
+  { align: 'center', label: '操作状态', slot: 'status', width: 90 },
   { align: 'center', prop: 'operTime', label: '操作时间', width: 170 },
-  { align: 'center', prop: 'duration', label: '消耗时间', slot: 'duration', width: 100 },
+  { align: 'center', label: '消耗时间', slot: 'duration', width: 100 },
   { align: 'center', slot: 'action', label: '操作', fixed: 'right', minWidth: 120 },
 ]
 

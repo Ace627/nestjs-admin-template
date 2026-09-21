@@ -78,7 +78,7 @@ const columns: ProTableColumn<Role.RoleItem>[] = [
   { align: 'center', prop: 'roleCode', label: '角色编码', showOverflowTooltip: true, minWidth: 100 },
   { align: 'center', prop: 'roleName', label: '角色名称', showOverflowTooltip: true, minWidth: 110 },
   { align: 'center', prop: 'roleSort', label: '排序', width: 72 },
-  { align: 'center', prop: 'status', label: '状态', slot: 'status', width: 80 },
+  { align: 'center', label: '状态', slot: 'status', width: 80 },
   { align: 'center', prop: 'remark', label: '备注', showOverflowTooltip: true, minWidth: 120 },
   { align: 'center', prop: 'createTime', label: '创建时间', minWidth: 170 },
   { align: 'center', slot: 'action', label: '操作', fixed: 'right', width: 220 },

@@ -76,7 +76,7 @@ const columns: ProTableColumn<JobLog.Item>[] = [
   { align: 'center', prop: 'jobGroup', label: '任务组名', width: 100 },
   { align: 'center', prop: 'invokeTarget', label: '调用目标', showOverflowTooltip: true, minWidth: 200 },
   { align: 'center', prop: 'jobMessage', label: '日志信息', showOverflowTooltip: true, minWidth: 200 },
-  { align: 'center', prop: 'status', label: '执行状态', slot: 'status', width: 90 },
+  { align: 'center', label: '执行状态', slot: 'status', width: 90 },
   { align: 'center', prop: 'createTime', label: '执行时间', width: 170 },
   { align: 'center', slot: 'action', label: '操作', fixed: 'right', width: 120 },
 ]

@@ -93,8 +93,8 @@ const columns: ProTableColumn<User.SysUser>[] = [
   { align: 'center', prop: 'realname', label: '真实姓名', showOverflowTooltip: true, minWidth: 90 },
   { align: 'center', prop: 'phone', label: '手机号码', showOverflowTooltip: true, minWidth: 120 },
   { align: 'center', prop: 'email', label: '用户邮箱', showOverflowTooltip: true, minWidth: 170 },
-  { align: 'center', prop: 'gender', label: '性别', slot: 'gender', width: 80 },
-  { align: 'center', prop: 'status', label: '状态', slot: 'status', width: 80 },
+  { align: 'center', label: '性别', slot: 'gender', width: 80 },
+  { align: 'center', label: '状态', slot: 'status', width: 80 },
   { align: 'center', prop: 'createTime', label: '创建时间', minWidth: 170 },
   { align: 'center', slot: 'action', label: '操作', fixed: 'right', width: 190 },
 ]
