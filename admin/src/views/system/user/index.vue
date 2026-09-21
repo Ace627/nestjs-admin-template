@@ -41,7 +41,7 @@
         </template>
       </ProTable>
 
-      <ProPagination :total v-model:page="queryParams.pageNo" v-model:limit="queryParams.pageSize" @pagination="getList" />
+      <ProPagination :total v-model:current-page="queryParams.pageNo" v-model:page-size="queryParams.pageSize" @pagination="getList" />
     </div>
 
     <!-- 用户新增/编辑弹窗 -->

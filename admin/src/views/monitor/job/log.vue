@@ -31,7 +31,7 @@
       </template>
     </ProTable>
 
-    <ProPagination :total v-model:page="queryParams.pageNo" v-model:limit="queryParams.pageSize" @pagination="getList" />
+    <ProPagination :total v-model:current-page="queryParams.pageNo" v-model:page-size="queryParams.pageSize" @pagination="getList" />
 
     <!-- 任务日志明细弹窗 -->
     <JobLogDetailDialog ref="jobLogDetailDialogRef" />

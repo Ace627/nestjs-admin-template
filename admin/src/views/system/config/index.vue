@@ -30,7 +30,7 @@
       </template>
     </ProTable>
 
-    <ProPagination :total v-model:page="queryParams.pageNo" v-model:limit="queryParams.pageSize" @pagination="getList" />
+    <ProPagination :total v-model:current-page="queryParams.pageNo" v-model:page-size="queryParams.pageSize" @pagination="getList" />
 
     <el-dialog v-model="visible" :title="dialogTitle" :close-on-click-modal="false" :width="dialogWidth">
       <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">

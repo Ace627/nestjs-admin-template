@@ -39,7 +39,7 @@
           </template>
         </ProTable>
 
-        <ProPagination :total v-model:page="dataQuery.pageNo" v-model:limit="dataQuery.pageSize" @pagination="getDataList" />
+        <ProPagination :total v-model:current-page="dataQuery.pageNo" v-model:page-size="dataQuery.pageSize" @pagination="getDataList" />
       </template>
     </div>
 
