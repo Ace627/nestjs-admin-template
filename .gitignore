@@ -20,5 +20,5 @@ server/.env
 .claude
 .gemini
 .opencode
-.codebuddy
 .workbuddy
+.codebuddy/memory
