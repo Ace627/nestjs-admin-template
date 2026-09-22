@@ -27,4 +27,7 @@ export class JobEntity extends BaseEntity {
 
   @Column({ type: 'char', length: 1, comment: '任务状态（1正常 0暂停）', default: CommonConstant.STATUS_NORMAL })
   status: string
+
+  @Column({ name: 'remark', type: 'varchar', comment: '备注', nullable: true, length: 200 })
+  remark: string
 }

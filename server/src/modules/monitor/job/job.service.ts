@@ -104,6 +104,8 @@ export class JobService {
       // 清理等待中的「执行一次」任务，防止删除后仍被消费
       await this.jobQueue.remove(job.id)
     }
+    // 级联删除该任务的调度日志（job_id 建有索引）
+    await this.jobLogRepository.delete({ jobId: In(jobIds) })
     await this.jobRepository.delete(jobIds)
     return '删除成功'
   }
@@ -174,7 +176,7 @@ export class JobService {
     try {
       const serviceClass = this.serviceMap.get(serviceName)
       if (!serviceClass) throw new Error('服务不存在')
-      const service = this.moduleRef.get(serviceClass)
+      const service = this.moduleRef.get(serviceClass, { strict: false })
       if (!service || !(funName in service)) throw new Error('方法不存在')
     } catch {
       throw new BusinessException('调用方法未找到')

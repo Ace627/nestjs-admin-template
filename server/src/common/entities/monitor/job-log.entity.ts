@@ -7,6 +7,9 @@ export class JobLogEntity {
   @PrimaryGeneratedColumn('uuid', { comment: '任务日志ID' })
   id: string
 
+  @Column({ name: 'job_id', type: 'varchar', length: 36, comment: '关联任务ID' })
+  jobId: string
+
   @Excel({ name: '任务名称', width: 30 })
   @Column({ name: 'job_name', type: 'varchar', length: 64, comment: '任务名称', default: null })
   jobName: string

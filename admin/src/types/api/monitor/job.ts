@@ -26,6 +26,8 @@ export interface Item {
   concurrent: string
   /** 任务状态（1正常 0暂停） */
   status: string
+  /** 备注 */
+  remark?: string
   /** 创建时间 */
   createTime: string
   /** 更新时间 */

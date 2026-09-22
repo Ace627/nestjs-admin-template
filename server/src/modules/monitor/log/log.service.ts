@@ -5,9 +5,9 @@ import { RedisService } from '@/shared/redis.service'
 import { Injectable, StreamableFile } from '@nestjs/common'
 import { QueryLoginlogDto, QueryOperlogDto } from './log.dto'
 import { formatTime, getLocationByIP, getRequestIp } from '@/utils'
-import { Equal, FindOptionsWhere, In, Like, Repository } from 'typeorm'
+import { Equal, FindOptionsWhere, In, LessThan, Like, Repository } from 'typeorm'
 import { ExcelService } from '@/modules/common/excel/excel.service'
-import { BusinessException, CommonConstant, ConfigConstant, LoginLogEntity, OperlogEntity, RedisConstant } from '@/common'
+import { BusinessException, CommonConstant, ConfigConstant, JobLogEntity, LoginLogEntity, OperlogEntity, RedisConstant } from '@/common'
 
 @Injectable()
 export class LogService {
@@ -15,6 +15,7 @@ export class LogService {
     private readonly redisService: RedisService,
     private readonly excelService: ExcelService,
     private readonly configService: ConfigService,
+    @InjectRepository(JobLogEntity) private readonly jobLogRepository: Repository<JobLogEntity>,
     @InjectRepository(OperlogEntity) private readonly operRepository: Repository<OperlogEntity>,
     @InjectRepository(LoginLogEntity) private readonly loginlogRepository: Repository<LoginLogEntity>,
   ) {}
@@ -133,6 +134,17 @@ export class LogService {
     queryBuilder.skip(skip).take(take) // 分页
     const [records, total] = await queryBuilder.getManyAndCount() //  一次性获取数据和总数
     return { total, records }
+  }
+
+  /** 清理 N 天前的三张日志表（定时任务调用） */
+  public async cleanExpiredLogs(days: number = 30) {
+    const validDays = Number.isInteger(days) && days > 0 ? days : 30
+    // varchar 存的 'YYYY-MM-DD HH:mm:ss' 字典序即时间序，字符串比较即可
+    const cutoff = formatTime(new Date(Date.now() - validDays * 24 * 60 * 60 * 1000))
+    const oper = await this.operRepository.delete({ operTime: LessThan(cutoff) })
+    const login = await this.loginlogRepository.delete({ loginTime: LessThan(cutoff) })
+    const job = await this.jobLogRepository.delete({ createTime: LessThan(cutoff) })
+    return `清理成功：操作日志 ${oper.affected ?? 0} 条、登录日志 ${login.affected ?? 0} 条、调度日志 ${job.affected ?? 0} 条`
   }
 
   /* -------------------------------------------------------------------------- */

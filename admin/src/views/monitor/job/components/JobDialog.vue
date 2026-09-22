@@ -1,30 +1,48 @@
 <template>
   <el-dialog v-model="visible" :title="dialogTitle" :close-on-click-modal="false" :width="dialogWidth">
     <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
-      <el-form-item label="任务名称" prop="jobName">
-        <el-input v-model="form.jobName" placeholder="请输入任务名称" />
-      </el-form-item>
-      <el-form-item label="任务组名" prop="jobGroup">
-        <el-select v-model="form.jobGroup" placeholder="请选择任务组名" style="width: 100%">
-          <el-option v-for="item in sys_job_group" :key="item.value" :label="item.label" :value="item.value" />
-        </el-select>
-      </el-form-item>
+      <el-row>
+        <el-col :span="12">
+          <el-form-item label="任务名称" prop="jobName">
+            <el-input v-model.trim="form.jobName" placeholder="请输入任务名称" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="任务组名" prop="jobGroup">
+            <el-select v-model="form.jobGroup" placeholder="请选择任务组名" style="width: 100%">
+              <el-option v-for="item in sys_job_group" :key="item.value" :label="item.label" :value="item.value" />
+            </el-select>
+          </el-form-item>
+        </el-col>
+      </el-row>
       <el-form-item label="调用目标" prop="invokeTarget">
-        <el-input v-model="form.invokeTarget" placeholder="请输入调用目标字符串，如 JobService.test()" />
+        <el-input v-model.trim="form.invokeTarget" placeholder="请输入调用目标字符串，如 JobService.test()" />
       </el-form-item>
       <el-form-item label="执行表达式" prop="cronExpression">
-        <el-input v-model="form.cronExpression" placeholder="请输入 cron 执行表达式，如 0/10 * * * * ?">
+        <el-input v-model.trim="form.cronExpression" placeholder="请输入 cron 执行表达式，如 0/10 * * * * ?">
           <template #append>
             <el-button @click="openCrontab">生成</el-button>
           </template>
         </el-input>
       </el-form-item>
-      <el-form-item label="并发执行" prop="concurrent">
-        <el-radio-group v-model="form.concurrent">
-          <el-radio value="1">允许</el-radio>
-          <el-radio value="0">禁止</el-radio>
-        </el-radio-group>
-      </el-form-item>
+      <el-row>
+        <el-col :span="12">
+          <el-form-item label="并发执行" prop="concurrent">
+            <el-radio-group v-model="form.concurrent">
+              <el-radio value="1">允许</el-radio>
+              <el-radio value="0">禁止</el-radio>
+            </el-radio-group>
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="任务状态" prop="status">
+            <el-radio-group v-model="form.status">
+              <el-radio value="1">正常</el-radio>
+              <el-radio value="0">暂停</el-radio>
+            </el-radio-group>
+          </el-form-item>
+        </el-col>
+      </el-row>
       <el-form-item label="计划策略" prop="misfirePolicy">
         <el-radio-group v-model="form.misfirePolicy">
           <el-radio value="1">立即执行</el-radio>
@@ -32,15 +50,14 @@
           <el-radio value="3">放弃执行</el-radio>
         </el-radio-group>
       </el-form-item>
-      <el-form-item label="任务状态" prop="status">
-        <el-radio-group v-model="form.status">
-          <el-radio value="1">正常</el-radio>
-          <el-radio value="0">暂停</el-radio>
-        </el-radio-group>
+      <el-form-item label="任务备注" prop="remark">
+        <el-input v-model="form.remark" type="textarea" :rows="4" maxlength="200" show-word-limit placeholder="请输入备注" />
       </el-form-item>
     </el-form>
+
     <!-- Cron 表达式生成器 -->
     <CrontabDialog ref="crontabDialogRef" @confirm="handleCronConfirm" />
+
     <template #footer>
       <el-button @click="close">取消</el-button>
       <el-button type="primary" @click="handleSubmit">确定</el-button>
@@ -71,8 +88,8 @@ const dialogTitle = computed(() => (isUpdate.value ? '编辑定时任务' : '新
 
 /** cron 表达式前端即时校验（与后端 cron-parser 同源解析） */
 function validateCronExpression(_rule: unknown, value: string, callback: (error?: Error) => void) {
-  if (!value) return callback()
   try {
+    if (!value) return callback()
     CronExpressionParser.parse(value)
     callback()
   } catch {
@@ -102,12 +119,7 @@ async function resetForm(id?: string) {
     form.value = await JobRequest.findOneById({ id })
     return
   }
-  form.value = {
-    jobGroup: 'DEFAULT',
-    concurrent: '0',
-    misfirePolicy: '1',
-    status: '1',
-  }
+  form.value = { jobGroup: 'DEFAULT', concurrent: '0', misfirePolicy: '1', status: '1' }
 }
 
 function close() {

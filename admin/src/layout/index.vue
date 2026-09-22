@@ -31,10 +31,11 @@ import SettingPanel from './components/SettingPanel/index.vue'
 
 const appStore = useAppStore()
 const settingStore = useSettingStore()
+const userStore = useUserStore()
 
-const VITE_APP_TITLE = import.meta.env.VITE_APP_TITLE
 const font = computed(() => ({ color: settingStore.isDark ? 'rgba(255, 255, 255, .15)' : 'rgba(0, 0, 0, .15)' }))
-const watermarkContent = computed<string | string[]>(() => (settingStore.showWatermark ? VITE_APP_TITLE : []))
+/** 水印内容：登录者账号与手机号（两行展示） */
+const watermarkContent = computed<string[]>(() => (settingStore.showWatermark ? [userStore.currentUserInfo.username, userStore.currentUserInfo.phone ?? ''] : []))
 
 const classes = computed(() => [
   appStore.device,

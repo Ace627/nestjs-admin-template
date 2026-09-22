@@ -62,6 +62,7 @@ export class JobProcessor extends WorkerHost {
   /** 写入任务调度日志 */
   private async createJobLog(data: JobEntity, status: string, jobMessage: string = '执行成功') {
     const jobLog = new JobLogEntity()
+    jobLog.jobId = data.id
     jobLog.jobName = data.jobName
     jobLog.jobGroup = data.jobGroup
     jobLog.invokeTarget = data.invokeTarget

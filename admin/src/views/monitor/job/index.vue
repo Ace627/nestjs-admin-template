@@ -29,6 +29,11 @@
       <template #concurrent="{ row }">
         <el-tag :type="row.concurrent === '1' ? 'success' : 'warning'">{{ row.concurrent === '1' ? '允许' : '禁止' }}</el-tag>
       </template>
+      <template #remark="{ row }">
+        <ProTooltip :content="row.remark" placement="top">
+          <span class="line-clamp-1">{{ row.remark || '-' }}</span>
+        </ProTooltip>
+      </template>
       <template #action="{ row }">
         <el-link v-permissions="['monitor:job:update']" type="primary" @click="handleEdit(row)">修改</el-link>
         <el-link v-permissions="['monitor:job:update']" type="primary" @click="handleRun(row)">执行一次</el-link>
@@ -82,6 +87,7 @@ const columns: ProTableColumn<Job.Item>[] = [
   { align: 'center', prop: 'cronExpression', label: '执行表达式', showOverflowTooltip: true, width: 140 },
   { align: 'center', label: '任务状态', slot: 'status', width: 80 },
   { align: 'center', label: '并发执行', slot: 'concurrent', width: 90 },
+  { align: 'center', label: '备注', slot: 'remark', minWidth: 120 },
   { align: 'center', prop: 'createTime', label: '创建时间', width: 170 },
   { align: 'center', slot: 'action', label: '操作', fixed: 'right', width: 220 },
 ]
@@ -168,7 +174,7 @@ async function handleRun(row: Job.Item) {
 /** 处理表格数据删除（支持单条删除与批量删除） */
 async function handleDelete(row?: Job.Item) {
   try {
-    const { cancel } = await TipModal.confirm('确定要删除选中的数据吗？')
+    const { cancel } = await TipModal.confirm('确定要删除选中的数据及其执行日志吗？')
     if (cancel) return TipModal.msg('操作取消')
     const ids = row ? row.id : multipleSelection.value.map((item) => item.id).join(',')
     await JobRequest.delete({ ids })

@@ -27,9 +27,13 @@ export class CreateJobDto {
   @IsOptional()
   @IsString()
   status: string
+
+  @IsOptional()
+  @IsString()
+  remark: string
 }
 
-export class UpdateJobDto extends PickType(CreateJobDto, ['jobName', 'invokeTarget', 'cronExpression', 'jobGroup', 'misfirePolicy', 'concurrent', 'status']) {
+export class UpdateJobDto extends PickType(CreateJobDto, ['jobName', 'invokeTarget', 'cronExpression', 'jobGroup', 'misfirePolicy', 'concurrent', 'status', 'remark']) {
   @IsNotEmpty({ message: '任务编号不能为空' })
   id: string
 }
