@@ -29,7 +29,7 @@
 
 一套开箱可用的中后台模板：前端 **Vue 3 + TypeScript + Element Plus + Vite 8**，后端 **NestJS 11 + TypeORM + MySQL + Redis + BullMQ**。除登录鉴权外，还完整实现了用户、角色、菜单、部门、字典、参数、日志、缓存、定时任务、在线用户等中后台标配功能。
 
-前后端放在**同一个仓库的两个独立工程**中（`admin/` 与 `server/`），**不是 monorepo**——根目录没有 `package.json`，两个工程各自 `pnpm install`，互不干扰，可以单独构建、单独部署。
+前后端放在**同一个仓库的两个独立工程**中（`admin/` 与 `server/`），**不是 monorepo**——两个工程各自 `pnpm install`，互不干扰，可以单独构建、单独部署；根目录的 `package.json` 仅提供 `dev:server` / `dev:admin` 一键启动脚本。
 
 ## 🎯 内置功能
 
@@ -75,7 +75,7 @@ mysql -uroot -p nestdemo < init.sql
 # 4. 配置后端环境变量：复制模板后按需修改连接信息与 JWT_SECRET
 cp server/.env.example server/.env
 
-# 5. 启动
+# 5. 启动（也可在根目录直接执行 pnpm dev:server / pnpm dev:admin）
 cd server && pnpm start:dev   # 后端 http://localhost:3000/api
 cd admin  && pnpm dev         # 前端 http://localhost:5173（开发代理已指向 3000）
 ```
@@ -101,6 +101,7 @@ docker compose up -d --build
 ├── admin/               # 前端工程（Vue 3 + TypeScript + Vite）
 ├── server/              # 后端工程（NestJS + TypeORM）
 │   └── .env.example     # 环境变量模板
+├── scripts/             # 仓库级脚本（SVG 图标批量清理等）
 ├── docs/                # 本地文档
 ├── init.sql             # 数据库初始化脚本（建表 + 种子数据）
 ├── docker-compose.yml   # 后端一键编排（server + MySQL + Redis）

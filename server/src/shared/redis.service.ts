@@ -45,6 +45,11 @@ export class RedisService implements OnModuleDestroy {
     return this.redisClient.getset.bind(this.redisClient)
   }
 
+  /** 获取键值对并原子删除（Redis 6.2+，适用于验证码等一次性消费场景） */
+  public get getdel(): typeof this.redisClient.getdel {
+    return this.redisClient.getdel.bind(this.redisClient)
+  }
+
   /** 删除键值对 */
   public get del(): typeof this.redisClient.del {
     return this.redisClient.del.bind(this.redisClient)
@@ -80,6 +85,19 @@ export class RedisService implements OnModuleDestroy {
   /** 增加键值对的整数值 */
   public get incr(): typeof this.redisClient.incr {
     return this.redisClient.incr.bind(this.redisClient)
+  }
+
+  /**
+   * 原子递增计数并设置过期时间（INCR 与 EXPIRE 经 MULTI 事务执行，避免进程中断产生无 TTL 的脏键）
+   * @param key - 目标键
+   * @param seconds - 过期秒数（每次调用刷新，滑动窗口语义）
+   * @returns 递增后的计数值；Redis 异常时直接抛出，由调用方按业务语义兜底
+   */
+  public async incrWithExpire(key: string, seconds: number): Promise<number> {
+    const results = await this.redisClient.multi().incr(key).expire(key, seconds).exec()
+    const [incrError, count] = results?.[0] ?? []
+    if (incrError) throw incrError
+    return Number(count ?? 0)
   }
 
   /** 减少键值对的整数值 */

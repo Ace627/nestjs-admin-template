@@ -10,7 +10,7 @@
       ;(() => {
         try {
           // 读取本地持久化的主题设置，供白屏阶段暗色适配
-          const settingJson = localStorage.getItem('app:storage:systemSetting')
+          const settingJson = localStorage.getItem('%VITE_STORAGE_PREFIX%systemSetting')
           if (settingJson && JSON.parse(settingJson).value?.theme === 'dark') document.documentElement.classList.add('dark')
         } catch {}
       })()

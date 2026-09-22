@@ -47,8 +47,7 @@ export class LoginLockService {
   public async recordFailure(username: string, ip: string): Promise<number> {
     const [maxFailCount, lockSeconds] = await Promise.all([this.getMaxFailCount(), this.getLockSeconds()])
     const failKey = this.getFailKey(username, ip)
-    const count = await this.redisService.incr(failKey)
-    await this.redisService.expire(failKey, lockSeconds)
+    const count = await this.redisService.incrWithExpire(failKey, lockSeconds)
     if (count < maxFailCount) return maxFailCount - count
     throw new BusinessException(`密码错误次数过多，账号已锁定 ${Math.round(lockSeconds / 60)} 分钟`)
   }
