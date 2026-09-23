@@ -1,6 +1,6 @@
 import { LogService } from './log.service'
 import { QueryLoginlogDto, QueryOperlogDto } from './log.dto'
-import { BusinessType, Operlog, PaginationPipe, RequirePermissions, SkipTransform } from '@/common'
+import { BusinessType, CurrentUser, Operlog, PaginationPipe, RequirePermissions, SkipTransform } from '@/common'
 import { Controller, Delete, Get, ParseArrayPipe, Post, Query } from '@nestjs/common'
 
 @Controller('monitor/log')
@@ -16,6 +16,12 @@ export class LogController {
   @RequirePermissions(['monitor:loginlog:query'])
   public findLoginlogList(@Query(PaginationPipe) queryParams: QueryLoginlogDto) {
     return this.logService.findLoginlogList(queryParams)
+  }
+
+  /** 查询当前登录用户的登录日志（个人中心用，仅校验登录态） */
+  @Get('loginlog/self')
+  public findMyLoginlogList(@CurrentUser('userId') userId: string, @Query(PaginationPipe) queryParams: QueryLoginlogDto) {
+    return this.logService.findLoginlogList(queryParams, userId)
   }
 
   /** 导出登录日志 */

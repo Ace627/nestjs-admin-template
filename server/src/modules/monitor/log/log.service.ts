@@ -77,10 +77,10 @@ export class LogService {
     return '清空成功'
   }
 
-  /** 分页查询登录日志 */
-  public async findLoginlogList(queryParams: QueryLoginlogDto) {
+  /** 分页查询登录日志（userId 存在时仅查询该用户自己的日志，个人中心用） */
+  public async findLoginlogList(queryParams: QueryLoginlogDto, userId?: string) {
     const queryBuilder = this.loginlogRepository.createQueryBuilder('loginlog')
-    queryBuilder.where(this.buildLoginlogWhere(queryParams))
+    queryBuilder.where(this.buildLoginlogWhere(queryParams, userId))
     queryBuilder.orderBy('loginlog.loginTime', 'DESC') // 排序
     queryBuilder.skip(queryParams.skip).take(queryParams.take) // 分页
     const [records, total] = await queryBuilder.getManyAndCount() //  一次性获取数据和总数
@@ -152,8 +152,9 @@ export class LogService {
   /* -------------------------------------------------------------------------- */
 
   /** 构造登录日志查询条件（列表与导出共用） */
-  private buildLoginlogWhere(queryParams: QueryLoginlogDto) {
+  private buildLoginlogWhere(queryParams: QueryLoginlogDto, userId?: string) {
     const where: FindOptionsWhere<LoginLogEntity> = {}
+    if (userId) where.userId = userId
     if (queryParams.ip) where.ip = Like(`%${queryParams.ip}%`)
     if (queryParams.username) where.username = Like(`%${queryParams.username}%`)
     if (queryParams.location) where.location = Like(`%${queryParams.location}%`)

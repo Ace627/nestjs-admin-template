@@ -22,12 +22,15 @@
 
       <el-col :md="17" :xl="24">
         <el-card shadow="never">
-          <el-tabs>
-            <el-tab-pane label="基本信息">
+          <el-tabs v-model="activeTab" @tab-change="handleTabChange">
+            <el-tab-pane label="基本信息" name="basic">
               <UserInfo :user="profile" @refresh="getProfile" />
             </el-tab-pane>
-            <el-tab-pane label="修改密码">
+            <el-tab-pane label="修改密码" name="password">
               <UpdatePassword />
+            </el-tab-pane>
+            <el-tab-pane lazy label="登录记录" name="loginRecord">
+              <LoginRecord ref="loginRecordRef" />
             </el-tab-pane>
           </el-tabs>
         </el-card>
@@ -43,15 +46,24 @@ defineOptions({ name: 'Profile' })
 import UserInfo from './UserInfo.vue'
 import UpdatePassword from './UpdatePassword.vue'
 import UserAvatar from './UserAvatar.vue'
+import LoginRecord from './LoginRecord.vue'
 import { resolveFileUrl } from '@/utils'
 import { UserRequest } from '@/api/system/user.request'
 import type { User } from '@/types'
+import type { TabPaneName } from 'element-plus'
 import dayjs from 'dayjs'
 import defaultAvatar from '@/assets/images/default-avatar.jpg'
 
 const loading = ref(false)
 const userAvatarRef = useTemplateRef('userAvatarRef')
+const loginRecordRef = useTemplateRef('loginRecordRef')
 const profile = ref({} as User.UserProfile)
+const activeTab = ref('basic')
+
+/** 切换到登录记录 Tab 时重新拉取数据（首次切换由 lazy 挂载触发） */
+function handleTabChange(name: TabPaneName) {
+  if (name === 'loginRecord') loginRecordRef.value?.getList()
+}
 
 /** 查询个人信息 */
 async function getProfile() {

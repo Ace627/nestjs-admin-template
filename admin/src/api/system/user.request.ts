@@ -1,5 +1,5 @@
 import { request } from '@/utils/request'
-import type { User } from '@/types'
+import type { Loginlog, User } from '@/types'
 
 export class UserRequest {
   /** 新建用户 */
@@ -45,5 +45,10 @@ export class UserRequest {
   /** 修改用户个人信息 */
   static updateProfile(data: User.UserProfile): Promise<string> {
     return request.put('/system/user/profile/update', data)
+  }
+
+  /** 查询当前登录用户的登录日志（个人中心用） */
+  static findMyLoginlogs(params: Loginlog.QueryParams): PaginationResult<Loginlog.Item> {
+    return request.get('/monitor/log/loginlog/self', { params })
   }
 }
