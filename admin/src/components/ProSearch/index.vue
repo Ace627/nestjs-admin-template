@@ -1,7 +1,7 @@
 <template>
   <section class="pro-search" :class="[{ 'is-expanded': isExpanded }, `label-position--${labelPosition}`]">
     <el-form :model v-bind="$attrs" :labelPosition>
-      <el-row :gutter>
+      <el-row :gutter class="search-row">
         <el-col v-for="item in visibleFormItems" :key="item.prop" :xs="24" :sm="12" :md="span" :lg="span" :xl="span">
           <el-form-item :label="item.label">
             <slot :name="item.prop" :item="item" :model="model">
@@ -19,23 +19,24 @@
             </slot>
           </el-form-item>
         </el-col>
+        <el-col class="search-actions-col" :xs="24" :sm="12" :md="actionsSpan" :lg="actionsSpan" :xl="actionsSpan">
+          <div class="search-actions">
+            <el-button plain type="primary" @click="handleQuery">
+              <template #icon> <SvgIcon name="Search" /> </template>
+              <span>{{ searchButtonText }}</span>
+            </el-button>
+            <el-button plain type="danger" @click="resetQuery">
+              <template #icon> <SvgIcon name="Refresh" /> </template>
+              <span>{{ resetButtonText }}</span>
+            </el-button>
+            <div @click="toggleExpand" class="filter-toggle cursor-pointer select-none" v-if="shouldShowExpandToggle">
+              <span>{{ isExpanded ? '收起' : '展开' }}</span>
+              <SvgIcon :name="isExpanded ? 'ArrowUp' : 'ArrowDown'" />
+            </div>
+          </div>
+        </el-col>
       </el-row>
     </el-form>
-
-    <div class="search-actions">
-      <el-button plain type="primary" @click="handleQuery">
-        <template #icon> <SvgIcon name="Search" /> </template>
-        <span>{{ searchButtonText }}</span>
-      </el-button>
-      <el-button plain type="danger" @click="resetQuery">
-        <template #icon> <SvgIcon name="Refresh" /> </template>
-        <span>{{ resetButtonText }}</span>
-      </el-button>
-      <div @click="toggleExpand" class="filter-toggle cursor-pointer select-none" v-if="shouldShowExpandToggle">
-        <span>{{ isExpanded ? '收起' : '展开' }}</span>
-        <SvgIcon :name="isExpanded ? 'ArrowUp' : 'ArrowDown'" />
-      </div>
-    </div>
   </section>
 </template>
 
@@ -65,6 +66,13 @@ const maxItemsPerRow = computed(() => Math.floor(24 / props.span) - 1)
 const visibleItems = computed(() => props.items.filter((item) => !item.hidden))
 const visibleFormItems = computed(() => (isExpanded.value ? visibleItems.value : visibleItems.value.slice(0, maxItemsPerRow.value)))
 const shouldShowExpandToggle = computed(() => visibleItems.value.length > maxItemsPerRow.value)
+
+// 展开态：按钮组占末行剩余跨度并右对齐，末行满员时独占一行
+const itemsPerRow = computed(() => Math.floor(24 / props.span))
+const actionsSpan = computed(() => {
+  const remainder = visibleItems.value.length % itemsPerRow.value
+  return remainder === 0 ? 24 : 24 - remainder * props.span
+})
 
 // options 可能是数组或 Ref，模板中不直接用 toValue（vue-tsc 无法解析模板里的 auto-import API）
 function getItemOptions(item: ProSearchItem) {
@@ -106,7 +114,13 @@ function getPlaceholder(item: ProSearchItem) {
   }
 }
 
-// 操作按钮组：默认（展开态/窄屏）文档流，独占一行右对齐
+// el-row 自带 position: relative，会劫持按钮组收起态的绝对定位锚点（锚到被 padding-right 收窄的内容区），
+// 强制回 static 让按钮组重新锚定 .pro-search 的最右侧
+.search-row {
+  position: static;
+}
+
+// 操作按钮组：展开态位于末行剩余跨度内右对齐（末行满员则独占一行），收起态绝对定位右上角
 .search-actions {
   display: flex;
   align-items: center;

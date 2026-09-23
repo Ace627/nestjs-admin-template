@@ -38,5 +38,9 @@ export class QueryOperlogDto extends PaginationDto {
 
   @IsOptional()
   @IsString()
+  businessType: string
+
+  @IsOptional()
+  @IsString()
   status: string
 }

@@ -7,7 +7,7 @@ export interface QueryParams extends PaginationParams {
   /** 操作人员 */
   username?: string
   /** 类型 */
-  businessType?: number
+  businessType?: string
   /** 状态 */
   status?: string
 }

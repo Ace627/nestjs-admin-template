@@ -48,7 +48,7 @@ export class FileController {
   /** 上传登记：单传/分片合并成功后写入文件记录 */
   @Post('register')
   @RequirePermissions(['system:file:create'])
-  @Operlog({ title: '文件管理', businessType: BusinessType.IMPORT })
+  @Operlog({ title: '文件管理', businessType: BusinessType.UPLOAD })
   register(@Body() registerDto: RegisterFileDto) {
     return this.fileService.register(registerDto)
   }

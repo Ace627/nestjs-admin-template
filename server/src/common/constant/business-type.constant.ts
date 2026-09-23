@@ -25,4 +25,10 @@ export class BusinessType {
 
   /** 解锁 */
   static UNLOCK = '8'
+
+  /** 上传 */
+  static UPLOAD = '9'
+
+  /** 授权 */
+  static GRANT = '10'
 }

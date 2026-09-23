@@ -42,7 +42,7 @@ export class RoleController {
   /** 授权角色菜单权限 */
   @Post('authPermission')
   @RequirePermissions(['system:role:update'])
-  @Operlog({ title: '角色管理', businessType: BusinessType.UPDATE })
+  @Operlog({ title: '角色管理', businessType: BusinessType.GRANT })
   authPermission(@Body() authDto: AuthRolePermissionDto) {
     return this.roleService.authPermission(authDto)
   }
@@ -50,7 +50,7 @@ export class RoleController {
   /** 设置角色数据范围 */
   @Put('dataScope')
   @RequirePermissions(['system:role:update'])
-  @Operlog({ title: '角色管理', businessType: BusinessType.UPDATE })
+  @Operlog({ title: '角色管理', businessType: BusinessType.GRANT })
   updateDataScope(@Body() scopeDto: UpdateRoleDataScopeDto) {
     return this.roleService.updateDataScope(scopeDto)
   }

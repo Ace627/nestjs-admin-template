@@ -170,6 +170,7 @@ export class LogService {
     if (queryParams.username) where.username = Like(`%${queryParams.username}%`)
     if (queryParams.location) where.location = Like(`%${queryParams.location}%`)
     if (queryParams.status) where.status = Equal(queryParams.status)
+    if (queryParams.businessType) where.businessType = Equal(queryParams.businessType)
     return where
   }
 

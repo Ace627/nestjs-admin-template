@@ -69,6 +69,7 @@ const items = computed<ProSearchItem[]>(() => [
   { type: 'input', prop: 'title', label: '系统模块' },
   { type: 'input', prop: 'username', label: '操作人员' },
   { type: 'input', prop: 'ip', label: '操作地址' },
+  { type: 'select', prop: 'businessType', label: '操作类型', options: sys_oper_type.value },
   { type: 'select', prop: 'status', label: '操作状态', options: sys_common_status.value },
 ])
 const columns: ProTableColumn<Operlog.Item>[] = [
