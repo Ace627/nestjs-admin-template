@@ -1,4 +1,3 @@
-import { createPinia } from 'pinia'
 import type { App } from 'vue'
 
 /** 创建 Pinia 实例（全局状态管理核心） */

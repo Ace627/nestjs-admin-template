@@ -53,7 +53,6 @@
 <script setup lang="ts">
 defineOptions({ name: 'OperateDetailDialog' })
 import type { Operlog } from '@/types'
-import { useDict } from '@/hooks/useDict'
 
 const appStore = useAppStore()
 const { sys_common_status } = useDict('sys_common_status')

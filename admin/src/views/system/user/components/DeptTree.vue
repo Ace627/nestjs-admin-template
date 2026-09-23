@@ -40,9 +40,9 @@
 </template>
 
 <script setup lang="ts">
-import type { TreeNodeData } from 'element-plus'
 import type { Dept } from '@/types'
 import { DeptRequest } from '@/api/system/dept.request'
+import type { TreeNodeData, TreeStoreNodesMap } from 'element-plus'
 
 const emit = defineEmits<{ nodeClick: [deptId: string] }>()
 const treeData = ref<Dept.DeptItem[]>([])
@@ -51,7 +51,7 @@ const isExpandAll = ref(true)
 const treeRef = useTemplateRef('treeRef')
 let lastClickedId = ''
 
-watch(filterText, (val) => treeRef.value?.filter(val))
+watch(filterText, (keyword) => treeRef.value?.filter(keyword))
 
 function filterNode(value: string, data: TreeNodeData) {
   if (!value) return true
@@ -73,14 +73,17 @@ function handleNodeClick(data: Dept.DeptItem) {
 /** 展开/收起全部节点（遍历 el-tree 内部节点表置 expanded） */
 function toggleExpandAll() {
   isExpandAll.value = !isExpandAll.value
-  Object.values(treeRef.value?.store.nodesMap ?? {}).forEach((node) => (node.expanded = isExpandAll.value))
+  const nodesMap: TreeStoreNodesMap | undefined = treeRef.value?.store.nodesMap
+  if (!nodesMap) return
+  Object.values(nodesMap).forEach((node) => (node.expanded = isExpandAll.value))
 }
 
 /** 刷新部门树并保持当前展开状态 */
 async function handleRefresh() {
   try {
     treeData.value = await DeptRequest.findTree()
-    Object.values(treeRef.value?.store.nodesMap ?? {}).forEach((node) => (node.expanded = isExpandAll.value))
+    const nodesMap: TreeStoreNodesMap | undefined = treeRef.value?.store.nodesMap
+    if (nodesMap) Object.values(nodesMap).forEach((node) => (node.expanded = isExpandAll.value))
   } catch (error: unknown) {
     const errMsg = error instanceof Error ? error.message : String(error)
     console.log('handleRefresh errMsg: ', errMsg)

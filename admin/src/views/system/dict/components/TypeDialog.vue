@@ -25,7 +25,6 @@
 defineOptions({ name: 'DictTypeDialog' })
 import { TipModal } from '@/utils'
 import { DictRequest } from '@/api/system/dict.request'
-import { useDict } from '@/hooks/useDict'
 import type { Dict } from '@/types'
 import type { FormRules } from 'element-plus'
 

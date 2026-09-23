@@ -50,10 +50,9 @@
 
 <script setup lang="ts">
 import { TipModal } from '@/utils'
-import { DictRequest } from '@/api/system/dict.request'
-import { resetDictCache, useDict } from '@/hooks/useDict'
 import TypePanel from './components/TypePanel.vue'
 import DataDialog from './components/DataDialog.vue'
+import { DictRequest } from '@/api/system/dict.request'
 import type { Dict, ProSearchItem, ProTableColumn } from '@/types'
 
 const appStore = useAppStore()

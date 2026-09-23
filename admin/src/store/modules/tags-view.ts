@@ -9,7 +9,7 @@ export const useTagsViewStore = defineStore('tags-view', () => {
 
   /** 新增/更新一个页签：已存在则同步最新 fullPath（防 query 丢失），否则追加 */
   function addVisitedView(view: TagView) {
-    const index = visitedViews.value.findIndex((v) => v.path === view.path)
+    const index = visitedViews.value.findIndex((visitedView) => visitedView.path === view.path)
     if (index !== -1) {
       // 防止 query 参数丢失
       visitedViews.value[index]?.fullPath !== view.fullPath && (visitedViews.value[index] = { ...view })
@@ -28,7 +28,7 @@ export const useTagsViewStore = defineStore('tags-view', () => {
 
   /** 按 path 移除一个页签（不处理缓存，缓存由 delCachedView 单独清理） */
   function delVisitedView(view: TagView) {
-    const index = visitedViews.value.findIndex((v) => v.path === view.path)
+    const index = visitedViews.value.findIndex((visitedView) => visitedView.path === view.path)
     if (index !== -1) visitedViews.value.splice(index, 1)
   }
 
@@ -41,37 +41,37 @@ export const useTagsViewStore = defineStore('tags-view', () => {
 
   /** 关闭其他：保留固定页 + 当前页，其余页签移除 */
   function delOthersVisitedViews(view: TagView) {
-    visitedViews.value = visitedViews.value.filter((v) => v.meta?.affix || v.path === view.path)
+    visitedViews.value = visitedViews.value.filter((visitedView) => visitedView.meta?.affix || visitedView.path === view.path)
   }
 
   /** 关闭其他：仅保留固定页与当前页对应的组件缓存，其余缓存移除 */
   function delOthersCachedViews(view: TagView) {
     const keepNames = visitedViews.value
-      .filter((v) => v.meta?.affix || v.path === view.path)
-      .map((v) => v.name)
-      .filter((n): n is string => typeof n === 'string')
+      .filter((visitedView) => visitedView.meta?.affix || visitedView.path === view.path)
+      .map((visitedView) => visitedView.name)
+      .filter((name): name is string => typeof name === 'string')
     cachedViews.value = cachedViews.value.filter((name) => keepNames.includes(name))
   }
 
   /** 关闭右侧：保留固定页 + 当前页及其左侧，移除右侧普通页，并同步清理这些页的缓存 */
   function delRightTags(view: TagView) {
-    const index = visitedViews.value.findIndex((v) => v.path === view.path)
+    const index = visitedViews.value.findIndex((visitedView) => visitedView.path === view.path)
     if (index === -1) return
     const removedNames = visitedViews.value
-      .filter((v, i) => i > index && !v.meta?.affix && typeof v.name === 'string')
-      .map((v) => v.name as string)
-    visitedViews.value = visitedViews.value.filter((v, i) => v.meta?.affix || i <= index)
+      .filter((visitedView, currentIndex) => currentIndex > index && !visitedView.meta?.affix && typeof visitedView.name === 'string')
+      .map((visitedView) => visitedView.name as string)
+    visitedViews.value = visitedViews.value.filter((visitedView, currentIndex) => visitedView.meta?.affix || currentIndex <= index)
     cachedViews.value = cachedViews.value.filter((name) => !removedNames.includes(name))
   }
 
   /** 关闭左侧：保留固定页 + 当前页及其右侧，移除左侧普通页，并同步清理这些页的缓存 */
   function delLeftTags(view: TagView) {
-    const index = visitedViews.value.findIndex((v) => v.path === view.path)
+    const index = visitedViews.value.findIndex((visitedView) => visitedView.path === view.path)
     if (index === -1) return
     const removedNames = visitedViews.value
-      .filter((v, i) => i < index && !v.meta?.affix && typeof v.name === 'string')
-      .map((v) => v.name as string)
-    visitedViews.value = visitedViews.value.filter((v, i) => v.meta?.affix || i >= index)
+      .filter((visitedView, currentIndex) => currentIndex < index && !visitedView.meta?.affix && typeof visitedView.name === 'string')
+      .map((visitedView) => visitedView.name as string)
+    visitedViews.value = visitedViews.value.filter((visitedView, currentIndex) => visitedView.meta?.affix || currentIndex >= index)
     cachedViews.value = cachedViews.value.filter((name) => !removedNames.includes(name))
   }
 
@@ -83,8 +83,8 @@ export const useTagsViewStore = defineStore('tags-view', () => {
   /** 清空缓存：仅保留固定页对应的组件缓存，普通页缓存一并移除 */
   function delAllCachedViews() {
     const affixNames = visitedViews.value
-      .filter((v) => v.meta?.affix && typeof v.name === 'string')
-      .map((v) => v.name as string)
+      .filter((visitedView) => visitedView.meta?.affix && typeof visitedView.name === 'string')
+      .map((visitedView) => visitedView.name as string)
     cachedViews.value = cachedViews.value.filter((name) => affixNames.includes(name))
   }
 

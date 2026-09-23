@@ -34,7 +34,6 @@
 </template>
 
 <script setup lang="ts">
-import { useDict } from '@/hooks/useDict'
 import { linkDownload, TipModal } from '@/utils'
 import { LoginlogRequest } from '@/api/monitor/loginlog.request'
 import type { ProTableColumn, ProSearchItem, Loginlog } from '@/types'
@@ -114,9 +113,9 @@ async function handleDelete(record?: Loginlog.Item) {
 async function handleClear() {
   const { cancel } = await TipModal.confirm(`确定要清空所有的数据吗？`)
   if (cancel) return TipModal.msg(`操作取消`)
-  const msg = await LoginlogRequest.clear()
+  const clearMessage = await LoginlogRequest.clear()
   await getList()
-  TipModal.msgSuccess(msg || `数据清空成功`)
+  TipModal.msgSuccess(clearMessage || `数据清空成功`)
 }
 
 async function handleExport() {

@@ -51,7 +51,6 @@
 
 <script setup lang="ts">
 import { TipModal } from '@/utils'
-import { useDict } from '@/hooks/useDict'
 import JobDialog from './components/JobDialog.vue'
 import { JobRequest } from '@/api/monitor/job.request'
 import type { Job, ProSearchItem, ProTableColumn } from '@/types'

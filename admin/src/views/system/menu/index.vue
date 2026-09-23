@@ -44,7 +44,6 @@
 
 <script setup lang="ts">
 import { TipModal } from '@/utils'
-import { useDict } from '@/hooks/useDict'
 import MenuDialog from './components/MenuDialog.vue'
 import { MenuRequest } from '@/api/system/menu.request'
 import type { Menu, ProSearchItem, ProTableColumn } from '@/types'

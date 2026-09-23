@@ -20,9 +20,8 @@
 
 <script setup lang="ts">
 defineOptions({ name: 'LoginRecord' })
-import { useDict } from '@/hooks/useDict'
-import { UserRequest } from '@/api/system/user.request'
 import type { Loginlog } from '@/types'
+import { UserRequest } from '@/api/system/user.request'
 
 const { sys_common_status } = useDict('sys_common_status')
 const list = ref<Loginlog.Item[]>([])

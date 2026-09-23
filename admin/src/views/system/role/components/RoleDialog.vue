@@ -30,7 +30,6 @@ defineOptions({ name: 'RoleDialog' })
 import { TipModal } from '@/utils'
 import type { Role } from '@/types'
 import { RoleRequest } from '@/api/system/role.request'
-import { useDict } from '@/hooks/useDict'
 import type { FormRules } from 'element-plus'
 
 const emits = defineEmits<{ getList: [] }>()

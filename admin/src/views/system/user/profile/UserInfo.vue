@@ -28,7 +28,6 @@
 defineOptions({ name: 'UserInfo' })
 import { TipModal } from '@/utils'
 import { UserRequest } from '@/api/system/user.request'
-import { useDict } from '@/hooks/useDict'
 import type { FormRules } from 'element-plus'
 import type { User } from '@/types'
 

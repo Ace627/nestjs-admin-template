@@ -35,7 +35,7 @@
         </div>
         <div v-if="state[field.key].type === 'specified'" class="field-row">
           <el-select v-model="state[field.key].selected" multiple filterable collapse-tags collapse-tags-tooltip :max-collapse-tags="8" placeholder="选择具体值" class="w-100%">
-            <el-option v-for="n in field.max - field.min + 1" :key="n" :label="n + field.min - 1" :value="n + field.min - 1" />
+            <el-option v-for="number in field.max - field.min + 1" :key="number" :label="number + field.min - 1" :value="number + field.min - 1" />
           </el-select>
         </div>
       </el-tab-pane>
@@ -71,7 +71,7 @@
         </div>
         <div v-if="state.day.type === 'specified'" class="field-row">
           <el-select v-model="state.day.selected" multiple filterable collapse-tags collapse-tags-tooltip :max-collapse-tags="8" placeholder="选择具体日期" class="w-100%">
-            <el-option v-for="n in 31" :key="n" :label="`${n} 号`" :value="n" />
+            <el-option v-for="number in 31" :key="number" :label="`${number} 号`" :value="number" />
           </el-select>
         </div>
         <div v-if="state.day.type !== 'unspecified'" class="field-tip">日指定后周字段将自动置为「?」</div>
@@ -106,7 +106,7 @@
         </div>
         <div v-if="state[field.key].type === 'specified'" class="field-row">
           <el-select v-model="state[field.key].selected" multiple filterable collapse-tags collapse-tags-tooltip :max-collapse-tags="8" placeholder="选择具体值" class="w-100%">
-            <el-option v-for="n in field.max - field.min + 1" :key="n" :label="n + field.min - 1" :value="n + field.min - 1" />
+            <el-option v-for="number in field.max - field.min + 1" :key="number" :label="number + field.min - 1" :value="number + field.min - 1" />
           </el-select>
         </div>
       </el-tab-pane>

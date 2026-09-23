@@ -39,7 +39,6 @@
 </template>
 
 <script setup lang="ts">
-import { useDict } from '@/hooks/useDict'
 import JobLogDetailDialog from './detail.vue'
 import { linkDownload, TipModal } from '@/utils'
 import { JoblogRequest } from '@/api/monitor/job-log.request'

@@ -63,7 +63,6 @@
 </template>
 
 <script setup lang="ts">
-defineOptions({ name: 'Config' })
 import { TipModal } from '@/utils'
 import { ConfigRequest } from '@/api/system/config.request'
 import type { Config, ProSearchItem, ProTableColumn } from '@/types'

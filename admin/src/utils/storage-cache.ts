@@ -54,7 +54,7 @@ export class StorageCache {
   /** 清空本工具写入的所有存储（不影响其它 localStorage 数据） */
   static clear(): void {
     Object.keys(localStorage)
-      .filter((k) => k.startsWith(STORAGE_PREFIX))
-      .forEach((k) => localStorage.removeItem(k))
+      .filter((key) => key.startsWith(STORAGE_PREFIX))
+      .forEach((key) => localStorage.removeItem(key))
   }
 }

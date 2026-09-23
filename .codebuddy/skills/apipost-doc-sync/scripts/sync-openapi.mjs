@@ -665,10 +665,16 @@ const defs = [
     data: str('回收站已清空，清理物理文件 2 个'), example: '回收站已清空，清理物理文件 2 个',
   },
 
-  /* ----------------------------- 日志管理（monitor/log，8 端点） ----------------------------- */
+  /* ----------------------------- 日志管理（monitor/log，9 端点） ----------------------------- */
   {
     path: '/monitor/log/loginlog/list', method: 'get', tag: '日志管理', sort: 1000, summary: '查询登录日志列表',
     params: [...pageParams(), q('ip', '登录IP'), q('username', '用户账号'), q('location', '登录地点'), q('status', '登录状态（1成功 0失败）')],
+    data: page(loginlogProps(), 1),
+    example: { total: 1, records: [{ id: '2b3c4d5e-6f7a-4b8c-9d0e-1f2a3b4c5d6e', username: 'admin', userId: '866b0232-507b-42a4-bdc1-47fc4a83616a', ip: '127.0.0.1', location: '内网', browser: 'Chrome 130', os: 'Windows 10', status: '1', message: '登录成功', loginTime: '2026-09-15 09:30:00', requestId: REQUEST_ID }] },
+  },
+  {
+    path: '/monitor/log/loginlog/self', method: 'get', tag: '日志管理', sort: 1100, summary: '个人登录日志', desc: '个人中心用，仅校验登录态，强制过滤为当前登录用户自己的日志',
+    params: [...pageParams(), q('ip', '登录IP'), q('location', '登录地点'), q('status', '登录状态（1成功 0失败）')],
     data: page(loginlogProps(), 1),
     example: { total: 1, records: [{ id: '2b3c4d5e-6f7a-4b8c-9d0e-1f2a3b4c5d6e', username: 'admin', userId: '866b0232-507b-42a4-bdc1-47fc4a83616a', ip: '127.0.0.1', location: '内网', browser: 'Chrome 130', os: 'Windows 10', status: '1', message: '登录成功', loginTime: '2026-09-15 09:30:00', requestId: REQUEST_ID }] },
   },

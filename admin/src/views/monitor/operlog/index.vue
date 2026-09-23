@@ -43,7 +43,6 @@
 </template>
 
 <script setup lang="ts">
-import { useDict } from '@/hooks/useDict'
 import OperateDetailDialog from './detail.vue'
 import { linkDownload, TipModal } from '@/utils'
 import { OperlogRequest } from '@/api/monitor/operlog.request'
@@ -131,9 +130,9 @@ function handleView(record: Operlog.Item) {
 async function handleClear() {
   const { cancel } = await TipModal.confirm(`确定要清空所有的数据吗？`)
   if (cancel) return TipModal.msg(`操作取消`)
-  const msg = await OperlogRequest.clear()
+  const clearMessage = await OperlogRequest.clear()
   await getList()
-  TipModal.msgSuccess(msg || `数据清空成功`)
+  TipModal.msgSuccess(clearMessage || `数据清空成功`)
 }
 
 async function handleExport() {

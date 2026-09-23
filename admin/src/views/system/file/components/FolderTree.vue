@@ -48,9 +48,9 @@
 
 <script setup lang="ts">
 defineOptions({ name: 'FolderTree' })
-import type { TreeNodeData } from 'element-plus'
 import type { File } from '@/types'
 import { FileRequest } from '@/api/system/file.request'
+import type { TreeNodeData, TreeStoreNodesMap } from 'element-plus'
 
 /** 根节点虚拟 ID（与后端 DEFAULT_PARENT_ID 一致），仅作为回根目录的事件值 */
 const ROOT_ID = '0'
@@ -62,7 +62,7 @@ const filterText = ref('')
 const treeRef = useTemplateRef('treeRef')
 let lastClickedId = ''
 
-watch(filterText, (val) => treeRef.value?.filter(val))
+watch(filterText, (keyword) => treeRef.value?.filter(keyword))
 
 function filterNode(value: string, data: TreeNodeData) {
   if (!value) return true
@@ -91,7 +91,8 @@ function handleBackRoot() {
 async function getTree() {
   try {
     treeData.value = await FileRequest.findFolderTree()
-    Object.values(treeRef.value?.store.nodesMap ?? {}).forEach((node) => (node.expanded = true))
+    const nodesMap: TreeStoreNodesMap | undefined = treeRef.value?.store.nodesMap
+    if (nodesMap) Object.values(nodesMap).forEach((node) => (node.expanded = true))
   } catch (error: unknown) {
     const errMsg = error instanceof Error ? error.message : String(error)
     console.log('getTree errMsg: ', errMsg)

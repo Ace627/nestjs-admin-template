@@ -10,7 +10,7 @@
               </template>
               <template v-else-if="item.type === 'select'">
                 <el-select v-model="model[item.prop]" :placeholder="getPlaceholder(item)" clearable>
-                  <el-option v-for="opt in toValue(item.options)" :key="opt.value" :label="opt.label" :value="opt.value" />
+                  <el-option v-for="option in getItemOptions(item)" :key="option.value" :label="option.label" :value="option.value" />
                 </el-select>
               </template>
               <template v-else-if="item.type === 'date'">
@@ -41,7 +41,6 @@
 
 <script setup lang="ts">
 defineOptions({ name: 'ProSearch' })
-import { toValue } from 'vue'
 import type { ProSearchItem, ProSearchProps } from './types'
 
 const props = withDefaults(defineProps<ProSearchProps>(), {
@@ -66,6 +65,11 @@ const maxItemsPerRow = computed(() => Math.floor(24 / props.span) - 1)
 const visibleItems = computed(() => props.items.filter((item) => !item.hidden))
 const visibleFormItems = computed(() => (isExpanded.value ? visibleItems.value : visibleItems.value.slice(0, maxItemsPerRow.value)))
 const shouldShowExpandToggle = computed(() => visibleItems.value.length > maxItemsPerRow.value)
+
+// options 可能是数组或 Ref，模板中不直接用 toValue（vue-tsc 无法解析模板里的 auto-import API）
+function getItemOptions(item: ProSearchItem) {
+  return toValue(item.options) ?? []
+}
 
 function toggleExpand() {
   isExpanded.value = !isExpanded.value

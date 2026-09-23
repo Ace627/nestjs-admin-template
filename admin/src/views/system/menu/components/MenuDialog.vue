@@ -96,7 +96,6 @@ defineOptions({ name: 'MenuDialog' })
 import type { GlobalComponents } from 'vue'
 import { TipModal } from '@/utils'
 import type { Menu } from '@/types'
-import { useDict } from '@/hooks/useDict'
 import type { FormRules } from 'element-plus'
 import { MenuRequest } from '@/api/system/menu.request'
 

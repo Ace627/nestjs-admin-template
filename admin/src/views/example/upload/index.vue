@@ -114,10 +114,10 @@ const appStore = useAppStore()
 
 const taskList = ref<UploadTask[]>([])
 
-const finishCount = computed(() => taskList.value.filter((t) => t.status === 'done').length)
+const finishCount = computed(() => taskList.value.filter((task) => task.status === 'done').length)
 const hasActiveTask = computed(() => taskList.value.length > 0)
-const hasPausedTask = computed(() => taskList.value.some((t) => t.status === 'paused'))
-const hasUploadingTask = computed(() => taskList.value.some((t) => t.status === 'uploading'))
+const hasPausedTask = computed(() => taskList.value.some((task) => task.status === 'paused'))
+const hasUploadingTask = computed(() => taskList.value.some((task) => task.status === 'uploading'))
 
 /** el-upload @change 回调，取到原生 File 后创建上传任务 */
 function handleUploadChange(uploadFile: UploadFile) {
@@ -206,13 +206,13 @@ function computeAllHashes(task: UploadTask): Promise<{ fileHash: string; chunkHa
 
     worker.postMessage({ type: 'init', totalChunks: task.totalChunks })
 
-    worker.onmessage = (e: MessageEvent<{ type: 'done'; fileHash: string; chunkHashes: string[] } | { type: 'error' }>) => {
-      if (e.data.type === 'error') {
+    worker.onmessage = (event: MessageEvent<{ type: 'done'; fileHash: string; chunkHashes: string[] } | { type: 'error' }>) => {
+      if (event.data.type === 'error') {
         resolve({ fileHash: '', chunkHashes: [] })
         worker.terminate()
         return
       }
-      resolve({ fileHash: e.data.fileHash, chunkHashes: e.data.chunkHashes })
+      resolve({ fileHash: event.data.fileHash, chunkHashes: event.data.chunkHashes })
       worker.terminate()
     }
 
@@ -222,8 +222,8 @@ function computeAllHashes(task: UploadTask): Promise<{ fileHash: string; chunkHa
       const end = Math.min(start + CHUNK_SIZE, task.file.size)
       const reader = new FileReader()
 
-      reader.onload = (e) => {
-        worker.postMessage({ type: 'chunk', buffer: e.target!.result as ArrayBuffer, index: currentChunk }, [e.target!.result as ArrayBuffer])
+      reader.onload = (event) => {
+        worker.postMessage({ type: 'chunk', buffer: event.target!.result as ArrayBuffer, index: currentChunk }, [event.target!.result as ArrayBuffer])
         currentChunk++
         setTimeout(loadNext, 0)
       }
@@ -241,14 +241,14 @@ function computeAllHashes(task: UploadTask): Promise<{ fileHash: string; chunkHa
 }
 
 /** 构建 FormData 并发起单个分片上传请求 */
-function uploadOneChunk(task: UploadTask, i: number) {
-  const start = i * CHUNK_SIZE
+function uploadOneChunk(task: UploadTask, chunkIndex: number) {
+  const start = chunkIndex * CHUNK_SIZE
   const end = Math.min(start + CHUNK_SIZE, task.file.size)
   const chunk = task.file.slice(start, end)
   const formData = new FormData()
   formData.append('file', chunk, task.fileName)
   formData.append('fileHash', task.hash)
-  formData.append('chunkHash', task.chunkHashes[i] + '-' + i)
+  formData.append('chunkHash', task.chunkHashes[chunkIndex] + '-' + chunkIndex)
   return UploadRequest.uploadChunk(formData, { signal: task.abortController!.signal }).then(() => {})
 }
 
@@ -275,8 +275,8 @@ async function startUpload(task: UploadTask) {
       return
     }
     const uploadedSet = new Set(checkResult.uploadedChunks)
-    chunkHashes.forEach((h, idx) => {
-      if (uploadedSet.has(h + '-' + idx)) task.doneChunkIndexes.add(idx)
+    chunkHashes.forEach((chunkHash, index) => {
+      if (uploadedSet.has(chunkHash + '-' + index)) task.doneChunkIndexes.add(index)
     })
     task.completedChunks = task.doneChunkIndexes.size
     task.percent = Math.round((task.completedChunks / task.totalChunks) * 100)
@@ -287,8 +287,8 @@ async function startUpload(task: UploadTask) {
 
   /** 分片上传协程池（CONCURRENCY 路并发） */
   const pending: number[] = []
-  for (let i = 0; i < task.totalChunks; i++) {
-    if (!task.doneChunkIndexes.has(i)) pending.push(i)
+  for (let chunkIndex = 0; chunkIndex < task.totalChunks; chunkIndex++) {
+    if (!task.doneChunkIndexes.has(chunkIndex)) pending.push(chunkIndex)
   }
 
   if (pending.length === 0) {
@@ -306,28 +306,28 @@ async function startUpload(task: UploadTask) {
     if (task.status !== 'uploading') return
 
     while (running.size < CONCURRENCY && nextIndex < pending.length) {
-      const i = pending[nextIndex]
+      const chunkIndex = pending[nextIndex]
       nextIndex++
-      running.set(i, uploadOneChunk(task, i))
+      running.set(chunkIndex, uploadOneChunk(task, chunkIndex))
     }
 
     const result = await Promise.race(
-      Array.from(running.entries()).map(([idx, p]) =>
-        p.then(
-          () => ({ idx, ok: true as const }),
-          (err) => ({ idx, ok: false as const, err }),
+      Array.from(running.entries()).map(([chunkIndex, promise]) =>
+        promise.then(
+          () => ({ chunkIndex, ok: true as const }),
+          (error) => ({ chunkIndex, ok: false as const, error }),
         ),
       ),
     )
 
     if (!result.ok) {
-      if (result.err?.name === 'CanceledError' || result.err?.code === 'ERR_CANCELED') return
+      if (result.error?.name === 'CanceledError' || result.error?.code === 'ERR_CANCELED') return
       task.status = 'paused'
       return
     }
 
-    running.delete(result.idx)
-    task.doneChunkIndexes.add(result.idx)
+    running.delete(result.chunkIndex)
+    task.doneChunkIndexes.add(result.chunkIndex)
     task.completedChunks++
     task.percent = Math.round((task.completedChunks / task.totalChunks) * 100)
   }
@@ -353,18 +353,18 @@ function cancelUpload(task: UploadTask) {
   if (task.hash) {
     UploadRequest.clearChunk({ fileHash: task.hash }).catch(() => {})
   }
-  const idx = taskList.value.findIndex((t) => t.id === task.id)
-  if (idx !== -1) taskList.value.splice(idx, 1)
+  const taskIndex = taskList.value.findIndex((item) => item.id === task.id)
+  if (taskIndex !== -1) taskList.value.splice(taskIndex, 1)
 }
 
 /** 批量继续所有暂停任务 */
 function resumeAll() {
-  taskList.value.filter((t) => t.status === 'paused').forEach(startUpload)
+  taskList.value.filter((task) => task.status === 'paused').forEach(startUpload)
 }
 
 /** 批量暂停所有上传中任务 */
 function pauseAll() {
-  taskList.value.filter((t) => t.status === 'uploading').forEach(pauseUpload)
+  taskList.value.filter((task) => task.status === 'uploading').forEach(pauseUpload)
 }
 </script>
 

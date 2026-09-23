@@ -53,7 +53,6 @@
 
 <script setup lang="ts">
 import { TipModal } from '@/utils'
-import { useDict } from '@/hooks/useDict'
 import DeptTree from './components/DeptTree.vue'
 import UserDialog from './components/UserDialog.vue'
 import { UserRequest } from '@/api/system/user.request'

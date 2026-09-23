@@ -155,7 +155,7 @@ function redrawCanvas() {
   if (!canvas) return
   const ctx = canvas.getContext('2d')!
   ctx.clearRect(0, 0, canvas.width, canvas.height)
-  strokes.value.forEach((s) => renderStroke(ctx, s))
+  strokes.value.forEach((stroke) => renderStroke(ctx, stroke))
 }
 
 function renderStroke(ctx: CanvasRenderingContext2D, stroke: Stroke) {
@@ -165,10 +165,10 @@ function renderStroke(ctx: CanvasRenderingContext2D, stroke: Stroke) {
   ctx.lineWidth = width
   ctx.beginPath()
   ctx.moveTo(points[0].x, points[0].y)
-  for (let i = 1; i < points.length - 1; i++) {
-    const midX = (points[i].x + points[i + 1].x) / 2
-    const midY = (points[i].y + points[i + 1].y) / 2
-    ctx.quadraticCurveTo(points[i].x, points[i].y, midX, midY)
+  for (let pointIndex = 1; pointIndex < points.length - 1; pointIndex++) {
+    const midX = (points[pointIndex].x + points[pointIndex + 1].x) / 2
+    const midY = (points[pointIndex].y + points[pointIndex + 1].y) / 2
+    ctx.quadraticCurveTo(points[pointIndex].x, points[pointIndex].y, midX, midY)
   }
   if (points.length > 1) {
     ctx.lineTo(points[points.length - 1].x, points[points.length - 1].y)

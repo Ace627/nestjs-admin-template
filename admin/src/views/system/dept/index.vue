@@ -39,7 +39,6 @@
 
 <script setup lang="ts">
 import { TipModal } from '@/utils'
-import { useDict } from '@/hooks/useDict'
 import DeptDialog from './components/DeptDialog.vue'
 import { DeptRequest } from '@/api/system/dept.request'
 import type { Dept, ProSearchItem, ProTableColumn } from '@/types'
