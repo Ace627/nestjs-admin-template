@@ -939,7 +939,7 @@ const defs = [
   },
 ]
 
-/* 目录定义（全量 16 个；x-sort 沿用菜单排序递增） */
+/* 目录定义（全量 17 个；x-sort 沿用菜单排序递增） */
 const newTags = [
   { name: '鉴权', sort: 20000 },
   { name: '用户管理', sort: 21000 },

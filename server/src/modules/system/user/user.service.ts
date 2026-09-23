@@ -67,18 +67,27 @@ export class UserService {
     return '删除成功'
   }
 
-  /** 编辑用户（同步角色关联） */
+  /** 编辑用户（同步角色关联；按变更字段精准失效缓存，普通字段不踢下线） */
   public async update(updateDto: UpdateUserDto) {
-    const { id, phone, email, roleIds } = updateDto
-    const entity = await this.userRepository.findOneBy({ id: Equal(id) })
+    const { id, phone, email, roleIds, deptId, status } = updateDto
+    const entity = await this.userRepository.findOne({ where: { id: Equal(id) }, relations: { roles: true } })
     if (!entity) throw new BusinessException('该用户不存在')
     if (await this.checkPhoneExists(phone, id)) throw new BusinessException('该手机号已存在')
     if (await this.checkEmailExists(email, id)) throw new BusinessException('该邮箱已存在')
 
+    const statusChangedToDisabled = status === CommonConstant.STATUS_DISABLE && entity.status !== CommonConstant.STATUS_DISABLE
+    const rolesChanged = !!roleIds && entity.roles.map((role) => role.id).sort().join() !== [...roleIds].sort().join()
+    const deptChanged = !!deptId && deptId !== entity.deptId
+
     if (roleIds) entity.roles = await this.roleRepository.findBy({ id: In(roleIds) })
     Object.assign(entity, updateDto)
     await this.userRepository.save(entity)
-    await this.cleanUserRelatedCache(id)
+
+    const invalidationTasks: Promise<unknown>[] = []
+    if (statusChangedToDisabled) invalidationTasks.push(this.revokeUserSessions(id))
+    if (rolesChanged) invalidationTasks.push(this.redisService.del(`${RedisConstant.ADMIN_USER_ROLES}:${id}`))
+    if (deptChanged) invalidationTasks.push(this.redisService.del(`${RedisConstant.ADMIN_USER_DEPTS}:${id}`))
+    await Promise.all(invalidationTasks)
     return '更新成功'
   }
 
@@ -259,6 +268,13 @@ export class UserService {
     where.email = Equal(email)
     if (userId) where.id = Not(userId)
     return await this.userRepository.existsBy(where)
+  }
+
+  /** 吊销用户全部会话（token / 在线状态）；角色与部门缓存由字段级变更单独失效 */
+  private async revokeUserSessions(userId: string) {
+    const patterns = [`${RedisConstant.ACCESS_TOKEN_KEY}:${userId}:*`, `${RedisConstant.ADMIN_USER_ONLINE_KEY}:${userId}:*`]
+    const keys = (await Promise.all(patterns.map((pattern) => this.redisService.scan(pattern)))).flat()
+    if (keys.length) await this.redisService.del(...keys)
   }
 
   /** 清除用户级缓存（token / 在线状态 / 角色 / 可见部门） */
