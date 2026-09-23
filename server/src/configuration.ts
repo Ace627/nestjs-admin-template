@@ -34,6 +34,7 @@ export const configuration = () => {
     jwt: {
       secret: process.env.JWT_SECRET,
       expiresIn: toInteger(process.env.JWT_EXPIRES_IN, 1800),
+      refreshExpiresIn: toInteger(process.env.JWT_REFRESH_EXPIRES_IN, 604800),
     },
   }
 }

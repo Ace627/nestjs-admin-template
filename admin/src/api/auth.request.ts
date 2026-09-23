@@ -12,6 +12,11 @@ export abstract class AuthRequest {
     return request.post(`/auth/login`, data)
   }
 
+  /** 刷新令牌 */
+  static refreshToken(data: Auth.RefreshTokenParams): Promise<Auth.LoginResult> {
+    return request.post(`/auth/refreshToken`, data)
+  }
+
   /** 获取登录者信息 */
   static getInfo(): Promise<Auth.CurrentUserInfo> {
     return request.get(`/auth/getInfo`)

@@ -1,4 +1,4 @@
-import { LoginDto } from './auth.dto'
+import { LoginDto, RefreshTokenDto } from './auth.dto'
 import { AuthService } from './auth.service'
 import { Body, Controller, Get, Post, Req, Headers } from '@nestjs/common'
 import { CommonConstant, CurrentUser, Public, RepeatSubmit, SkipThrottle } from '@/common'
@@ -21,6 +21,14 @@ export class AuthController {
   @Post('login')
   public login(@Body() loginDto: LoginDto, @Req() request: ExpressRequest) {
     return this.authService.login(loginDto, request)
+  }
+
+  /** 刷新令牌（无感续期，不挂防重复提交：并发 401 排队重放时 body 相同会被误拦） */
+  @Public()
+  @SkipThrottle()
+  @Post('refreshToken')
+  public refreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
+    return this.authService.refreshToken(refreshTokenDto.refreshToken)
   }
 
   /* 获取登录用户信息 */

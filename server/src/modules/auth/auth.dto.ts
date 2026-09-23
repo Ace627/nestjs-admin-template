@@ -18,3 +18,9 @@ export class LoginDto {
   @IsString({ message: '参数 $property  必须是字符串' })
   uuid: string
 }
+
+export class RefreshTokenDto {
+  @IsNotEmpty({ message: '参数 $property  不能为空' })
+  @IsString({ message: '参数 $property  必须是字符串' })
+  refreshToken: string
+}

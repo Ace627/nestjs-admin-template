@@ -6,6 +6,10 @@ export interface JwtPayload {
   username: string
   // 用户唯一标识（用于令牌失效校验）
   uuid: string
+  // 令牌类型：访问令牌省略（兼容存量令牌），刷新令牌固定为 'refresh'
+  type?: 'access' | 'refresh'
+  // 刷新令牌轮换唯一标识（每次刷新重新生成，使旧刷新令牌作废）
+  jti?: string
 }
 
 // user:roles:{userId} 缓存结构（AuthService.getInfo 写入，守卫/拦截器消费）

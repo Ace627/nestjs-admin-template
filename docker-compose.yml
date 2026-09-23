@@ -40,6 +40,7 @@ services:
       REDIS_DB: 0
       JWT_SECRET: ${JWT_SECRET:?请先在仓库根 .env 配置 JWT_SECRET}
       JWT_EXPIRES_IN: 1800
+      JWT_REFRESH_EXPIRES_IN: 604800
     volumes:
       # 上传文件 / 日志目录都相对 process.cwd()，即 /app
       - uploads:/app/uploads

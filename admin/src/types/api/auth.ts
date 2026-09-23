@@ -25,8 +25,16 @@ export interface LoginParams {
 export interface LoginResult {
   /** 访问令牌 */
   accessToken: string
+  /** 刷新令牌（长时凭证，用于向服务端换取新的访问令牌） */
+  refreshToken: string
   /** 过期时间 */
   expiresIn: number
+}
+
+/** 刷新令牌请求参数 */
+export interface RefreshTokenParams {
+  /** 刷新令牌 */
+  refreshToken: string
 }
 
 /** 获取登录者信息 */

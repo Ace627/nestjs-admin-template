@@ -94,4 +94,10 @@ export const ConfigConstant = {
    * 单位：秒，1800 表示 30 分钟，需与 .env 中 JWT_EXPIRES_IN 一致
    */
   JWT_EXPIRES_IN: 'jwt.expiresIn',
+
+  /**
+   * JWT 刷新令牌有效期
+   * 单位：秒，604800 表示 7 天，服务端代码兜底默认值与此一致，.env 可选覆盖
+   */
+  JWT_REFRESH_EXPIRES_IN: 'jwt.refreshExpiresIn',
 }

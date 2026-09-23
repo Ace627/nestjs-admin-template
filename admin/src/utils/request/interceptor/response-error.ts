@@ -1,4 +1,4 @@
-import { TipModal, removeAccessToken, sleep } from '@/utils'
+import { TipModal } from '@/utils'
 import { AxiosError, HttpStatusCode, type AxiosInstance } from 'axios'
 
 const ErrorMessageMap: Record<string, string> = {
@@ -16,9 +16,6 @@ const ErrorMessageMap: Record<string, string> = {
   [HttpStatusCode.GatewayTimeout]: '网关超时，请稍后重试',
 }
 
-/** 并发 401 只处理一次（弹一次提示、刷新一次页面），其余静默 reject */
-let isHandlingUnauthorized = false
-
 export function responseErrorInterceptor(instance: AxiosInstance) {
   instance.interceptors.response.use(undefined, async (error: AxiosError<ApiResponse>) => {
     // 业务错误由响应转换拦截器以普通对象 reject（无 message 字段），此处须兜底防 TypeError 中断提示链路
@@ -28,21 +25,12 @@ export function responseErrorInterceptor(instance: AxiosInstance) {
     if (message.includes('timeout')) status = HttpStatusCode.RequestTimeout
     if (message.includes('Network Error')) message = '网络连接异常，请检查服务或网络是否正常'
 
+    // 401 已由令牌刷新拦截器处理（无感恢复或清场提示），此处直接透传
+    if (status === HttpStatusCode.Unauthorized) return Promise.reject(error)
+
     // 提取错误信息（优先级：后端返回 > 本地映射）
     message = ErrorMessageMap[status.toString()] || message
     if (error?.response?.data?.message) message = error.response.data.message
-
-    // 处理 401 错误（会话过期）
-    if (status === HttpStatusCode.Unauthorized) {
-      if (!isHandlingUnauthorized) {
-        isHandlingUnauthorized = true
-        TipModal.msgError(message, { duration: 1.5 * 1000 })
-        await sleep(1500)
-        removeAccessToken()
-        window.location.reload()
-      }
-      return Promise.reject(error)
-    }
 
     // 统一提示错误信息
     TipModal.msgError(message, { duration: 1.5 * 1000 })

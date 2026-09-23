@@ -16,6 +16,12 @@ export const RedisConstant = {
   ACCESS_TOKEN_KEY: 'token:access',
 
   /**
+   * 刷新令牌缓存键
+   * 用于存储刷新令牌的 Redis 键，值为 'token:refresh'
+   */
+  REFRESH_TOKEN_KEY: 'token:refresh',
+
+  /**
    * 用户在线状态缓存 Key 前缀
    * 拼接用户 ID/用户名形成唯一缓存 Key，格式为「user:online:userId」，用于记录用户在线状态
    */

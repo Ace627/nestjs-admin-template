@@ -58,13 +58,13 @@ export class AuthService {
         throw new BusinessException(`账号或密码错误，还可尝试 ${remainingCount} 次`)
       }
       await this.loginLockService.clearFailCount(username, ip)
-      // 5. 生成 Token
-      const { accessTokenKey, accessToken } = await this.generateAccessToken(user)
+      // 5. 生成令牌对
+      const { accessTokenKey, accessToken, refreshToken } = await this.generateTokenPair(user)
       // 6. 更新登录时间
       this.userService.getRepository().update(userId, { loginTime: formatTime() })
       this.logService.createLoginlog(request, '登录成功', userId, accessTokenKey)
       // 7. 记录日志
-      return { accessToken, expiresIn: this.expiresIn }
+      return { accessToken, refreshToken, expiresIn: this.expiresIn }
     } catch (error: unknown) {
       const errorMsg = error instanceof Error ? error.message : '登录失败'
       this.logService.createLoginlog(request, errorMsg)
@@ -114,13 +114,38 @@ export class AuthService {
     return this.menuService.findRoutesByRoleIds(roleIds, isAdmin)
   }
 
+  /** 刷新令牌：校验并轮换 refreshToken，重发 accessToken（滑动续期，每次刷新重置 7 天） */
+  public async refreshToken(refreshToken: string) {
+    let payload: AuthType.JwtPayload
+    try {
+      payload = this.jwtService.verify(refreshToken)
+    } catch {
+      throw new BusinessException('登录状态已失效，请重新登录', HttpStatus.UNAUTHORIZED)
+    }
+    const { userId, username, uuid, type } = payload
+    if (type !== 'refresh') throw new BusinessException('登录状态已失效，请重新登录', HttpStatus.UNAUTHORIZED)
+    // 值比对防「已轮换的旧刷新令牌重放」
+    const refreshTokenKey = `${RedisConstant.REFRESH_TOKEN_KEY}:${userId}:${uuid}`
+    const storedToken = await this.redisService.get(refreshTokenKey)
+    if (storedToken !== refreshToken) throw new BusinessException('登录状态已失效，请重新登录', HttpStatus.UNAUTHORIZED)
+    // 轮换：签发新 refreshToken（新 jti）并重置 TTL，旧令牌随之作废
+    const newRefreshToken = this.jwtService.sign({ userId, username, uuid, type: 'refresh', jti: randomUUID() })
+    await this.redisService.set(refreshTokenKey, newRefreshToken, 'EX', this.refreshExpiresIn)
+    // 重发 accessToken（同 uuid，签名结果确定）并重置访问/在线 key TTL
+    const accessToken = this.jwtService.sign({ userId, username, uuid })
+    await this.redisService.set(`${RedisConstant.ACCESS_TOKEN_KEY}:${userId}:${uuid}`, accessToken, 'EX', this.expiresIn)
+    await this.redisService.expire(`${RedisConstant.ADMIN_USER_ONLINE_KEY}:${userId}:${uuid}`, this.expiresIn)
+    return { accessToken, refreshToken: newRefreshToken, expiresIn: this.expiresIn }
+  }
+
   /** 退出登录 */
   public async logout(token: string) {
     try {
       const { userId, uuid }: AuthType.JwtPayload = this.jwtService.verify(token)
       const tokenKey = `${RedisConstant.ACCESS_TOKEN_KEY}:${userId}:${uuid}`
+      const refreshTokenKey = `${RedisConstant.REFRESH_TOKEN_KEY}:${userId}:${uuid}`
       const onlineKey = `${RedisConstant.ADMIN_USER_ONLINE_KEY}:${userId}:${uuid}`
-      await this.redisService.del(tokenKey, onlineKey)
+      await this.redisService.del(tokenKey, refreshTokenKey, onlineKey)
     } catch (error: unknown) {
       const errorMsg = error instanceof Error ? error.message : '退出登录失败'
       this.logger.error(errorMsg)
@@ -136,13 +161,21 @@ export class AuthService {
     return this.configService.getOrThrow<number>(ConfigConstant.JWT_EXPIRES_IN)
   }
 
-  /** 生成 AccessToken 并存入 Redis */
-  private async generateAccessToken(user: { id: string; username: string }) {
+  /** 获取 RefreshToken 的过期时间（秒，默认 7 天） */
+  private get refreshExpiresIn() {
+    return this.configService.get<number>(ConfigConstant.JWT_REFRESH_EXPIRES_IN, 604800)
+  }
+
+  /** 生成访问/刷新令牌对并存入 Redis（共用同一 uuid，刷新令牌载荷带 type 与 jti） */
+  private async generateTokenPair(user: { id: string; username: string }) {
     const { id: userId, username } = user
     const uuid = randomUUID()
     const accessTokenKey = `${RedisConstant.ACCESS_TOKEN_KEY}:${userId}:${uuid}`
+    const refreshTokenKey = `${RedisConstant.REFRESH_TOKEN_KEY}:${userId}:${uuid}`
     const accessToken = this.jwtService.sign({ userId, username, uuid })
-    await this.redisService.set(accessTokenKey, accessToken, 'EX', this.configService.getOrThrow(ConfigConstant.JWT_EXPIRES_IN))
-    return { accessToken, accessTokenKey }
+    const refreshToken = this.jwtService.sign({ userId, username, uuid, type: 'refresh', jti: randomUUID() })
+    await this.redisService.set(accessTokenKey, accessToken, 'EX', this.expiresIn)
+    await this.redisService.set(refreshTokenKey, refreshToken, 'EX', this.refreshExpiresIn)
+    return { accessToken, accessTokenKey, refreshToken }
   }
 }

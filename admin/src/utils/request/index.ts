@@ -3,6 +3,7 @@ import { jwtAuthInterceptor } from './interceptor/jwt-auth'
 import { responseErrorInterceptor } from './interceptor/response-error'
 import { requestProgressInterceptor } from './interceptor/request-progress'
 import { responseTransformInterceptor } from './interceptor/response-transform'
+import { tokenRefreshInterceptor } from './interceptor/token-refresh'
 
 const instance = axios.create({
   // baseURL 将自动加在 url 前面，除非 url 是一个绝对 URL
@@ -17,6 +18,8 @@ requestProgressInterceptor(instance)
 jwtAuthInterceptor(instance)
 // 响应转换拦截器
 responseTransformInterceptor(instance)
+// 令牌刷新拦截器（须在响应错误拦截器之前，401 清场提示才不会被重复弹出）
+tokenRefreshInterceptor(instance)
 // 响应错误拦截器
 responseErrorInterceptor(instance)
 

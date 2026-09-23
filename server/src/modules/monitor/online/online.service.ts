@@ -32,8 +32,9 @@ export class OnlineService {
   public async forceLogout(data: ForceLogoutDto) {
     const { userId, uuid } = data
     const tokenPattern = `${RedisConstant.ACCESS_TOKEN_KEY}:${userId}:${uuid}` // 登录token
+    const refreshTokenPattern = `${RedisConstant.REFRESH_TOKEN_KEY}:${userId}:${uuid}` // 刷新token（不删则被踢用户可刷新复活会话）
     const onlinePattern = `${RedisConstant.ADMIN_USER_ONLINE_KEY}:${userId}:${uuid}` // 在线状态
-    await this.redisService.del(tokenPattern, onlinePattern)
+    await this.redisService.del(tokenPattern, refreshTokenPattern, onlinePattern)
     return '强退成功'
   }
 }

@@ -241,7 +241,7 @@ const healthResultExample = { status: 'ok', info: { database: { status: 'up' } }
  * raw200: true                                    二进制流响应（导出接口），省略 data/example
  */
 const defs = [
-  /* ----------------------------- 鉴权（auth，5 端点） ----------------------------- */
+  /* ----------------------------- 鉴权（auth，6 端点） ----------------------------- */
   {
     path: '/auth/captcha', method: 'get', tag: '鉴权', sort: 1000, summary: '获取图片验证码',
     desc: '实时读取参数开关，关闭时不生成图片，仅返回 enabled 标识（uuid/captcha 为空串）',
@@ -251,8 +251,15 @@ const defs = [
   {
     path: '/auth/login', method: 'post', tag: '鉴权', sort: 2000, summary: '用户登录',
     body: jsonBody({ username: 'admin', password: '123456', captcha: '3', uuid: '8f1e2a10-6f10-4c10-8a10-1e2f3a4b5c01' }),
-    data: obj({ accessToken: str('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI4NjZiMDIzMi01MDdiLTQyYTQtYmRjMS00N2ZjNGE4MzYxNmEiLCJ1c2VybmFtZSI6ImFkbWluIiwidXVpZCI6IjMwZTBiZjkwLTI0ZmItNDcwMC05NjkwLTA2YzZkZjM4YzQ0YiJ9.dQw4w9WgXcQ', '访问令牌'), expiresIn: int(1800, '令牌有效期（秒）') }),
-    example: { accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI4NjZiMDIzMi01MDdiLTQyYTQtYmRjMS00N2ZjNGE4MzYxNmEiLCJ1c2VybmFtZSI6ImFkbWluIiwidXVpZCI6IjMwZTBiZjkwLTI0ZmItNDcwMC05NjkwLTA2YzZkZjM4YzQ0YiJ9.dQw4w9WgXcQ', expiresIn: 1800 },
+    data: obj({ accessToken: str('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI4NjZiMDIzMi01MDdiLTQyYTQtYmRjMS00N2ZjNGE4MzYxNmEiLCJ1c2VybmFtZSI6ImFkbWluIiwidXVpZCI6IjMwZTBiZjkwLTI0ZmItNDcwMC05NjkwLTA2YzZkZjM4YzQ0YiJ9.dQw4w9WgXcQ', '访问令牌'), refreshToken: str('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI4NjZiMDIzMi01MDdiLTQyYTQtYmRjMS00N2ZjNGE4MzYxNmEiLCJ1c2VybmFtZSI6ImFkbWluIiwidXVpZCI6IjMwZTBiZjkwLTI0ZmItNDcwMC05NjkwLTA2YzZkZjM4YzQ0YiIsInR5cGUiOiJyZWZyZXNoIiwianRpIjoiMmFhYzQ1NjctYjg5ZS00Y2RmLThmZWItMWQyZTM0NTY3ODkwIn0.xYz4w9WgXcQ', '刷新令牌，用于向服务端换取新的访问令牌'), expiresIn: int(1800, '访问令牌有效期（秒）') }),
+    example: { accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI4NjZiMDIzMi01MDdiLTQyYTQtYmRjMS00N2ZjNGE4MzYxNmEiLCJ1c2VybmFtZSI6ImFkbWluIiwidXVpZCI6IjMwZTBiZjkwLTI0ZmItNDcwMC05NjkwLTA2YzZkZjM4YzQ0YiJ9.dQw4w9WgXcQ', refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI4NjZiMDIzMi01MDdiLTQyYTQtYmRjMS00N2ZjNGE4MzYxNmEiLCJ1c2VybmFtZSI6ImFkbWluIiwidXVpZCI6IjMwZTBiZjkwLTI0ZmItNDcwMC05NjkwLTA2YzZkZjM4YzQ0YiIsInR5cGUiOiJyZWZyZXNoIiwianRpIjoiMmFhYzQ1NjctYjg5ZS00Y2RmLThmZWItMWQyZTM0NTY3ODkwIn0.xYz4w9WgXcQ', expiresIn: 1800 },
+  },
+  {
+    path: '/auth/refreshToken', method: 'post', tag: '鉴权', sort: 2500, summary: '刷新访问令牌',
+    desc: '无感续期：校验 refreshToken（验签与 Redis 值比对防重放）后轮换签发新令牌对，刷新令牌有效期滑动重置 7 天，旧刷新令牌即告作废',
+    body: jsonBody({ refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI4NjZiMDIzMi01MDdiLTQyYTQtYmRjMS00N2ZjNGE4MzYxNmEiLCJ1c2VybmFtZSI6ImFkbWluIiwidXVpZCI6IjMwZTBiZjkwLTI0ZmItNDcwMC05NjkwLTA2YzZkZjM4YzQ0YiIsInR5cGUiOiJyZWZyZXNoIiwianRpIjoiMmFhYzQ1NjctYjg5ZS00Y2RmLThmZWItMWQyZTM0NTY3ODkwIn0.xYz4w9WgXcQ' }),
+    data: obj({ accessToken: str('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI4NjZiMDIzMi01MDdiLTQyYTQtYmRjMS00N2ZjNGE4MzYxNmEiLCJ1c2VybmFtZSI6ImFkbWluIiwidXVpZCI6IjMwZTBiZjkwLTI0ZmItNDcwMC05NjkwLTA2YzZkZjM4YzQ0YiJ9.dQw4w9WgXcQ', '访问令牌'), refreshToken: str('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI4NjZiMDIzMi01MDdiLTQyYTQtYmRjMS00N2ZjNGE4MzYxNmEiLCJ1c2VybmFtZSI6ImFkbWluIiwidXVpZCI6IjMwZTBiZjkwLTI0ZmItNDcwMC05NjkwLTA2YzZkZjM4YzQ0YiIsInR5cGUiOiJyZWZyZXNoIiwianRpIjoiM2RkZjU2NzgtYzkwZS01ZGVmLTlhZmMtMmUzZjQ1Njc4OTAxIn0.zXw5w9WgXcQ', '轮换后的新刷新令牌，须替换客户端旧值'), expiresIn: int(1800, '访问令牌有效期（秒）') }),
+    example: { accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI4NjZiMDIzMi01MDdiLTQyYTQtYmRjMS00N2ZjNGE4MzYxNmEiLCJ1c2VybmFtZSI6ImFkbWluIiwidXVpZCI6IjMwZTBiZjkwLTI0ZmItNDcwMC05NjkwLTA2YzZkZjM4YzQ0YiJ9.dQw4w9WgXcQ', refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI4NjZiMDIzMi01MDdiLTQyYTQtYmRjMS00N2ZjNGE4MzYxNmEiLCJ1c2VybmFtZSI6ImFkbWluIiwidXVpZCI6IjMwZTBiZjkwLTI0ZmItNDcwMC05NjkwLTA2YzZkZjM4YzQ0YiIsInR5cGUiOiJyZWZyZXNoIiwianRpIjoiM2RkZjU2NzgtYzkwZS01ZGVmLTlhZmMtMmUzZjQ1Njc4OTAxIn0.zXw5w9WgXcQ', expiresIn: 1800 },
   },
   {
     path: '/auth/getInfo', method: 'get', tag: '鉴权', sort: 3000, summary: '获取登录用户信息',

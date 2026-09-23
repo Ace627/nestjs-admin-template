@@ -39,3 +39,15 @@ export function getRefreshToken(): string | null {
 export function removeRefreshToken(): void {
   StorageCache.remove('refreshToken')
 }
+
+/** 写入令牌对（登录 / 刷新令牌成功后调用） */
+export function setTokenPair(data: { accessToken: string; refreshToken: string }): void {
+  setAccessToken(data.accessToken)
+  setRefreshToken(data.refreshToken)
+}
+
+/** 清除令牌对（登出 / 收到 401 清场时调用） */
+export function removeTokenPair(): void {
+  removeAccessToken()
+  removeRefreshToken()
+}

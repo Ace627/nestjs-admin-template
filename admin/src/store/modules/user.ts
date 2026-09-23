@@ -1,6 +1,6 @@
 import type { Auth } from '@/types'
 import { AuthRequest } from '@/api/auth.request'
-import { removeAccessToken, resolveFileUrl, setAccessToken } from '@/utils'
+import { removeTokenPair, resolveFileUrl, setTokenPair } from '@/utils'
 import defaultAvatar from '@/assets/images/default-avatar.jpg'
 
 export const useUserStore = defineStore('user', () => {
@@ -18,7 +18,7 @@ export const useUserStore = defineStore('user', () => {
   /** 登录 */
   async function login(LoginForm: Auth.LoginParams) {
     const data = await AuthRequest.login(LoginForm)
-    setAccessToken(data.accessToken)
+    setTokenPair(data)
   }
 
   /** 获取登录者信息 */
@@ -37,7 +37,7 @@ export const useUserStore = defineStore('user', () => {
       const errMsg = error instanceof Error ? error.message : String(error)
       console.error('退出登录失败:', errMsg)
     } finally {
-      removeAccessToken()
+      removeTokenPair()
       tagsViewStore.clear()
     }
   }
