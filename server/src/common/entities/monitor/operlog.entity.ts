@@ -43,7 +43,7 @@ export class OperlogEntity {
   location: string
 
   @Excel({ name: '操作类型', dictType: 'sys_oper_type' })
-  @Column({ name: 'business_type', type: 'char', comment: '操作类型', default: BusinessType.OTHER })
+  @Column({ name: 'business_type', type: 'char', length: 2, comment: '操作类型', default: BusinessType.OTHER })
   businessType: BusinessType
 
   @Excel({ name: '操作状态', dictType: 'sys_common_status' })
