@@ -27,8 +27,8 @@ export class AuthController {
   @Public()
   @SkipThrottle()
   @Post('refreshToken')
-  public refreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
-    return this.authService.refreshToken(refreshTokenDto.refreshToken)
+  public refreshToken(@Body() refreshTokenDto: RefreshTokenDto, @Req() request: ExpressRequest) {
+    return this.authService.refreshToken(refreshTokenDto.refreshToken, request)
   }
 
   /* 获取登录用户信息 */

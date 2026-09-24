@@ -39,14 +39,29 @@ export class LogService {
     loginlog.requestId = request[CommonConstant.REQUEST_ID] // 从请求上下文获取请求 ID
     // 如果登录成功，就记录这个登录信息，方便在线用户查询
     if (userId && accessTokenKey) {
-      const { ip, location, username, loginTime, browser, os } = loginlog
       const uuid = accessTokenKey.split(':').at(-1)
-      const record = { userId, ip, location, username, loginTime, browser, os, uuid }
-      const key = `${RedisConstant.ADMIN_USER_ONLINE_KEY}:${userId}:${uuid}`
-      await this.redisService.set(key, JSON.stringify(record), 'EX', this.configService.getOrThrow(ConfigConstant.JWT_EXPIRES_IN))
+      await this.saveOnlineRecord(request, userId, loginlog.username, uuid)
     }
     await this.loginlogRepository.save(loginlog)
     return '添加成功'
+  }
+
+  /** 写在线用户记录（登录时创建；无感刷新时覆盖重建，键缺失后 EXPIRE 无法续期，必须重写） */
+  public async saveOnlineRecord(request: ExpressRequest, userId: string, username: string, uuid: string | undefined) {
+    const ip = getRequestIp(request)
+    const { browser, os } = this.parseUserAgent(request.headers['user-agent'] || '')
+    const record = {
+      userId,
+      ip,
+      location: await getLocationByIP(ip),
+      username,
+      loginTime: formatTime(),
+      browser,
+      os,
+      uuid,
+    }
+    const key = `${RedisConstant.ADMIN_USER_ONLINE_KEY}:${userId}:${uuid}`
+    await this.redisService.set(key, JSON.stringify(record), 'EX', this.configService.getOrThrow(ConfigConstant.JWT_EXPIRES_IN))
   }
 
   /** 导出登录日志（按查询条件全量导出） */

@@ -115,7 +115,7 @@ export class AuthService {
   }
 
   /** 刷新令牌：校验并轮换 refreshToken，重发 accessToken（滑动续期，每次刷新重置 7 天） */
-  public async refreshToken(refreshToken: string) {
+  public async refreshToken(refreshToken: string, request: ExpressRequest) {
     let payload: AuthType.JwtPayload
     try {
       payload = this.jwtService.verify(refreshToken)
@@ -131,10 +131,11 @@ export class AuthService {
     // 轮换：签发新 refreshToken（新 jti）并重置 TTL，旧令牌随之作废
     const newRefreshToken = this.jwtService.sign({ userId, username, uuid, type: 'refresh', jti: randomUUID() })
     await this.redisService.set(refreshTokenKey, newRefreshToken, 'EX', this.refreshExpiresIn)
-    // 重发 accessToken（同 uuid，签名结果确定）并重置访问/在线 key TTL
+    // 重发 accessToken（同 uuid，签名结果确定）并重置访问 key TTL
     const accessToken = this.jwtService.sign({ userId, username, uuid })
     await this.redisService.set(`${RedisConstant.ACCESS_TOKEN_KEY}:${userId}:${uuid}`, accessToken, 'EX', this.expiresIn)
-    await this.redisService.expire(`${RedisConstant.ADMIN_USER_ONLINE_KEY}:${userId}:${uuid}`, this.expiresIn)
+    // 在线记录覆盖重建（原记录可能已过期，EXPIRE 对缺失键无效）
+    await this.logService.saveOnlineRecord(request, userId, username, uuid)
     return { accessToken, refreshToken: newRefreshToken, expiresIn: this.expiresIn }
   }
 

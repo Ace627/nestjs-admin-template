@@ -270,17 +270,17 @@ export class UserService {
     return await this.userRepository.existsBy(where)
   }
 
-  /** 吊销用户全部会话（token / 在线状态）；角色与部门缓存由字段级变更单独失效 */
+  /** 吊销用户全部会话（access/refresh token / 在线状态）；角色与部门缓存由字段级变更单独失效 */
   private async revokeUserSessions(userId: string) {
-    const patterns = [`${RedisConstant.ACCESS_TOKEN_KEY}:${userId}:*`, `${RedisConstant.ADMIN_USER_ONLINE_KEY}:${userId}:*`]
+    const patterns = [`${RedisConstant.ACCESS_TOKEN_KEY}:${userId}:*`, `${RedisConstant.REFRESH_TOKEN_KEY}:${userId}:*`, `${RedisConstant.ADMIN_USER_ONLINE_KEY}:${userId}:*`]
     const keys = (await Promise.all(patterns.map((pattern) => this.redisService.scan(pattern)))).flat()
     if (keys.length) await this.redisService.del(...keys)
   }
 
-  /** 清除用户级缓存（token / 在线状态 / 角色 / 可见部门） */
+  /** 清除用户级缓存（access/refresh token / 在线状态 / 角色 / 可见部门） */
   private async cleanUserRelatedCache(userId: string) {
     if (!userId?.trim()) return
-    const patterns = [`${RedisConstant.ACCESS_TOKEN_KEY}:${userId}:*`, `${RedisConstant.ADMIN_USER_ONLINE_KEY}:${userId}:*`, `${RedisConstant.ADMIN_USER_ROLES}:${userId}`, `${RedisConstant.ADMIN_USER_DEPTS}:${userId}`]
+    const patterns = [`${RedisConstant.ACCESS_TOKEN_KEY}:${userId}:*`, `${RedisConstant.REFRESH_TOKEN_KEY}:${userId}:*`, `${RedisConstant.ADMIN_USER_ONLINE_KEY}:${userId}:*`, `${RedisConstant.ADMIN_USER_ROLES}:${userId}`, `${RedisConstant.ADMIN_USER_DEPTS}:${userId}`]
     const keys = (await Promise.all(patterns.map((pattern) => this.redisService.scan(pattern)))).flat()
     if (!keys.length) return
     await this.redisService.del(...keys)
