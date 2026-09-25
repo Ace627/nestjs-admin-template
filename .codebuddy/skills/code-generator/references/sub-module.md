@@ -20,3 +20,4 @@
 5. **前端形态**：主编辑弹窗（XxxDialog.vue）内嵌子表编辑区，子表行操作不单独出权限码（随主表 update 码走）；主页面骨架仍按 paged-module.md。
 6. **权限码与 SQL**：init.sql 只按主表出菜单行与按钮行；DEFS 只按 controller 实际端点录，detail 的子表结构写进 data schema。
 7. **缓存失效**：主表或子表任一变动都触发该模块的缓存主动失效（口径同 paged-module.md 第 5 条）。
+8. **数据权限**（仅当 SKILL.md 第 2 步模块级确认项勾选时生成，未勾选则整条跳过）：仅主表列表查询挂载，写法与 paged-module.md 第 10 条示例一致——Controller list 端点在 `@RequirePermissions` 旁追加 `@DataScope({ alias: '<主表 qb 别名>' })`，Service 列表方法签名追加 `@DataScopeSql() ds: DataScopeCondition` 并消费 `if (ds) queryBuilder.andWhere(ds.sql, ds.params)`；子表明细随主表过滤，不单独挂载；事务内写操作不受数据权限影响。

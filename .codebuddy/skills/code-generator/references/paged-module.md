@@ -40,3 +40,18 @@
 7. 前端 columns/slots/搜索项/表单控件按配置表落；slot 列不写 prop；绑定字典的列用 useDict 渲染。
 8. init.sql 追加行：1 条 C 菜单行 + 每个按钮 1 条 F 行；UUID 全新且互不冲突。
 9. 成功文案对齐既有口径：新增「添加成功」或「新增成功」（同一模块内统一）、更新「修改成功」或「更新成功」（同上）、删除「删除成功」，DEFS 与 service 文案一致。
+10. 数据权限（仅当 SKILL.md 第 2 步模块级确认项勾选时生成，未勾选则整条跳过）。挂载示例（标本 `server/src/modules/system/user/user.controller.ts:52-57`、`user.service.ts:140`；alias 必须传本模块 qb 主表别名，默认值 'user' 不适用）：
+
+   ```ts
+   // Controller 查询端点：在 @RequirePermissions 旁追加，alias 占位为 <业务表别名>
+   @DataScope({ alias: '<业务表别名>' })
+   public findList(@Query(PaginationPipe) queryParams: QueryDto, @DataScopeSql() ds: DataScopeCondition) {
+     return this.<模块>Service.findList(queryParams, ds)
+   }
+
+   // Service 列表方法：签名追加 ds 参数，qb 条件消费（ds 为 undefined 表示无过滤，如超管）
+   public async findList(queryParams: QueryDto, ds?: DataScopeCondition) {
+     // ...常规 where 条件...
+     if (ds) queryBuilder.andWhere(ds.sql, ds.params)
+   }
+   ```
