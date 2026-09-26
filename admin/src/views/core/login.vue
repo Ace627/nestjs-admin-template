@@ -63,7 +63,7 @@ const userStore = useUserStore()
 const appTitle = import.meta.env.VITE_APP_TITLE
 
 /** 是否记住密码 */
-const rememberMe = ref<boolean>(false)
+const rememberMe = ref<boolean>(true)
 
 /** 验证码开关（由后端参数 sys.account.captchaEnabled 控制） */
 const captchaEnabled = ref<boolean>(true)
