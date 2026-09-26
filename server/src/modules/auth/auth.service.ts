@@ -74,29 +74,11 @@ export class AuthService {
 
   /** 获取登录用户信息（每次调用都重建角色/部门缓存与角色级权限缓存，权限变更刷新即生效） */
   public async getInfo(userId: string) {
-    // 1. 查询用户信息（含角色关联）
-    const user = await this.userService.findOneById(userId)
-    const activeRoles = (user.roles ?? []).filter((role) => role.status === CommonConstant.STATUS_NORMAL)
+    // 1. 重建鉴权缓存并取用户与角色
+    const { user, activeRoles, permissions } = await this.warmAuthCaches(userId)
     const roleCodeList = [...new Set(activeRoles.map((role) => role.roleCode))]
-    const adminRole = activeRoles.find((role) => role.roleCode === RbacConstant.SUPER_ROLE_CODE)
 
-    // 2. 写用户级缓存（角色 + 可见部门；角色级权限缓存在第 3 步按需回源）
-    await Promise.all([
-      this.redisService.set(`${RedisConstant.ADMIN_USER_ROLES}:${userId}`, JSON.stringify(activeRoles.map((role) => ({ id: role.id, roleCode: role.roleCode }))), 'EX', this.expiresIn),
-      this.userService.getVisibleDeptIds(userId),
-    ])
-
-    // 3. 权限标识：超管读全量权限（内容为菜单表全部启用按钮权限串，权限守卫依赖此缓存做严格匹配）；
-    // 普通用户按角色聚合。每次刷新强制回源重算并覆盖写回（force），
-    // 新增菜单/按钮后刷新页面即生效，无需重存授权或等缓存过期（守卫高频读仍走缓存，性能设计不变）
-    const permissions = adminRole
-      ? await this.menuService.getPermsCacheByRoleId(adminRole.id, true, true)
-      : [...new Set((await Promise.all(activeRoles.map((role) => this.menuService.getPermsCacheByRoleId(role.id, false, true)))).flat())]
-
-    // 4. 预热角色数据范围缓存（数据权限拦截器只读缓存，缺失时 fail-closed 按 1=0 查空；超管不再短路，同样需要预热）
-    await Promise.all(activeRoles.map((role) => this.roleService.getRoleScopeCache(role.id)))
-
-    // 4. 剔除敏感字段后返回
+    // 2. 剔除敏感字段后返回
     const safeUser: Record<string, unknown> = { ...user }
     delete safeUser.password
     delete safeUser.deleteTime
@@ -114,7 +96,7 @@ export class AuthService {
     return this.menuService.findRoutesByRoleIds(roleIds, isAdmin)
   }
 
-  /** 刷新令牌：校验并轮换 refreshToken，重发 accessToken（滑动续期，每次刷新重置 7 天） */
+  /** 刷新令牌：校验并轮换 refreshToken，重发 accessToken（滑动续期，每次刷新重置 7 天），并重建鉴权缓存 */
   public async refreshToken(refreshToken: string, request: ExpressRequest) {
     let payload: AuthType.JwtPayload
     try {
@@ -128,6 +110,9 @@ export class AuthService {
     const refreshTokenKey = `${RedisConstant.REFRESH_TOKEN_KEY}:${userId}:${uuid}`
     const storedToken = await this.redisService.get(refreshTokenKey)
     if (storedToken !== refreshToken) throw new BusinessException('登录状态已失效，请重新登录', HttpStatus.UNAUTHORIZED)
+    // 重建鉴权守卫依赖的缓存（离开期间角色/权限缓存已随 TTL 过期，不重建则重放请求仍被守卫 401 拒绝）
+    const { activeRoles } = await this.warmAuthCaches(userId)
+    if (activeRoles.length === 0) throw new BusinessException('登录状态已失效，请重新登录', HttpStatus.UNAUTHORIZED)
     // 轮换：签发新 refreshToken（新 jti）并重置 TTL，旧令牌随之作废
     const newRefreshToken = this.jwtService.sign({ userId, username, uuid, type: 'refresh', jti: randomUUID() })
     await this.redisService.set(refreshTokenKey, newRefreshToken, 'EX', this.refreshExpiresIn)
@@ -165,6 +150,33 @@ export class AuthService {
   /** 获取 RefreshToken 的过期时间（秒，默认 7 天） */
   private get refreshExpiresIn() {
     return this.configService.get<number>(ConfigConstant.JWT_REFRESH_EXPIRES_IN, 604800)
+  }
+
+  /**
+   * 重建鉴权体系依赖的全部缓存（getInfo 与 refreshToken 共用；角色为空时照常返回，由调用方决定如何拒绝）
+   * 权限缓存每次强制回源重算并覆盖写回（force），新增菜单/按钮后刷新页面或刷新令牌即生效（守卫高频读仍走缓存）
+   */
+  private async warmAuthCaches(userId: string) {
+    // 1. 查询用户信息（含角色关联）
+    const user = await this.userService.findOneById(userId)
+    const activeRoles = (user.roles ?? []).filter((role) => role.status === CommonConstant.STATUS_NORMAL)
+    const adminRole = activeRoles.find((role) => role.roleCode === RbacConstant.SUPER_ROLE_CODE)
+
+    // 2. 用户级缓存（角色 + 可见部门；角色守卫与权限守卫读前者，数据权限拦截器读后者）
+    await Promise.all([
+      this.redisService.set(`${RedisConstant.ADMIN_USER_ROLES}:${userId}`, JSON.stringify(activeRoles.map((role) => ({ id: role.id, roleCode: role.roleCode }))), 'EX', this.expiresIn),
+      this.userService.getVisibleDeptIds(userId),
+    ])
+
+    // 3. 角色级权限缓存：超管读全量权限（内容为菜单表全部启用按钮权限串，权限守卫依赖此缓存做严格匹配），普通用户按角色聚合
+    const permissions = adminRole
+      ? await this.menuService.getPermsCacheByRoleId(adminRole.id, true, true)
+      : [...new Set((await Promise.all(activeRoles.map((role) => this.menuService.getPermsCacheByRoleId(role.id, false, true)))).flat())]
+
+    // 4. 预热角色数据范围缓存（数据权限拦截器只读缓存，缺失时 fail-closed 按 1=0 查空；超管不再短路，同样需要预热）
+    await Promise.all(activeRoles.map((role) => this.roleService.getRoleScopeCache(role.id)))
+
+    return { user, activeRoles, permissions }
   }
 
   /** 生成访问/刷新令牌对并存入 Redis（共用同一 uuid，刷新令牌载荷带 type 与 jti） */
