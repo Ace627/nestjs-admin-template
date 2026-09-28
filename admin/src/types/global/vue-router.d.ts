@@ -16,5 +16,9 @@ declare module 'vue-router' {
     keepAlive?: boolean
     /** 是否始终显示为根路由 */
     alwaysShow?: boolean
+    /** 站内 iframe 页面地址（外链菜单生成路由时写入） */
+    link?: string
+    /** 打开方式（1 当前页 / 2 新标签页） */
+    target?: string
   }
 }

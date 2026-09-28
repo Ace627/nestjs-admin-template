@@ -24,7 +24,7 @@
                   <template v-else>{{ part.text }}</template>
                 </template>
               </span>
-              <span class="search-item__path">{{ item.path }}</span>
+              <span class="search-item__path">{{ item.link ?? item.path }}</span>
             </div>
           </template>
         </template>
@@ -42,7 +42,6 @@
 
 <script setup lang="ts">
 defineOptions({ name: 'HeaderSearch' })
-import { isExternal } from '@/utils'
 import type { RouteRecordRaw } from 'vue-router'
 import { resolvePath } from '@/router/router.helper'
 
@@ -53,8 +52,10 @@ interface SearchItem {
   path: string
   /** 菜单图标（SvgIcon 名） */
   icon?: string
-  /** 是否外链 */
-  isExternal: boolean
+  /** 外链原始地址（展示用，target=2 时新标签直达） */
+  link?: string
+  /** 打开方式（1 当前页 / 2 新标签页） */
+  target?: string
   /** 目录路由仅作为分组标题展示，不可选中跳转 */
   isGroup: boolean
 }
@@ -78,30 +79,25 @@ const searchPool = computed<SearchItem[]>(() => {
       if (route.meta?.hidden) continue
 
       const titleList = [...prefixTitle, route.meta?.title ?? ''].filter(Boolean)
-      if (isExternal(route.path)) {
-        pool.push({ title: titleList.join(' / '), path: route.path, icon: route.meta?.icon, isExternal: true, isGroup: false })
-        continue
-      }
-
       const fullPath = resolvePath(route.path, basePath)
       if (route.children?.length) {
         // 目录路由：仅作为分组标题，不可选中
         if (titleList.length > 0) {
-          pool.push({ title: titleList.join(' / '), path: fullPath, icon: route.meta?.icon, isExternal: false, isGroup: true })
+          pool.push({ title: titleList.join(' / '), path: fullPath, icon: route.meta?.icon, isGroup: true })
         }
         flattenRoutes(route.children, fullPath, titleList)
       } else if (titleList.length > 0) {
-        pool.push({ title: titleList.join(' / '), path: fullPath, icon: route.meta?.icon, isExternal: false, isGroup: false })
+        pool.push({ title: titleList.join(' / '), path: fullPath, icon: route.meta?.icon, link: route.meta?.link, target: route.meta?.target, isGroup: false })
       }
     }
   }
 })
 
-/** 纯 includes 子串过滤：标题或路径任一命中 */
+/** 纯 includes 子串过滤：标题或路径任一命中（外链按原始地址匹配） */
 const options = computed<SearchItem[]>(() => {
   const query = keyword.value.trim().toLowerCase()
   if (!query) return searchPool.value
-  return searchPool.value.filter((item) => item.title.toLowerCase().includes(query) || item.path.toLowerCase().includes(query))
+  return searchPool.value.filter((item) => item.title.toLowerCase().includes(query) || (item.link ?? item.path).toLowerCase().includes(query))
 })
 
 /** 搜索结果变化时默认选中第一个可选项 */
@@ -132,14 +128,12 @@ function handleEnter() {
   if (item) handleChange(item)
 }
 
+/** 选中跳转（与侧边栏点击逻辑一致：外链 target=2 新标签直达原地址，其余当前页跳转） */
 function handleChange(item: SearchItem) {
   if (item.isGroup) return
   visible.value = false
-  if (item.isExternal) {
-    window.open(item.path, '_blank')
-  } else {
-    router.push(item.path)
-  }
+  if (item.link && item.target === '2') return window.open(item.link, '_blank', 'noopener')
+  router.push(item.path)
 }
 
 /** 关键词高亮分段（正则元字符转义防注入） */

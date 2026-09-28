@@ -22,12 +22,11 @@
 <script setup lang="ts">
 defineOptions({ name: 'SidebarItem' })
 import { router } from '@/router'
-import { isExternal } from '@/utils'
 import type { RouteRecordRaw } from 'vue-router'
 
 interface OneChild {
   path: string
-  meta?: { title?: string; icon?: string }
+  meta?: { title?: string; icon?: string; link?: string; target?: string }
   children?: RouteRecordRaw[]
   noShowingChildren?: boolean
   hidden?: boolean
@@ -69,8 +68,8 @@ function hasTitle(title?: string): string {
 }
 
 function resolvePath(routePath: string): string {
-  if (isExternal(routePath)) return routePath
-  if (isExternal(props.basePath)) return props.basePath
+  // 根绝对路径（外链 iframe 路由）直接返回，避免被 basePath 拼接成错误地址
+  if (routePath.startsWith('/')) return routePath
   return normalizePath(props.basePath + '/' + routePath)
 }
 
@@ -78,10 +77,10 @@ function normalizePath(path: string): string {
   return path ? path.replace(/\/+/g, '/').replace(/\/$/, '') : path
 }
 
-/** 处理菜单项点击事件，根据路径打开新窗口或跳转路由。 */
+/** 处理菜单项点击事件（外链 target=2 新标签直达外链原地址，其余一律当前页跳转） */
 function handleMenuItemClick(item: OneChild) {
   const path: string = resolvePath(item.path)
-  if (isExternal(path)) return window.open(path, '_blank', 'noopener')
+  if (item.meta?.link && item.meta.target === '2') return window.open(item.meta?.link, '_blank', 'noopener')
   router.push(path)
 }
 </script>

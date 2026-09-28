@@ -3,6 +3,18 @@ export { isArray } from 'lodash-es'
 export { isEmpty } from 'lodash-es'
 
 /**
+ * 判断链接是否为外部链接
+ * @param value - 待判断的链接/路径
+ * @returns boolean
+ */
+export function isExternal(value: unknown): boolean {
+  if (typeof value !== 'string') return false
+  const trimmedValue = value.trim()
+  if (trimmedValue === '') return false
+  return /^(https?:|mailto:|tel:)/.test(trimmedValue)
+}
+
+/**
  * 判断字符串是否为有效的数字格式
  * 支持整数、小数、负数和科学计数法
  * @param value - 待判断的值

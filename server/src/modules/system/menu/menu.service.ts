@@ -1,6 +1,6 @@
 import { BusinessException, CommonConstant, ConfigConstant, MenuEntity, MenuType, RedisConstant } from '@/common'
 import { RedisService } from '@/shared/redis.service'
-import { listToTree } from '@/utils'
+import { isExternal, listToTree } from '@/utils'
 import { DataSource, Equal, In } from 'typeorm'
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm'
 import { ConfigService } from '@nestjs/config'
@@ -49,6 +49,10 @@ export class MenuService {
     await this.checkParentMenuType(targetParentId, targetType)
     if (targetType === MenuType.BUTTON) await this.checkPermissionExists(updateDto.permission, id)
     else await this.checkPathExists(updateDto.path ?? entity.path, id)
+    // 本菜单已有子菜单时不可改为外链（前端 iframe 包装组件无子路由出口，子菜单会不可达）
+    if (targetType !== MenuType.BUTTON && isExternal(updateDto.path ?? entity.path) && (await this.menuRepository.existsBy({ parentId: Equal(id) }))) {
+      throw new BusinessException('存在子菜单，无法改为外链')
+    }
 
     Object.assign(entity, updateDto, { parentId: targetParentId })
     this.cleanFields(entity, targetType)
@@ -195,6 +199,9 @@ export class MenuService {
     if (menuType === MenuType.MENU) {
       entity.permission = null
     }
+    // 外链菜单不存组件路径；内链菜单无「新标签页」打开方式，固定当前页
+    if (isExternal(entity.path ?? '')) entity.component = null
+    else entity.target = '1'
   }
 
   /** 校验路由 path 唯一（排除指定 ID） */
@@ -215,12 +222,13 @@ export class MenuService {
     if (await queryBuilder.getExists()) throw new BusinessException(`按钮权限 ${permission} 已存在`)
   }
 
-  /** 校验上级菜单类型（菜单 C 下不能挂子级；按钮 F 不校验） */
+  /** 校验上级菜单类型（菜单 C 下不能挂子级；外链菜单下不能挂子级；按钮 F 不校验） */
   private async checkParentMenuType(parentId: string, menuType: string): Promise<void> {
     if (parentId === CommonConstant.DEFAULT_PARENT_ID || menuType === MenuType.BUTTON) return
     const parent = await this.menuRepository.findOneBy({ id: Equal(parentId) })
     if (!parent) throw new BusinessException('上级菜单不存在')
     if (parent.menuType === MenuType.MENU) throw new BusinessException('菜单（C）下不能挂载子菜单')
+    if (isExternal(parent.path ?? '')) throw new BusinessException('外链菜单下不能挂载子菜单')
   }
 
   /** 内存计算菜单子孙 ID 集合（含自身，防环校验用） */

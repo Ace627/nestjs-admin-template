@@ -15,7 +15,7 @@ export function isExternal(value: unknown): boolean {
   if (typeof value !== 'string') return false
   const trimmedValue = value.trim()
   if (trimmedValue === '') return false
-  return /^(https?:|ftp:|sftp:|mailto:|tel:|file:|\/\/)/i.test(trimmedValue)
+  return /^(https?:|mailto:|tel:)/.test(trimmedValue)
 }
 
 /**

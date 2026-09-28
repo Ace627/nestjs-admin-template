@@ -49,7 +49,7 @@
           </el-form-item>
         </el-col>
 
-        <el-col :span="12" v-if="form.menuType === 'C'">
+        <el-col :span="12" v-if="form.menuType === 'C' && !isExternalPath">
           <el-form-item label="组件路径" prop="component">
             <el-input v-model.trim="form.component" placeholder="如 system/user/index" maxlength="255" />
           </el-form-item>
@@ -70,6 +70,15 @@
         <el-col :span="12" v-if="form.menuType !== 'F'">
           <el-form-item label="菜单状态" prop="status">
             <el-radio-group v-model="form.status" :options="sys_normal_disable" />
+          </el-form-item>
+        </el-col>
+
+        <el-col :span="12" v-if="form.menuType !== 'F' && isExternalPath">
+          <el-form-item label="打开方式" prop="target">
+            <el-radio-group v-model="form.target">
+              <el-radio value="1">当前页</el-radio>
+              <el-radio value="2">新标签页</el-radio>
+            </el-radio-group>
           </el-form-item>
         </el-col>
 
@@ -94,7 +103,7 @@
 <script setup lang="ts">
 defineOptions({ name: 'MenuDialog' })
 import type { GlobalComponents } from 'vue'
-import { TipModal } from '@/utils'
+import { TipModal, isExternal } from '@/utils'
 import type { Menu } from '@/types'
 import type { FormRules } from 'element-plus'
 import { MenuRequest } from '@/api/system/menu.request'
@@ -111,6 +120,8 @@ const form = ref<Menu.MenuForm>({})
 const isEdit = computed(() => !!form.value.id)
 const dialogWidth = computed(() => (appStore.isDesktop ? '680px' : 'calc(100% - 32px)'))
 const dialogTitle = computed(() => (isEdit.value ? '修改菜单' : '新增菜单'))
+/** 路由地址是否外链（外链无组件路径，仅有打开方式） */
+const isExternalPath = computed(() => isExternal(form.value.path ?? ''))
 /** 上级菜单下拉树（排除按钮与停用，根节点为「主类目」） */
 const parentList = ref<Menu.ParentItem[]>([])
 
@@ -141,6 +152,7 @@ async function open(mode: 'create' | 'update', menu?: Menu.MenuItem) {
       status: '1',
       visible: '1',
       isCache: '0',
+      target: '1',
     }
   }
   await loadParentList()

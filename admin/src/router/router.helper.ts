@@ -1,8 +1,9 @@
 import { isExternal } from '@/utils'
 import type { Menu } from '@/types'
 import { camelCase, upperFirst } from 'lodash-es'
-import type { DefineComponent } from 'vue'
+import type { Component, DefineComponent } from 'vue'
 import type { RouteRecordRaw } from 'vue-router'
+import IframeView from '@/views/core/iframe/index.vue'
 
 /** 根节点 parentId 约定值 */
 const ROOT_PARENT_ID = '0'
@@ -40,8 +41,37 @@ export function loadView(componentPath: string): (() => Promise<DefineComponent>
   console.error(`动态路由组件不存在: src/views/${componentPath}.vue`)
 }
 
+/** 外链路由的 iframe 包装组件缓存（key 为原始外链地址，同名复用避免重复创建） */
+const iframeComponents = new Map<string, Component>()
+
+/** 已占用的 iframe 包装组件 name（保证路由 name 唯一） */
+const usedIframeNames = new Set<string>()
+
+let iframeNameSeq = 0
+
+/**
+ * 为外链路由生成与路由 name 同名的 iframe 包装组件
+ * （KeepAlive 的 include 按组件 name 匹配而 cachedViews 存的是路由 name，两者对齐后
+ * 外链页签才能命中缓存，切换页签不重载 iframe）
+ * @param url 原始外链地址
+ */
+function loadIframeView(url: string): { name: string; component: Component } {
+  const cached = iframeComponents.get(url)
+  if (cached) return { name: (cached as DefineComponent).name!, component: cached }
+
+  let name = `Iframe${toPascalCase(url)}`
+  if (usedIframeNames.has(name)) name = `${name}_${++iframeNameSeq}`
+  usedIframeNames.add(name)
+
+  const component: Component = defineComponent({ name, setup: () => () => h(IframeView) })
+  iframeComponents.set(url, component)
+  return { name, component }
+}
+
 /**
  * 将后端扁平菜单列表递归生成动态路由表（目录不设 component，由 vue-router 跳过渲染子级）
+ * 外链菜单（isExternal 命中，无论一级还是子级）统一转换为内部 iframe 路由：
+ * 原始地址入 meta.link，打开方式入 meta.target，点击行为由侧边栏按 target 决定
  * @param menus 后端返回的路由菜单（已排除按钮与停用）
  * @param parentId 从根节点开始建树
  */
@@ -51,11 +81,19 @@ export function generateRoutes(menus: Menu.MenuItem[], parentId: string = ROOT_P
     if (menu.parentId !== parentId) continue
 
     const route = {} as RouteRecordRaw
-    route.name = toPascalCase(menu.component || menu.path || menu.id)
-    route.path = isExternal(menu.path ?? '') ? menu.path! : parentId === ROOT_PARENT_ID ? `/${menu.path}` : menu.path!
-    // 顶级目录跳转时重定向到 404（与静态路由惯例一致，正常导航都走子菜单）
-    route.redirect = parentId === ROOT_PARENT_ID && menu.menuType === 'M' ? '/404' : undefined
-    if (menu.component) {
+    const externalUrl = isExternal(menu.path ?? '') ? menu.path! : undefined
+    if (externalUrl) {
+      const iframeRoute = loadIframeView(externalUrl)
+      route.name = iframeRoute.name
+      route.path = `/iframe/${encodeURIComponent(externalUrl)}`
+      route.component = iframeRoute.component
+    } else {
+      route.name = toPascalCase(menu.component || menu.path || menu.id)
+      route.path = parentId === ROOT_PARENT_ID ? `/${menu.path}` : menu.path!
+    }
+    // 顶级目录跳转时重定向到 404（与静态路由惯例一致，正常导航都走子菜单；外链已是实体路由无需重定向）
+    route.redirect = parentId === ROOT_PARENT_ID && menu.menuType === 'M' && !externalUrl ? '/404' : undefined
+    if (!externalUrl && menu.component) {
       const component = loadView(menu.component)
       if (component) route.component = component
     }
@@ -64,7 +102,9 @@ export function generateRoutes(menus: Menu.MenuItem[], parentId: string = ROOT_P
       icon: menu.icon ?? undefined,
       hidden: menu.visible === STATUS_DISABLE,
       keepAlive: menu.isCache === STATUS_NORMAL,
-      alwaysShow: menu.menuType === 'M' && !isExternal(menu.path ?? ''),
+      alwaysShow: menu.menuType === 'M' && !externalUrl,
+      link: externalUrl,
+      target: menu.target,
     }
 
     const children = generateRoutes(menus, menu.id)
@@ -79,7 +119,7 @@ export function normalizePath(path: string): string {
 }
 
 export function resolvePath(routePath: string, basePath: string): string {
-  if (isExternal(routePath)) return routePath
-  if (isExternal(basePath)) return basePath
+  // 根绝对路径（外链 iframe 路由）直接返回，避免被 basePath 拼接成错误地址
+  if (routePath.startsWith('/')) return routePath
   return normalizePath(basePath + '/' + routePath)
 }

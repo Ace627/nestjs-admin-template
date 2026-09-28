@@ -23,6 +23,8 @@ export interface MenuItem extends BaseEntity {
   menuSort: number
   /** 是否缓存组件（1 是 / 0 否，仅菜单类型） */
   isCache: string
+  /** 打开方式（1 当前页 / 2 新标签页） */
+  target?: string
   /** 子菜单（后端 list 接口返回的树形结构） */
   children?: MenuItem[]
 }

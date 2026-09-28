@@ -67,7 +67,7 @@
             <span>我的菜单</span>
           </template>
           <div v-if="myMenuList.length" class="dashboard__entries">
-            <div v-for="menu in myMenuList" :key="menu.path" class="dashboard__entry" @click="handleNavigate(menu.path)">
+            <div v-for="menu in myMenuList" :key="menu.path" class="dashboard__entry" @click="handleNavigate(menu.path, menu)">
               <SvgIcon :name="menu.icon" class="dashboard__entry-icon" />
               <span>{{ menu.title }}</span>
             </div>
@@ -84,7 +84,6 @@ defineOptions({ name: 'Dashboard' })
 import dayjs from 'dayjs'
 import type { EChartsOption } from 'echarts'
 import type { Dashboard } from '@/types'
-import { isExternal } from '@/utils'
 import { resolvePath } from '@/router/router.helper'
 import { DashboardRequest } from '@/api/dashboard.request'
 import { CacheRequest } from '@/api/monitor/cache.request'
@@ -212,24 +211,24 @@ const quickEntryList = computed<QuickEntry[]>(() =>
 )
 
 /** 我的菜单（当前用户可访问的动态路由叶子页） */
-const myMenuList = computed<{ title: string; icon?: string; path: string }[]>(() => {
-  const menuList: { title: string; icon?: string; path: string }[] = []
+const myMenuList = computed<{ title: string; icon?: string; path: string; link?: string; target?: string }[]>(() => {
+  const menuList: { title: string; icon?: string; path: string; link?: string; target?: string }[] = []
   for (const route of permissionStore.dynamicRouteList) {
     if (route.children?.length) {
       for (const child of route.children) {
         if (child.meta?.hidden) continue
-        menuList.push({ title: child.meta?.title ?? '', icon: child.meta?.icon, path: resolvePath(child.path, route.path) })
+        menuList.push({ title: child.meta?.title ?? '', icon: child.meta?.icon, path: resolvePath(child.path, route.path), link: child.meta?.link, target: child.meta?.target })
       }
     } else if (!route.meta?.hidden) {
-      menuList.push({ title: route.meta?.title ?? '', icon: route.meta?.icon, path: route.path })
+      menuList.push({ title: route.meta?.title ?? '', icon: route.meta?.icon, path: route.path, link: route.meta?.link, target: route.meta?.target })
     }
   }
   return menuList
 })
 
-/** 入口跳转（外链新窗口打开） */
-function handleNavigate(path: string) {
-  if (isExternal(path)) return window.open(path)
+/** 入口跳转（与侧边栏/菜单搜索一致：外链 target=2 新标签直达原地址，其余当前页跳转） */
+function handleNavigate(path: string, entry?: { link?: string; target?: string }) {
+  if (entry?.link && entry.target === '2') return window.open(entry.link, '_blank', 'noopener')
   router.push(path)
 }
 

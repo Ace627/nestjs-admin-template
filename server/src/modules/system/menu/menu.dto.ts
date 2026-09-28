@@ -53,6 +53,10 @@ export class CreateMenuDto {
   @IsOptional()
   @Matches(/^[01]$/, { message: '是否缓存取值仅限 0 或 1' })
   isCache: string
+
+  @IsOptional()
+  @Matches(/^[12]$/, { message: '打开方式取值仅限 1 或 2' })
+  target: string
 }
 
 export class UpdateMenuDto extends PartialType(CreateMenuDto) {

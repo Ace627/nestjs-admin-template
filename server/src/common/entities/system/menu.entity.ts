@@ -45,6 +45,9 @@ export class MenuEntity extends BaseEntity {
   @Column({ name: 'is_cache', type: 'char', length: 1, comment: '是否缓存组件', default: CommonConstant.STATUS_DISABLE })
   isCache: string
 
+  @Column({ name: 'target', type: 'char', length: 1, comment: '打开方式（1当前页 2新标签页）', default: '1' })
+  target: string
+
   /** 反向关联：授权该菜单的角色（owning side 在 RoleEntity.menus，JoinTable sys_role_menu） */
   @ManyToMany(() => RoleEntity, (role) => role.menus)
   roles: RoleEntity[]
