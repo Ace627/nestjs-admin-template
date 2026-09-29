@@ -7,6 +7,9 @@
         <el-button v-permissions="['system:dept:create']" plain type="primary" @click="handleCreate()">
           <template #icon><SvgIcon name="Plus" /></template><span>新增</span>
         </el-button>
+        <el-button v-permissions="['system:dept:update']" plain type="warning" :disabled="!hasSortChanges" :loading="savingSort" @click="handleSaveSort">
+          <template #icon><SvgIcon name="Sort" /></template><span>保存排序</span>
+        </el-button>
         <el-button plain type="info" @click="toggleExpandAll">
           <template #icon><SvgIcon name="Sort" /></template><span>{{ isExpandAll ? '折叠' : '展开' }}</span>
         </el-button>
@@ -21,6 +24,9 @@
           <span>{{ row.deptName }}</span>
         </span>
         <DictTag v-if="row.status === '0'" :options="sys_normal_disable" :value="row.status" class="ml-6px" />
+      </template>
+      <template #deptSort="{ row }">
+        <el-input-number v-permissions="['system:dept:update']" v-model="row.deptSort" controls-position="right" :min="0" size="small" style="width: 72px" @change="handleSortChange(row)" />
       </template>
       <template #status="{ row }">
         <DictTag :options="sys_normal_disable" :value="row.status" />
@@ -59,6 +65,11 @@ const hiddenColumnKeys = ref<string[]>([])
 
 const { sys_normal_disable } = useDict('sys_normal_disable')
 
+/** 排序变更集合（id -> 最新值，保存成功后清空） */
+const sortChanges = ref<Record<string, number>>({})
+const hasSortChanges = computed(() => Object.keys(sortChanges.value).length > 0)
+const savingSort = ref(false)
+
 const items = computed<ProSearchItem[]>(() => [
   { type: 'input', prop: 'deptName', label: '部门名称' },
   { type: 'select', prop: 'status', label: '部门状态', options: sys_normal_disable.value },
@@ -67,7 +78,7 @@ const columns: ProTableColumn<Dept.DeptItem>[] = [
   { align: 'left', label: '部门名称', slot: 'deptName', minWidth: 200 },
   { align: 'center', prop: 'leader', label: '负责人', minWidth: 90 },
   { align: 'center', prop: 'phone', label: '联系电话', minWidth: 120 },
-  { align: 'center', prop: 'deptSort', label: '显示排序', width: 90 },
+  { align: 'center', label: '显示排序', slot: 'deptSort', width: 130 },
   { align: 'center', label: '状态', slot: 'status', width: 80 },
   { align: 'center', prop: 'createTime', label: '创建时间', minWidth: 170 },
   { align: 'center', label: '操作', slot: 'action', width: 180, fixed: 'right' },
@@ -114,6 +125,29 @@ async function handleDelete(row: Dept.DeptItem) {
     const errMsg = error instanceof Error ? error.message : String(error)
     console.log('handleDelete errMsg: ', errMsg)
     return Promise.reject(error)
+  }
+}
+
+/** 记录行排序变更（v-model 已直接改写 row.deptSort，此处仅登记待保存项） */
+function handleSortChange(row: Dept.DeptItem) {
+  sortChanges.value[row.id] = row.deptSort
+}
+
+async function handleSaveSort() {
+  const items = Object.entries(sortChanges.value).map(([id, deptSort]) => ({ id, deptSort }))
+  if (!items.length) return TipModal.msgWarning('未检测到排序修改')
+  try {
+    savingSort.value = true
+    const message = await DeptRequest.updateSort(items)
+    sortChanges.value = {}
+    await getList()
+    TipModal.msgSuccess(message || '排序成功')
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : String(error)
+    console.log('handleSaveSort errMsg: ', errMsg)
+    return Promise.reject(error)
+  } finally {
+    savingSort.value = false
   }
 }
 

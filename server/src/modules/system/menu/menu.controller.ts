@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, ParseArrayPipe, Post, Put, Query } from '@nestjs/common'
 import { BusinessType, Operlog, RequirePermissions } from '@/common'
 import { MenuService } from './menu.service'
-import { CreateMenuDto, QueryMenuDto, UpdateMenuDto } from './menu.dto'
+import { CreateMenuDto, QueryMenuDto, UpdateMenuDto, UpdateMenuSortItemDto } from './menu.dto'
 
 @Controller('system/menu')
 export class MenuController {
@@ -29,6 +29,14 @@ export class MenuController {
   @Operlog({ title: '菜单管理', businessType: BusinessType.UPDATE })
   update(@Body() updateDto: UpdateMenuDto) {
     return this.menuService.update(updateDto)
+  }
+
+  /** 批量保存菜单排序 */
+  @Put('update/sort')
+  @RequirePermissions(['system:menu:update'])
+  @Operlog({ title: '菜单管理', businessType: BusinessType.UPDATE })
+  updateSort(@Body(new ParseArrayPipe({ items: UpdateMenuSortItemDto, whitelist: true })) items: UpdateMenuSortItemDto[]) {
+    return this.menuService.updateSort(items)
   }
 
   /** 菜单树形列表 */

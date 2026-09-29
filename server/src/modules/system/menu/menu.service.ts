@@ -6,7 +6,7 @@ import { InjectDataSource, InjectRepository } from '@nestjs/typeorm'
 import { ConfigService } from '@nestjs/config'
 import { Injectable } from '@nestjs/common'
 import { Repository } from 'typeorm'
-import { CreateMenuDto, QueryMenuDto, UpdateMenuDto } from './menu.dto'
+import { CreateMenuDto, QueryMenuDto, UpdateMenuDto, UpdateMenuSortItemDto } from './menu.dto'
 
 @Injectable()
 export class MenuService {
@@ -59,6 +59,20 @@ export class MenuService {
     await this.menuRepository.save(entity)
     // 菜单（权限标识/状态）变更对角色权限缓存的影响延迟至缓存过期或重新登录生效（TTL 惰性重建）
     return '修改成功'
+  }
+
+  /** 批量保存菜单排序（事务内逐条更新，任一失败整体回滚） */
+  public async updateSort(items: UpdateMenuSortItemDto[]): Promise<string> {
+    if (!items.length) throw new BusinessException('未检测到排序修改')
+    const ids = items.map((item) => item.id)
+    const targets = await this.menuRepository.findBy({ id: In(ids) })
+    if (targets.length !== new Set(ids).size) throw new BusinessException('菜单不存在')
+    await this.dataSource.transaction(async (manager) => {
+      for (const { id, menuSort } of items) {
+        await manager.update(MenuEntity, id, { menuSort })
+      }
+    })
+    return '排序成功'
   }
 
   /** 批量删除菜单（存在子菜单时拦截） */

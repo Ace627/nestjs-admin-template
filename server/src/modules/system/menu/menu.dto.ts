@@ -65,6 +65,16 @@ export class UpdateMenuDto extends PartialType(CreateMenuDto) {
   id: string
 }
 
+export class UpdateMenuSortItemDto {
+  @IsNotEmpty({ message: '参数 $property 不能为空' })
+  @IsString()
+  id: string
+
+  @Type(() => Number)
+  @IsInt({ message: '显示顺序必须是整数' })
+  menuSort: number
+}
+
 export class QueryMenuDto {
   @IsOptional()
   @IsString()

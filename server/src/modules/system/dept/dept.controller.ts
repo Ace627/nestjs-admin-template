@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, ParseArrayPipe, Post, Put, Query } from '@nestjs/common'
 import { BusinessType, Operlog, RequirePermissions } from '@/common'
 import { DeptService } from './dept.service'
-import { CreateDeptDto, QueryDeptDto, UpdateDeptDto } from './dept.dto'
+import { CreateDeptDto, QueryDeptDto, UpdateDeptDto, UpdateDeptSortItemDto } from './dept.dto'
 
 @Controller('system/dept')
 export class DeptController {
@@ -42,6 +42,14 @@ export class DeptController {
   @Operlog({ title: '部门管理', businessType: BusinessType.UPDATE })
   update(@Body() updateDto: UpdateDeptDto) {
     return this.deptService.update(updateDto)
+  }
+
+  /** 批量保存部门排序 */
+  @Put('update/sort')
+  @RequirePermissions(['system:dept:update'])
+  @Operlog({ title: '部门管理', businessType: BusinessType.UPDATE })
+  updateSort(@Body(new ParseArrayPipe({ items: UpdateDeptSortItemDto, whitelist: true })) items: UpdateDeptSortItemDto[]) {
+    return this.deptService.updateSort(items)
   }
 
   /** 删除部门 */

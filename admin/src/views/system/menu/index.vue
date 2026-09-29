@@ -7,6 +7,9 @@
         <el-button v-permissions="['system:menu:create']" plain type="primary" @click="handleCreate()">
           <template #icon><SvgIcon name="Plus" /></template><span>新增</span>
         </el-button>
+        <el-button v-permissions="['system:menu:update']" plain type="warning" :disabled="!hasSortChanges" :loading="savingSort" @click="handleSaveSort">
+          <template #icon><SvgIcon name="Sort" /></template><span>保存排序</span>
+        </el-button>
         <el-button plain type="info" @click="toggleExpandAll">
           <template #icon><SvgIcon name="Sort" /></template><span>{{ isExpandAll ? '折叠' : '展开' }}</span>
         </el-button>
@@ -23,6 +26,9 @@
         <el-tag v-if="row.menuType === 'M'" type="primary">目录</el-tag>
         <el-tag v-else-if="row.menuType === 'C'" type="success">菜单</el-tag>
         <el-tag v-else type="warning">按钮</el-tag>
+      </template>
+      <template #menuSort="{ row }">
+        <el-input-number v-permissions="['system:menu:update']" v-model="row.menuSort" controls-position="right" :min="0" size="small" style="width: 72px" @change="handleSortChange(row)" />
       </template>
       <template #visible="{ row }">
         <DictTag v-if="row.menuType !== 'F'" :options="sys_menu_visible" :value="row.visible" />
@@ -62,6 +68,11 @@ const showSearch = ref(true)
 /** 隐藏列 key 数组（RightToolbar v-model 控制） */
 const hiddenColumnKeys = ref<string[]>([])
 
+/** 排序变更集合（id -> 最新值，保存成功后清空） */
+const sortChanges = ref<Record<string, number>>({})
+const hasSortChanges = computed(() => Object.keys(sortChanges.value).length > 0)
+const savingSort = ref(false)
+
 const menuTypeOptions = [
   { label: '目录', value: 'M' },
   { label: '菜单', value: 'C' },
@@ -78,7 +89,7 @@ const items = computed<ProSearchItem[]>(() => [
 const columns: ProTableColumn<Menu.MenuItem>[] = [
   { align: 'left', label: '菜单名称', slot: 'menuName', minWidth: 180 },
   { align: 'center', label: '菜单类型', slot: 'menuType', width: 90 },
-  { align: 'center', prop: 'menuSort', label: '显示排序', width: 90 },
+  { align: 'center', label: '显示排序', slot: 'menuSort', width: 130 },
   { align: 'center', prop: 'permission', label: '权限字符', showOverflowTooltip: true, minWidth: 180 },
   { align: 'center', prop: 'path', label: '路由地址', showOverflowTooltip: true, minWidth: 140 },
   { align: 'center', prop: 'component', label: '组件路径', showOverflowTooltip: true, minWidth: 160 },
@@ -108,6 +119,29 @@ function handleQuery() {
 function resetQuery() {
   queryParams.value = {}
   getList()
+}
+
+/** 记录行排序变更（v-model 已直接改写 row.menuSort，此处仅登记待保存项） */
+function handleSortChange(row: Menu.MenuItem) {
+  sortChanges.value[row.id] = row.menuSort
+}
+
+async function handleSaveSort() {
+  const items = Object.entries(sortChanges.value).map(([id, menuSort]) => ({ id, menuSort }))
+  if (!items.length) return TipModal.msgWarning('未检测到排序修改')
+  try {
+    savingSort.value = true
+    const message = await MenuRequest.updateSort(items)
+    sortChanges.value = {}
+    await getList()
+    TipModal.msgSuccess(message || '排序成功')
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : String(error)
+    console.log('handleSaveSort errMsg: ', errMsg)
+    return Promise.reject(error)
+  } finally {
+    savingSort.value = false
+  }
 }
 
 function handleCreate(row?: Menu.MenuItem) {

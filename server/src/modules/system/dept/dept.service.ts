@@ -5,7 +5,7 @@ import { DataSource, Equal, In, Like } from 'typeorm'
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm'
 import { Injectable } from '@nestjs/common'
 import { Repository } from 'typeorm'
-import { CreateDeptDto, QueryDeptDto, UpdateDeptDto } from './dept.dto'
+import { CreateDeptDto, QueryDeptDto, UpdateDeptDto, UpdateDeptSortItemDto } from './dept.dto'
 
 @Injectable()
 export class DeptService {
@@ -55,6 +55,21 @@ export class DeptService {
     })
     await this.invalidateCache()
     return '修改成功'
+  }
+
+  /** 批量保存部门排序（事务内逐条更新，任一失败整体回滚） */
+  public async updateSort(items: UpdateDeptSortItemDto[]): Promise<string> {
+    if (!items.length) throw new BusinessException('未检测到排序修改')
+    const ids = items.map((item) => item.id)
+    const targets = await this.deptRepository.findBy({ id: In(ids) })
+    if (targets.length !== new Set(ids).size) throw new BusinessException('部门不存在')
+    await this.dataSource.transaction(async (manager) => {
+      for (const { id, deptSort } of items) {
+        await manager.update(DeptEntity, id, { deptSort })
+      }
+    })
+    await this.invalidateCache()
+    return '排序成功'
   }
 
   /** 删除部门（根部门、存在下级部门或挂有用户时拦截） */

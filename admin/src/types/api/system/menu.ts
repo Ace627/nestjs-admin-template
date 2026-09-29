@@ -44,3 +44,9 @@ export interface ParentItem {
 }
 
 export type MenuForm = Partial<MenuItem>
+
+/** 排序保存项 */
+export interface SortItem {
+  id: string
+  menuSort: number
+}

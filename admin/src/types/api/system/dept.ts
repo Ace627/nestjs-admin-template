@@ -27,3 +27,9 @@ export interface DeptQuery {
 }
 
 export type DeptForm = Partial<DeptItem>
+
+/** 排序保存项 */
+export interface SortItem {
+  id: string
+  deptSort: number
+}

@@ -411,7 +411,7 @@ const defs = [
     example: { dataScope: '4', deptIds: [] },
   },
 
-  /* ----------------------------- 菜单管理（system/menu，6 端点） ----------------------------- */
+  /* ----------------------------- 菜单管理（system/menu，7 端点） ----------------------------- */
   {
     path: '/system/menu/create', method: 'post', tag: '菜单管理', sort: 1000, summary: '新增菜单',
     body: jsonBody({ parentId: '0', menuName: '用户管理', menuType: 'C', path: 'user', component: 'system/user/index', icon: 'user', permission: '', visible: '1', status: '1', menuSort: 1, isCache: '0' }),
@@ -426,6 +426,19 @@ const defs = [
     path: '/system/menu/update', method: 'put', tag: '菜单管理', sort: 3000, summary: '编辑菜单',
     body: jsonBody({ id: '3a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d', parentId: '0', menuName: '用户管理', menuType: 'C', path: 'user', component: 'system/user/index', icon: 'user', visible: '1', status: '1', menuSort: 1, isCache: '0' }),
     data: str('修改成功'), example: '修改成功',
+  },
+  {
+    path: '/system/menu/update/sort', method: 'put', tag: '菜单管理', sort: 3100, summary: '保存菜单排序',
+    desc: '数组请求体，事务内逐条更新排序，任一失败整体回滚',
+    body: {
+      content: {
+        'application/json': {
+          schema: { type: 'array', items: { type: 'object', required: ['id', 'menuSort'], properties: { id: str('3a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d', '菜单 ID'), menuSort: int(1, '显示顺序') } } },
+          example: JSON.stringify([{ id: '3a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d', menuSort: 1 }], null, '\t'),
+        },
+      },
+    },
+    data: str('排序成功'), example: '排序成功',
   },
   {
     path: '/system/menu/list', method: 'get', tag: '菜单管理', sort: 4000, summary: '菜单树形列表',
@@ -445,7 +458,7 @@ const defs = [
     example: { createTime: '2026-08-29 22:01:32', updateTime: '2026-09-12 11:52:50', deleteTime: null, createBy: 'admin', updateBy: 'admin', id: '3a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d', parentId: '0', path: 'user', component: 'system/user/index', menuType: 'C', icon: 'user', menuName: '用户管理', visible: '1', permission: null, status: '1', menuSort: 1, isCache: '0' },
   },
 
-  /* ----------------------------- 部门管理（system/dept，6 端点） ----------------------------- */
+  /* ----------------------------- 部门管理（system/dept，7 端点） ----------------------------- */
   {
     path: '/system/dept/list', method: 'get', tag: '部门管理', sort: 1000, summary: '部门树列表', desc: '树形列表，含停用部门',
     params: [q('deptName', '部门名称'), q('status', '状态（1正常 0停用）')],
@@ -472,6 +485,19 @@ const defs = [
     path: '/system/dept/update', method: 'put', tag: '部门管理', sort: 5000, summary: '编辑部门',
     body: jsonBody({ id: 'd2c17a9e-8e3c-4f9a-9f2a-6b7c8d9e0f1a', deptName: '研发中心', leader: '李四', deptSort: 1, status: '1' }),
     data: str('修改成功'), example: '修改成功',
+  },
+  {
+    path: '/system/dept/update/sort', method: 'put', tag: '部门管理', sort: 5100, summary: '保存部门排序',
+    desc: '数组请求体，事务内逐条更新排序，任一失败整体回滚',
+    body: {
+      content: {
+        'application/json': {
+          schema: { type: 'array', items: { type: 'object', required: ['id', 'deptSort'], properties: { id: str('d2c17a9e-8e3c-4f9a-9f2a-6b7c8d9e0f1a', '部门 ID'), deptSort: int(1, '显示顺序') } } },
+          example: JSON.stringify([{ id: 'd2c17a9e-8e3c-4f9a-9f2a-6b7c8d9e0f1a', deptSort: 1 }], null, '\t'),
+        },
+      },
+    },
+    data: str('排序成功'), example: '排序成功',
   },
   {
     path: '/system/dept/delete', method: 'delete', tag: '部门管理', sort: 6000, summary: '删除部门',

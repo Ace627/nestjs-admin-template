@@ -8,7 +8,7 @@
  Target Server Type    : MySQL
  File Encoding         : 65001
 
- Date: 28/09/2026 23:22:02
+ Date: 29/09/2026 10:30:23
  Tables: 15
 */
 
@@ -75,7 +75,7 @@ INSERT INTO `sys_dept` VALUES ('2026-09-04 22:38:43', '2026-09-04 22:38:43', NUL
 INSERT INTO `sys_dept` VALUES ('2026-09-04 22:38:30', '2026-09-04 22:38:30', NULL, 'admin', 'admin', 'ac2a115f-7ee4-465a-9392-e68544e28850', 'bb93a81a-039e-4cc3-a90d-9dce0857dde1', '0,bb93a81a-039e-4cc3-a90d-9dce0857dde1', '北京分公司', '云禾', NULL, NULL, 1, '1');
 INSERT INTO `sys_dept` VALUES ('2026-09-04 22:41:22', '2026-09-04 22:41:22', NULL, 'admin', 'admin', 'af3bd6d6-7a64-4c22-9abd-3d964524edf8', 'd3e747cf-f705-4ac0-bef2-89b578f1a256', '0,bb93a81a-039e-4cc3-a90d-9dce0857dde1,d3e747cf-f705-4ac0-bef2-89b578f1a256', '市场部门', '云禾', NULL, NULL, 1, '1');
 INSERT INTO `sys_dept` VALUES ('2026-09-04 20:29:15', '2026-09-04 20:29:15', NULL, 'admin', 'admin', 'bb93a81a-039e-4cc3-a90d-9dce0857dde1', '0', '0', '云禾科技', '云禾', NULL, NULL, 1, '1');
-INSERT INTO `sys_dept` VALUES ('2026-09-04 22:40:04', '2026-09-04 22:40:04', NULL, 'admin', 'admin', 'd3e747cf-f705-4ac0-bef2-89b578f1a256', 'bb93a81a-039e-4cc3-a90d-9dce0857dde1', '0,bb93a81a-039e-4cc3-a90d-9dce0857dde1', '上海分公司', '云禾', NULL, NULL, 2, '1');
+INSERT INTO `sys_dept` VALUES ('2026-09-04 22:40:04', '2026-09-29 10:29:49', NULL, 'admin', 'admin', 'd3e747cf-f705-4ac0-bef2-89b578f1a256', 'bb93a81a-039e-4cc3-a90d-9dce0857dde1', '0,bb93a81a-039e-4cc3-a90d-9dce0857dde1', '上海分公司', '云禾', NULL, NULL, 2, '1');
 -- ----------------------------
 -- Table structure for sys_dict_data
 -- ----------------------------
@@ -225,6 +225,7 @@ CREATE TABLE `sys_job_log` (
 INSERT INTO `sys_job_log` VALUES ('63b75139-e9de-464c-b103-ed4675654fc3', '日志清理', 'DEFAULT', 'LogService.cleanExpiredLogs(30)', '执行成功', '1', '2026-09-23 04:00:00', '571db7d1-c7e0-4bce-b8e4-d9ca8ea6f328');
 INSERT INTO `sys_job_log` VALUES ('6d550bdb-6cc4-440f-afcd-edaf4be16d77', '日志清理', 'DEFAULT', 'LogService.cleanExpiredLogs(30)', '执行成功', '1', '2026-09-26 04:00:00', '571db7d1-c7e0-4bce-b8e4-d9ca8ea6f328');
 INSERT INTO `sys_job_log` VALUES ('8b374c95-065f-426c-b5d9-0094c901e2e7', '日志清理', 'DEFAULT', 'LogService.cleanExpiredLogs(30)', '执行成功', '1', '2026-09-24 04:00:00', '571db7d1-c7e0-4bce-b8e4-d9ca8ea6f328');
+INSERT INTO `sys_job_log` VALUES ('b10eeb39-5b7f-4898-a7c8-16087294f3e8', '日志清理', 'DEFAULT', 'LogService.cleanExpiredLogs(30)', '执行成功', '1', '2026-09-29 04:00:00', '571db7d1-c7e0-4bce-b8e4-d9ca8ea6f328');
 INSERT INTO `sys_job_log` VALUES ('bf54bb5e-0f48-42aa-a350-dd392bfdafbb', '日志清理', 'DEFAULT', 'LogService.cleanExpiredLogs(30)', '执行成功', '1', '2026-09-28 04:00:00', '571db7d1-c7e0-4bce-b8e4-d9ca8ea6f328');
 INSERT INTO `sys_job_log` VALUES ('dbb31fc4-7d01-497f-8b76-5acf37371ecb', '日志清理', 'DEFAULT', 'LogService.cleanExpiredLogs(30)', '执行成功', '1', '2026-09-27 04:00:00', '571db7d1-c7e0-4bce-b8e4-d9ca8ea6f328');
 -- ----------------------------
@@ -249,6 +250,7 @@ CREATE TABLE `sys_login_log` (
 -- ----------------------------
 -- Records of sys_login_log
 -- ----------------------------
+INSERT INTO `sys_login_log` VALUES ('1d20aec1-2b4f-4f63-adbd-dbee35113040', 'admin', '127.0.0.1', '内网IP', 'Chrome134.0.0.0', 'Windows10', '1', '登录成功', '2026-09-29 09:34:59', '70a8c78a-668d-4c92-a9c9-61b56cca4164', '866b0232-507b-42a4-bdc1-47fc4a83616a');
 -- ----------------------------
 -- Table structure for sys_menu
 -- ----------------------------
@@ -316,7 +318,7 @@ INSERT INTO `sys_menu` VALUES ('2026-09-04 19:28:20', '2026-09-04 19:28:20', NUL
 INSERT INTO `sys_menu` VALUES ('2026-09-04 19:22:19', '2026-09-04 19:22:19', NULL, 'admin', 'admin', '62808f35-de2b-41cc-a1c3-dfab0f8835d6', '631474ec-7487-4039-aab3-fb120a627d90', NULL, NULL, 'F', NULL, '字典新增', '1', 'system:dict:create', '1', 2, '0', '1');
 INSERT INTO `sys_menu` VALUES ('2026-09-04 19:21:37', '2026-09-04 19:21:37', NULL, 'admin', 'admin', '631474ec-7487-4039-aab3-fb120a627d90', 'c0e187f4-9550-4d69-ac3b-f9f0b1db46f3', 'dict', 'system/dict/index', 'C', 'Dict', '字典管理', '1', NULL, '1', 5, '0', '1');
 INSERT INTO `sys_menu` VALUES ('2026-09-04 19:26:29', '2026-09-06 13:22:39', NULL, 'admin', 'admin', '656742cc-c81b-4d5d-8a33-524469e84cfc', '760c23de-73fa-4d69-8d1c-674a235d3799', 'cache/list', 'monitor/cache/list', 'C', 'CacheList', '缓存列表', '1', NULL, '1', 5, '0', '1');
-INSERT INTO `sys_menu` VALUES ('2026-09-28 23:03:28', '2026-09-28 23:21:27', NULL, 'admin', 'admin', '6595b3f6-ad19-4c16-853e-023eac8bc2c3', '067936bd-28c3-4677-a795-5cf41c7a1ea9', 'https://docs.apipost.net/docs/detail/61e0debdacca000?target_id=0', NULL, 'C', 'External', '接口文档', '1', NULL, '1', 2, '0', '1');
+INSERT INTO `sys_menu` VALUES ('2026-09-28 23:03:28', '2026-09-29 10:19:35', NULL, 'admin', 'admin', '6595b3f6-ad19-4c16-853e-023eac8bc2c3', '067936bd-28c3-4677-a795-5cf41c7a1ea9', 'https://docs.apipost.net/docs/detail/61e0debdacca000?target_id=0', NULL, 'C', 'ApiDoc', '接口文档', '1', NULL, '1', 2, '0', '1');
 INSERT INTO `sys_menu` VALUES ('2026-09-13 11:12:24', '2026-09-13 11:12:24', NULL, 'admin', 'admin', '66090e1b-ba7e-4b5e-ab48-217e5241a8d6', 'ce940b28-31f7-45f2-b1ce-59af70c2dd58', NULL, NULL, 'F', NULL, '文件删除', '1', 'system:file:delete', '1', 4, '0', '1');
 INSERT INTO `sys_menu` VALUES ('2026-09-04 19:18:55', '2026-09-04 19:18:55', NULL, 'admin', 'admin', '711a6df6-7206-4bd5-8fbe-ace9ccd1e2ee', '1f575ab8-fa15-428d-b91d-5aae8470e141', NULL, NULL, 'F', NULL, '菜单新增', '1', 'system:menu:create', '1', 2, '0', '1');
 INSERT INTO `sys_menu` VALUES ('2026-09-06 13:23:56', '2026-09-06 13:23:56', NULL, 'admin', 'admin', '74b437d3-5665-4b37-9a9d-420f82dba5be', 'd50c6827-b234-4549-9f98-ea029eb42d56', NULL, NULL, 'F', NULL, '定时任务查询', '1', 'monitor:job:query', '1', 1, '0', '1');
@@ -386,7 +388,14 @@ CREATE TABLE `sys_oper_log` (
 -- ----------------------------
 -- Records of sys_oper_log
 -- ----------------------------
+INSERT INTO `sys_oper_log` VALUES ('40a1b108-f4e0-45b8-8999-35fd0b754ef5', '部门管理', 'admin', 'DeptController.updateSort', 'PUT', '{\n  \"query\": {},\n  \"body\": [\n    {\n      \"id\": \"d3e747cf-f705-4ac0-bef2-89b578f1a256\",\n      \"deptSort\": 2\n    }\n  ]\n}', '/api/system/dept/update/sort', '127.0.0.1', '内网IP', '1', '2026-09-29 10:29:49', 'ce461d22-1ad1-42b8-8a95-2b776148f526', 19, '866b0232-507b-42a4-bdc1-47fc4a83616a', '2');
+INSERT INTO `sys_oper_log` VALUES ('4b0f38ed-20e4-4cae-a263-99830e5fd8e4', '部门管理', 'admin', 'DeptController.updateSort', 'PUT', '{\n  \"query\": {},\n  \"body\": [\n    {\n      \"id\": \"d3e747cf-f705-4ac0-bef2-89b578f1a256\",\n      \"deptSort\": 3\n    }\n  ]\n}', '/api/system/dept/update/sort', '127.0.0.1', '内网IP', '1', '2026-09-29 10:29:24', '453de98e-2183-4e4a-a8d6-f3b991b9a6df', 39, '866b0232-507b-42a4-bdc1-47fc4a83616a', '2');
 INSERT INTO `sys_oper_log` VALUES ('959353a6-3304-4abc-aebc-2c181776a99c', '操作日志', 'admin', 'LogController.clearOperinfo', 'DELETE', '{\n  \"query\": {}\n}', '/api/monitor/log/operlog/clear', '127.0.0.1', '内网IP', '1', '2026-09-28 23:21:46', '5b1a581e-9540-4825-b998-23a4177441a2', 43, '866b0232-507b-42a4-bdc1-47fc4a83616a', '4');
+INSERT INTO `sys_oper_log` VALUES ('a32673be-6e18-449f-aeb3-fd47fb77d2a7', '菜单管理', 'admin', 'MenuController.updateSort', 'PUT', '{\n  \"query\": {},\n  \"body\": [\n    {\n      \"id\": \"6595b3f6-ad19-4c16-853e-023eac8bc2c3\",\n      \"menuSort\": 2\n    }\n  ]\n}', '/api/system/menu/update/sort', '127.0.0.1', '内网IP', '1', '2026-09-29 10:19:35', 'e907ad07-04bb-4d86-8d49-0dee3d751687', 24, '866b0232-507b-42a4-bdc1-47fc4a83616a', '2');
+INSERT INTO `sys_oper_log` VALUES ('a3722be7-424a-4872-97ad-3fa5dfd752ea', '菜单管理', 'admin', 'MenuController.update', 'PUT', '{\n  \"query\": {},\n  \"body\": {\n    \"createTime\": \"2026-09-28 23:03:28\",\n    \"updateTime\": \"2026-09-28 23:34:35\",\n    \"deleteTime\": null,\n    \"createBy\": \"admin\",\n    \"updateBy\": \"admin\",\n    \"id\": \"6595b3f6-ad19-4c16-853e-023eac8bc2c3\",\n    \"parentId\": \"067936bd-28c3-4677-a795-5cf41c7a1ea9\",\n    \"path\": \"https://docs.apipost.net/docs/detail/61e0debdacca000?target_id=0\",\n    \"component\": null,\n    \"menuType\": \"C\",\n    \"icon\": \"External\",\n    \"menuName\": \"接口文档\",\n    \"visible\": \"1\",\n    \"permission\": null,\n    \"status\": \"1\",\n    \"menuSort\": 2,\n    \"isCache\": \"0\",\n    \"target\": \"1\"\n  }\n}', '/api/system/menu/update', '127.0.0.1', '内网IP', '1', '2026-09-29 09:35:19', '9d49030f-e998-4bb0-ba47-711bb71a3720', 46, '866b0232-507b-42a4-bdc1-47fc4a83616a', '2');
+INSERT INTO `sys_oper_log` VALUES ('b31f3f9f-93ca-4171-9f61-2cc4c90cbe6e', '菜单管理', 'admin', 'MenuController.update', 'PUT', '{\n  \"query\": {},\n  \"body\": {\n    \"createTime\": \"2026-09-28 23:03:28\",\n    \"updateTime\": \"2026-09-29 09:35:19\",\n    \"deleteTime\": null,\n    \"createBy\": \"admin\",\n    \"updateBy\": \"admin\",\n    \"id\": \"6595b3f6-ad19-4c16-853e-023eac8bc2c3\",\n    \"parentId\": \"067936bd-28c3-4677-a795-5cf41c7a1ea9\",\n    \"path\": \"https://docs.apipost.net/docs/detail/61e0debdacca000?target_id=0\",\n    \"component\": null,\n    \"menuType\": \"C\",\n    \"icon\": \"ApiDoc\",\n    \"menuName\": \"接口文档\",\n    \"visible\": \"1\",\n    \"permission\": null,\n    \"status\": \"1\",\n    \"menuSort\": 2,\n    \"isCache\": \"0\",\n    \"target\": \"1\"\n  }\n}', '/api/system/menu/update', '127.0.0.1', '内网IP', '1', '2026-09-29 09:45:07', '55bc4dec-23e7-4aa5-9076-c0bf1e9efb1f', 49, '866b0232-507b-42a4-bdc1-47fc4a83616a', '2');
+INSERT INTO `sys_oper_log` VALUES ('ebae70dd-50e1-4eaf-adee-7b9dddf5b8ce', '菜单管理', 'admin', 'MenuController.updateSort', 'PUT', '{\n  \"query\": {},\n  \"body\": {\n    \"items\": [\n      {\n        \"id\": \"6595b3f6-ad19-4c16-853e-023eac8bc2c3\",\n        \"menuSort\": 3\n      }\n    ]\n  }\n}', '/api/system/menu/update/sort', '127.0.0.1', '内网IP', '1', '2026-09-29 10:17:49', '242cf698-4cae-4f1b-b5b6-a3e441e435f8', 29, '866b0232-507b-42a4-bdc1-47fc4a83616a', '2');
+INSERT INTO `sys_oper_log` VALUES ('f38c2fdf-33a7-413c-aff0-8c91d4827bf7', '菜单管理', 'admin', 'MenuController.update', 'PUT', '{\n  \"query\": {},\n  \"body\": {\n    \"createTime\": \"2026-09-28 23:03:28\",\n    \"updateTime\": \"2026-09-28 23:21:27\",\n    \"deleteTime\": null,\n    \"createBy\": \"admin\",\n    \"updateBy\": \"admin\",\n    \"id\": \"6595b3f6-ad19-4c16-853e-023eac8bc2c3\",\n    \"parentId\": \"067936bd-28c3-4677-a795-5cf41c7a1ea9\",\n    \"path\": \"https://docs.apipost.net/docs/detail/61e0debdacca000?target_id=0\",\n    \"component\": null,\n    \"menuType\": \"C\",\n    \"icon\": \"External\",\n    \"menuName\": \"接口文档\",\n    \"visible\": \"1\",\n    \"permission\": null,\n    \"status\": \"1\",\n    \"menuSort\": 2,\n    \"isCache\": \"0\",\n    \"target\": \"2\"\n  }\n}', '/api/system/menu/update', '127.0.0.1', '内网IP', '1', '2026-09-28 23:34:35', 'ad7a6687-2c9b-42d8-9e0c-dddcc52fb1fc', 33, '866b0232-507b-42a4-bdc1-47fc4a83616a', '2');
 -- ----------------------------
 -- Table structure for sys_role
 -- ----------------------------
@@ -540,7 +549,7 @@ CREATE TABLE `sys_user` (
 -- Records of sys_user
 -- ----------------------------
 INSERT INTO `sys_user` VALUES ('2026-09-21 21:22:21', '2026-09-23 17:06:41', 'admin', 'admin', '30bb5fcd-b6d0-45b4-979c-796a8d993cbf', 'test', '$argon2id$v=19$m=65536,p=4,t=3$XpZEKTRJkkmcDRHO4PpJSQ$QrR0JD1zHei7coSTLXdMeYFM/V77g0f+AHWZdcuDtQI', '13344445555', '测试', '13344445555@163.com', '1', '1', 18, NULL, NULL, NULL, 'bb93a81a-039e-4cc3-a90d-9dce0857dde1', NULL, '测试');
-INSERT INTO `sys_user` VALUES ('2026-08-29 22:01:32', '2026-09-28 23:19:56', 'admin', 'admin', '866b0232-507b-42a4-bdc1-47fc4a83616a', 'admin', '$argon2id$v=19$m=65536,p=4,t=3$9TpqdrZbWIjXxG3RWFla0w$VA9fL3QvLvB6yQxTzic9or9lbKAtq+IMm0CC8X6JhaQ', '16688889999', '天道', 'yunhe@163.com', '1', '1', 18, NULL, '2026-09-28 23:19:56', NULL, 'bb93a81a-039e-4cc3-a90d-9dce0857dde1', '', '超级管理员');
+INSERT INTO `sys_user` VALUES ('2026-08-29 22:01:32', '2026-09-29 09:34:59', 'admin', 'admin', '866b0232-507b-42a4-bdc1-47fc4a83616a', 'admin', '$argon2id$v=19$m=65536,p=4,t=3$9TpqdrZbWIjXxG3RWFla0w$VA9fL3QvLvB6yQxTzic9or9lbKAtq+IMm0CC8X6JhaQ', '16688889999', '天道', 'yunhe@163.com', '1', '1', 18, NULL, '2026-09-29 09:34:59', NULL, 'bb93a81a-039e-4cc3-a90d-9dce0857dde1', '', '超级管理员');
 -- ----------------------------
 -- Table structure for sys_user_role
 -- ----------------------------

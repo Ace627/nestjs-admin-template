@@ -17,6 +17,11 @@ export class MenuRequest {
     return request.put('/system/menu/update', data)
   }
 
+  /** 批量保存菜单排序（空数组时后端校验拒绝） */
+  static updateSort(data: Menu.SortItem[]): Promise<string> {
+    return request.put('/system/menu/update/sort', data)
+  }
+
   /** 查询菜单树形列表（后端返回树形结构，含按钮与停用） */
   static findList(params: Menu.MenuQuery): Promise<Menu.MenuItem[]> {
     return request.get('/system/menu/list', { params })

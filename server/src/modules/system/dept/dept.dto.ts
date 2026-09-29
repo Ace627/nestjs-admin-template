@@ -45,6 +45,16 @@ export class UpdateDeptDto extends PartialType(CreateDeptDto) {
   id: string
 }
 
+export class UpdateDeptSortItemDto {
+  @IsNotEmpty({ message: '参数 $property 不能为空' })
+  @IsString()
+  id: string
+
+  @Type(() => Number)
+  @IsInt({ message: '显示顺序必须是整数' })
+  deptSort: number
+}
+
 export class QueryDeptDto extends PaginationDto {
   @IsOptional()
   @IsString()

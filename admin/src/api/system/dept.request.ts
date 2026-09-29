@@ -27,6 +27,11 @@ export class DeptRequest {
     return request.put('/system/dept/update', data)
   }
 
+  /** 批量保存部门排序（空数组时后端校验拒绝） */
+  static updateSort(data: Dept.SortItem[]): Promise<string> {
+    return request.put('/system/dept/update/sort', data)
+  }
+
   /** 批量删除部门（存在下级部门或挂有用户时后端拦截；ids 为逗号拼接字符串，后端 ParseArrayPipe 接收） */
   static delete(params: { ids: string }): Promise<string> {
     return request.delete('/system/dept/delete', { params })
