@@ -87,7 +87,7 @@ function handleMenuItemClick(item: OneChild) {
 
 <style lang="scss" scoped>
 .sidebar-icon {
-  font-size: var(--el-sidebar-icon-size);
+  font-size: var(--el-sidebar-icon-size) !important; /* 加权 抵消 SvgIcon 的权重 方便支持自定义变量 */
   margin-right: 8px;
   transition: margin-right var(--el-transition-duration);
 }
