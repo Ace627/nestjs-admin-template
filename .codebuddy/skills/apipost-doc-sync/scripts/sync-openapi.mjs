@@ -241,28 +241,28 @@ const healthResultExample = { status: 'ok', info: { database: { status: 'up' } }
  * raw200: true                                    二进制流响应（导出接口），省略 data/example
  */
 const defs = [
-  /* ----------------------------- 鉴权（auth，6 端点） ----------------------------- */
+  /* ----------------------------- 鉴权管理（auth，6 端点） ----------------------------- */
   {
-    path: '/auth/captcha', method: 'get', tag: '鉴权', sort: 1000, summary: '获取图片验证码',
+    path: '/auth/captcha', method: 'get', tag: '鉴权管理', sort: 1000, summary: '获取图片验证码',
     desc: '实时读取参数开关，关闭时不生成图片，仅返回 enabled 标识（uuid/captcha 为空串）',
     data: obj({ enabled: bool(true, '验证码开关（实时读取参数 sys.account.captchaEnabled）'), uuid: str('8f1e2a10-6f10-4c10-8a10-1e2f3a4b5c01', '验证码唯一标识，登录时回传'), captcha: str('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciL', 'base64 图片，img 标签可直接渲染，有效期 60 秒') }),
     example: { enabled: true, uuid: '8f1e2a10-6f10-4c10-8a10-1e2f3a4b5c01', captcha: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciL' },
   },
   {
-    path: '/auth/login', method: 'post', tag: '鉴权', sort: 2000, summary: '用户登录',
+    path: '/auth/login', method: 'post', tag: '鉴权管理', sort: 2000, summary: '用户登录',
     body: jsonBody({ username: 'admin', password: '123456', captcha: '3', uuid: '8f1e2a10-6f10-4c10-8a10-1e2f3a4b5c01' }),
     data: obj({ accessToken: str('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI4NjZiMDIzMi01MDdiLTQyYTQtYmRjMS00N2ZjNGE4MzYxNmEiLCJ1c2VybmFtZSI6ImFkbWluIiwidXVpZCI6IjMwZTBiZjkwLTI0ZmItNDcwMC05NjkwLTA2YzZkZjM4YzQ0YiJ9.dQw4w9WgXcQ', '访问令牌'), refreshToken: str('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI4NjZiMDIzMi01MDdiLTQyYTQtYmRjMS00N2ZjNGE4MzYxNmEiLCJ1c2VybmFtZSI6ImFkbWluIiwidXVpZCI6IjMwZTBiZjkwLTI0ZmItNDcwMC05NjkwLTA2YzZkZjM4YzQ0YiIsInR5cGUiOiJyZWZyZXNoIiwianRpIjoiMmFhYzQ1NjctYjg5ZS00Y2RmLThmZWItMWQyZTM0NTY3ODkwIn0.xYz4w9WgXcQ', '刷新令牌，用于向服务端换取新的访问令牌'), expiresIn: int(1800, '访问令牌有效期（秒）') }),
     example: { accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI4NjZiMDIzMi01MDdiLTQyYTQtYmRjMS00N2ZjNGE4MzYxNmEiLCJ1c2VybmFtZSI6ImFkbWluIiwidXVpZCI6IjMwZTBiZjkwLTI0ZmItNDcwMC05NjkwLTA2YzZkZjM4YzQ0YiJ9.dQw4w9WgXcQ', refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI4NjZiMDIzMi01MDdiLTQyYTQtYmRjMS00N2ZjNGE4MzYxNmEiLCJ1c2VybmFtZSI6ImFkbWluIiwidXVpZCI6IjMwZTBiZjkwLTI0ZmItNDcwMC05NjkwLTA2YzZkZjM4YzQ0YiIsInR5cGUiOiJyZWZyZXNoIiwianRpIjoiMmFhYzQ1NjctYjg5ZS00Y2RmLThmZWItMWQyZTM0NTY3ODkwIn0.xYz4w9WgXcQ', expiresIn: 1800 },
   },
   {
-    path: '/auth/refreshToken', method: 'post', tag: '鉴权', sort: 2500, summary: '刷新访问令牌',
+    path: '/auth/refreshToken', method: 'post', tag: '鉴权管理', sort: 2500, summary: '刷新访问令牌',
     desc: '无感续期：校验 refreshToken（验签与 Redis 值比对防重放）后轮换签发新令牌对，刷新令牌有效期滑动重置 7 天，旧刷新令牌即告作废',
     body: jsonBody({ refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI4NjZiMDIzMi01MDdiLTQyYTQtYmRjMS00N2ZjNGE4MzYxNmEiLCJ1c2VybmFtZSI6ImFkbWluIiwidXVpZCI6IjMwZTBiZjkwLTI0ZmItNDcwMC05NjkwLTA2YzZkZjM4YzQ0YiIsInR5cGUiOiJyZWZyZXNoIiwianRpIjoiMmFhYzQ1NjctYjg5ZS00Y2RmLThmZWItMWQyZTM0NTY3ODkwIn0.xYz4w9WgXcQ' }),
     data: obj({ accessToken: str('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI4NjZiMDIzMi01MDdiLTQyYTQtYmRjMS00N2ZjNGE4MzYxNmEiLCJ1c2VybmFtZSI6ImFkbWluIiwidXVpZCI6IjMwZTBiZjkwLTI0ZmItNDcwMC05NjkwLTA2YzZkZjM4YzQ0YiJ9.dQw4w9WgXcQ', '访问令牌'), refreshToken: str('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI4NjZiMDIzMi01MDdiLTQyYTQtYmRjMS00N2ZjNGE4MzYxNmEiLCJ1c2VybmFtZSI6ImFkbWluIiwidXVpZCI6IjMwZTBiZjkwLTI0ZmItNDcwMC05NjkwLTA2YzZkZjM4YzQ0YiIsInR5cGUiOiJyZWZyZXNoIiwianRpIjoiM2RkZjU2NzgtYzkwZS01ZGVmLTlhZmMtMmUzZjQ1Njc4OTAxIn0.zXw5w9WgXcQ', '轮换后的新刷新令牌，须替换客户端旧值'), expiresIn: int(1800, '访问令牌有效期（秒）') }),
     example: { accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI4NjZiMDIzMi01MDdiLTQyYTQtYmRjMS00N2ZjNGE4MzYxNmEiLCJ1c2VybmFtZSI6ImFkbWluIiwidXVpZCI6IjMwZTBiZjkwLTI0ZmItNDcwMC05NjkwLTA2YzZkZjM4YzQ0YiJ9.dQw4w9WgXcQ', refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI4NjZiMDIzMi01MDdiLTQyYTQtYmRjMS00N2ZjNGE4MzYxNmEiLCJ1c2VybmFtZSI6ImFkbWluIiwidXVpZCI6IjMwZTBiZjkwLTI0ZmItNDcwMC05NjkwLTA2YzZkZjM4YzQ0YiIsInR5cGUiOiJyZWZyZXNoIiwianRpIjoiM2RkZjU2NzgtYzkwZS01ZGVmLTlhZmMtMmUzZjQ1Njc4OTAxIn0.zXw5w9WgXcQ', expiresIn: 1800 },
   },
   {
-    path: '/auth/getInfo', method: 'get', tag: '鉴权', sort: 3000, summary: '获取登录用户信息',
+    path: '/auth/getInfo', method: 'get', tag: '鉴权管理', sort: 3000, summary: '获取登录用户信息',
     data: obj({ user: obj(safeUserProps()), roles: arr(str('admin')), permissions: arr(str('system:user:create')) }),
     example: {
       user: { createTime: '2026-08-29 22:01:32', updateTime: '2026-09-12 11:52:50', createBy: 'admin', updateBy: 'admin', id: '866b0232-507b-42a4-bdc1-47fc4a83616a', username: 'admin', phone: '15888888888', nickname: '管理员', email: 'admin@example.com', status: '1', gender: '1', age: 30, remark: null, deptId: 'd2c17a9e-8e3c-4f9a-9f2a-6b7c8d9e0f1a', avatar: null, loginTime: '2026-09-15 09:30:00' },
@@ -271,12 +271,12 @@ const defs = [
     },
   },
   {
-    path: '/auth/getRoutes', method: 'get', tag: '鉴权', sort: 4000, summary: '获取路由菜单',
+    path: '/auth/getRoutes', method: 'get', tag: '鉴权管理', sort: 4000, summary: '获取路由菜单',
     data: arr(obj(menuProps())),
     example: [{ createTime: '2026-08-29 22:01:32', updateTime: '2026-09-12 11:52:50', deleteTime: null, createBy: 'admin', updateBy: 'admin', id: '3a1b2c3d-4e5f-4a6b-8c9d-0e1f2a3b4c5d', parentId: '0', path: 'user', component: 'system/user/index', menuType: 'C', icon: 'user', menuName: '用户管理', visible: '1', permission: null, status: '1', menuSort: 1, isCache: '0' }],
   },
   {
-    path: '/auth/logout', method: 'post', tag: '鉴权', sort: 5000, summary: '退出登录',
+    path: '/auth/logout', method: 'post', tag: '鉴权管理', sort: 5000, summary: '退出登录',
     data: str('退出登录成功'), example: '退出登录成功',
   },
 
@@ -948,7 +948,7 @@ const defs = [
 
 /* 目录定义（全量 17 个；x-sort 沿用菜单排序递增） */
 const newTags = [
-  { name: '鉴权', sort: 20000 },
+  { name: '鉴权管理', sort: 20000 },
   { name: '用户管理', sort: 21000 },
   { name: '角色管理', sort: 22000 },
   { name: '菜单管理', sort: 23000 },
