@@ -32,14 +32,14 @@
 ## 差异点清单（照标本生成时必须替换的点）
 
 1. 路由前缀 `@Controller('system/<模块>')` 与全部端点路径。
-2. 功能名 = 文档目录 tag = @Operlog title = sys_menu 的 menu_name；DEFS 目录 x-sort 续接 `newTags` 现有最大值。
+2. 功能名 = @Operlog title = sys_menu 的 menu_name。
 3. 四个权限码：`system:<模块>:query|create|update|delete`，前端按钮门控与后端一一对应。
 4. businessType 取值按 `server/src/common/constant/business-type.constant.ts`（create/update/delete 对应新增/修改/删除）。
 5. 缓存键前缀：读 `server/src/common/constant/redis.constant.ts`，确认复用既有分类或新增，并与用户确认。
 6. 实体字段、DTO 校验装饰器、Query 的查询方式（LIKE/EQ/BETWEEN）严格按第 2 步定稿配置表落，不照抄 config 字段。
 7. 前端 columns/slots/搜索项/表单控件按配置表落；slot 列不写 prop；绑定字典的列用 useDict 渲染。
 8. init.sql 追加行：1 条 C 菜单行 + 每个按钮 1 条 F 行；UUID 全新且互不冲突。
-9. 成功文案对齐既有口径：新增「添加成功」或「新增成功」（同一模块内统一）、更新「修改成功」或「更新成功」（同上）、删除「删除成功」，DEFS 与 service 文案一致。
+9. 成功文案对齐既有口径：新增「添加成功」或「新增成功」（同一模块内统一）、更新「修改成功」或「更新成功」（同上）、删除「删除成功」。
 10. 数据权限（仅当 SKILL.md 第 2 步模块级确认项勾选时生成，未勾选则整条跳过）。挂载示例（标本 `server/src/modules/system/user/user.controller.ts:52-57`、`user.service.ts:140`；alias 必须传本模块 qb 主表别名，默认值 'user' 不适用）：
 
    ```ts

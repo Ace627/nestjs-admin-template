@@ -34,5 +34,5 @@
 2. 实体比分页型多 parentId 与 ancestors；create/update 须维护祖级链（标本用 `dataSource.transaction` 包裹，父级变更时同步刷新全部子孙 ancestors）。
 3. 删除前置校验：存在子节点、或被业务数据引用时拒绝删除，拒绝文案回读标本口径。
 4. 前端为树形表格而非分页表；编辑弹窗含上级节点树选择，且禁止把自己/自己的子孙选为上级（死循环防护口径回读标本）。
-5. 其余口径（四个权限码、@Operlog、DEFS 补录、init.sql 行形态、成功文案）与 paged-module.md 一致。
+5. 其余口径（四个权限码、@Operlog、init.sql 行形态、成功文案）与 paged-module.md 一致。
 6. 数据权限（仅当 SKILL.md 第 2 步模块级确认项勾选时生成，未勾选则整条跳过）：树形标本 dept 自身即部门树，通常不适用；业务树表确有部门归属列（deptId）且勾选时，挂载写法与 paged-module.md 第 10 条示例一致——Controller list 端点在 `@RequirePermissions` 旁追加 `@DataScope({ alias: '<树表 qb 主表别名>' })`，Service 树构建方法签名追加 `@DataScopeSql() ds: DataScopeCondition` 并消费 `if (ds) queryBuilder.andWhere(ds.sql, ds.params)`；默认按 createBy 匹配「仅本人」档位。
