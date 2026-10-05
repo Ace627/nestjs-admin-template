@@ -22,6 +22,10 @@ html {
   --el-tags-view-bg-color: var(--el-bg-color);
   --el-tags-view-box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.12), 0 0 3px 0 rgba(0, 0, 0, 0.04);
   --el-tags-view-border-color: #d8dce5;
+
+  /** 主题切换圆形扩散动效 */
+  --el-theme-transition-duration: 400ms;
+  --el-theme-transition-easing: ease-out;
 }
 
 html.dark {

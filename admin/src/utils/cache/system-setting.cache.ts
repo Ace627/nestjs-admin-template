@@ -1,9 +1,8 @@
+import { StorageCache } from '../storage-cache'
 import type { SystemSetting } from '@/defaultSettings'
 
-import { StorageCache } from '../storage-cache'
 
 export function setSystemSetting(config: SystemSetting) {
-  // CacheUtil.set(CacheConstant.SYSTEM_SETTING, config)
   StorageCache.set('systemSetting', config)
 }
 

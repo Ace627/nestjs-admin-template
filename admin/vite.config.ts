@@ -1,7 +1,5 @@
 import { fileURLToPath } from 'node:url'
-
 import { defineConfig, loadEnv } from 'vite'
-
 import { setupVitePlugins } from './build/plugins/index.ts'
 
 // https://vite.dev/config/

@@ -1,5 +1,5 @@
 <template>
-  <div @click="toggleTheme">
+  <div @click="toggle">
     <SvgIcon :name="settingStore.isDark ? 'Moon' : 'Sunny'" size="1.16em" />
   </div>
 </template>
@@ -7,7 +7,7 @@
 <script setup lang="ts">
 defineOptions({ name: 'ThemeSwitch' })
 
-const { toggleTheme } = useTheme()
+const { toggle } = useTheme()
 const settingStore = useSettingStore()
 </script>
 

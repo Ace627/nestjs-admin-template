@@ -1,0 +1,46 @@
+// 主题切换圆形扩散动效，与 Element Plus 官网实现一致：
+// https://github.com/element-plus/element-plus/blob/dev/docs/.vitepress/vitepress/styles/base.scss
+// https://github.com/element-plus/element-plus/blob/dev/docs/.vitepress/vitepress/components/common/vp-theme-toggler.vue
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  z-index: 1;
+}
+
+::view-transition-new(root) {
+  z-index: 2147483646;
+}
+
+// 切深色：旧浅色快照置顶做圆形收缩，露出底层新深色快照
+html[data-theme-transition='to-dark']::view-transition-old(root) {
+  z-index: 2147483646;
+  animation: theme-change var(--el-theme-transition-duration) var(--el-theme-transition-easing) both;
+}
+
+html[data-theme-transition='to-dark']::view-transition-new(root) {
+  z-index: 1;
+}
+
+// 切浅色：新浅色快照置顶，复用同一 keyframes 反向播放即圆形扩张，覆盖旧深色快照
+html[data-theme-transition='to-light']::view-transition-old(root) {
+  z-index: 1;
+}
+
+html[data-theme-transition='to-light']::view-transition-new(root) {
+  z-index: 2147483646;
+  animation: theme-change var(--el-theme-transition-duration) var(--el-theme-transition-easing) both;
+  animation-direction: reverse;
+}
+
+@keyframes theme-change {
+  from {
+    clip-path: circle(var(--theme-transition-radius) at var(--theme-transition-x) var(--theme-transition-y));
+  }
+  to {
+    clip-path: circle(0% at var(--theme-transition-x) var(--theme-transition-y));
+  }
+}

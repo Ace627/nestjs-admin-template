@@ -39,11 +39,3 @@ a {
 li {
   list-style: none;
 }
-
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation: none;
-}
-.dark::view-transition-old(root) {
-  z-index: 2026;
-}
