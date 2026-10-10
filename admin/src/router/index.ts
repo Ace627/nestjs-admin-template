@@ -9,7 +9,7 @@ const { VITE_ROUTER_MODE, VITE_PUBLIC_PATH } = import.meta.env
 export const router = createRouter({
   history: VITE_ROUTER_MODE === 'hash' ? createWebHashHistory(VITE_PUBLIC_PATH) : createWebHistory(VITE_PUBLIC_PATH),
   routes: STATIC_ROUTE_LIST,
-  scrollBehavior: () => ({ left: 0, top: 0 }),
+  scrollBehavior: () => new Promise((resolve) => setTimeout(() => resolve({ left: 0, top: 0 }), 160)),
 })
 
 /** 路由配置函数 */
