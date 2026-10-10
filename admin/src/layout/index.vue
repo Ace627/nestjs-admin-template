@@ -74,6 +74,8 @@ const classes = computed(() => [
 /* 主体内容区域容器 */
 .main-container {
   position: relative;
+  display: flex;
+  flex-direction: column;
   height: 100%;
   transition: margin-left var(--el-transition-duration);
   margin-left: var(--el-sidebar-width);
