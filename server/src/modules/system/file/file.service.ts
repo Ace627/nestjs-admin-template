@@ -1,11 +1,11 @@
 import { extname, resolve } from 'node:path'
 import { createReadStream, existsSync, rmSync } from 'node:fs'
 import { Injectable, StreamableFile } from '@nestjs/common'
-import { InjectRepository } from '@nestjs/typeorm'
-import { Equal, FindOptionsWhere, Like, Not, Repository } from 'typeorm'
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm'
+import { DataSource, Equal, FindOptionsWhere, In, Like, Not, Repository } from 'typeorm'
 import { listToTree } from '@/utils'
 import { BusinessException, CommonConstant, FileEntity, FileType } from '@/common'
-import { CreateFolderDto, QueryFileDto, RecycleQueryDto, RegisterFileDto, UpdateFolderDto } from './file.dto'
+import { CreateFolderDto, MoveFileDto, QueryFileDto, RecycleQueryDto, RegisterFileDto, UpdateFolderDto } from './file.dto'
 
 @Injectable()
 export class FileService {
@@ -14,6 +14,7 @@ export class FileService {
 
   constructor(
     @InjectRepository(FileEntity) private readonly fileRepository: Repository<FileEntity>,
+    @InjectDataSource() private readonly dataSource: DataSource,
   ) {}
 
   /** 目录树（仅目录、未删除） */
@@ -50,6 +51,39 @@ export class FileService {
     Object.assign(entity, { fileName: updateDto.fileName })
     await this.fileRepository.save(entity)
     return '修改成功'
+  }
+
+  /** 移动文件/目录到目标目录（目录事务内级联平移子孙 ancestors） */
+  public async move(moveDto: MoveFileDto): Promise<string> {
+    const ids = [...new Set(moveDto.ids.split(',').filter(Boolean))]
+    const targets = await this.fileRepository.findBy({ id: In(ids) })
+    if (targets.length !== ids.length) throw new BusinessException('文件不存在')
+    const targetParentId = moveDto.targetParentId || CommonConstant.DEFAULT_PARENT_ID
+    await this.assertParentFolder(targetParentId)
+    const folders = targets.filter((item) => item.fileType === FileType.FOLDER)
+    for (const folder of folders) {
+      // 不能移入自身或自己的子孙（防环）
+      if ((await this.expandWithDescendants([folder])).includes(targetParentId)) throw new BusinessException(`目录「${folder.fileName}」不能移入自身或其子目录`)
+      // 目标目录下同名冲突
+      if (targetParentId !== folder.parentId) await this.assertFolderNameUnique(targetParentId, folder.fileName, folder.id)
+    }
+    const newAncestors = await this.buildAncestors(targetParentId)
+    await this.dataSource.transaction(async (manager) => {
+      for (const target of targets) {
+        if (targetParentId === target.parentId) continue
+        const oldAncestors = target.ancestors
+        await manager.update(FileEntity, target.id, { parentId: targetParentId, ancestors: newAncestors })
+        if (target.fileType !== FileType.FOLDER) continue
+        // 旧链前缀 = 旧祖先链 + 自身；所有子孙的 ancestors 均以该前缀开头，按前缀平移
+        const oldPrefix = `${oldAncestors},${target.id}`
+        const descendants = await manager.find(FileEntity, { where: { ancestors: Like(`${oldPrefix}%`) } })
+        const newPrefix = `${newAncestors},${target.id}`
+        for (const descendant of descendants) {
+          await manager.update(FileEntity, descendant.id, { ancestors: `${newPrefix}${descendant.ancestors.slice(oldPrefix.length)}` })
+        }
+      }
+    })
+    return '移动成功'
   }
 
   /** 删除文件/目录（目录按 ancestors 级联软删整棵子树，进入回收站） */

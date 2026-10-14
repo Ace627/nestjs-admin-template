@@ -20,6 +20,19 @@ export class UpdateFolderDto extends PartialType(CreateFolderDto) {
   id: string
 }
 
+/* ----------------------------- 移动 ----------------------------- */
+
+export class MoveFileDto {
+  /** 待移动的文件/目录 ID（逗号分隔） */
+  @IsNotEmpty({ message: '待移动的文件不能为空' })
+  ids: string
+
+  /** 目标目录 ID（0 表示根节点） */
+  @IsNotEmpty({ message: '目标目录不能为空' })
+  @Length(1, 36, { message: '目标目录 ID 长度须在 1 到 36 个字符之间' })
+  targetParentId: string
+}
+
 /* ----------------------------- 文件列表 ----------------------------- */
 
 export class QueryFileDto extends PaginationDto {

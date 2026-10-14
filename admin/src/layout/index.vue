@@ -1,5 +1,5 @@
 <template>
-  <el-watermark :content="watermarkContent" class="w-full min-h-full" :gap="[16, 16]" :font :z-index="2026">
+  <el-watermark :content="watermarkContent" class="w-full h-full" :gap="[16, 16]" :font :z-index="2026">
     <div class="app-container" :class="classes">
       <!-- mobile 端侧边栏遮罩层 -->
       <div v-if="appStore.isMobile && !appStore.isCollapse" class="drawer-bg" @click="appStore.closeSidebar(true)"></div>

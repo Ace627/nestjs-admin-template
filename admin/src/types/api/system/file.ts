@@ -43,6 +43,14 @@ export interface RecycleQuery {
 
 export type FolderForm = Partial<Pick<Item, 'id' | 'parentId' | 'fileName'>>
 
+/** 移动参数 */
+export interface MoveParams {
+  /** 待移动的文件/目录 ID（逗号分隔） */
+  ids: string
+  /** 目标目录 ID（0 表示根目录） */
+  targetParentId: string
+}
+
 /** 上传登记参数（单传/分片合并成功后调用） */
 export interface RegisterParams {
   /** 父目录 ID（0 表示根节点） */

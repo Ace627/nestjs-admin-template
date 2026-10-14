@@ -22,6 +22,11 @@ export class FileRequest {
     return request.put('/system/file/folder/update', data)
   }
 
+  /** 移动文件/目录到目标目录（ids 为逗号拼接字符串） */
+  static move(data: File.MoveParams): Promise<string> {
+    return request.put('/system/file/move', data)
+  }
+
   /** 删除文件/目录（ids 为逗号拼接字符串，软删进入回收站） */
   static delete(params: { ids: string }): Promise<string> {
     return request.delete('/system/file/delete', { params })

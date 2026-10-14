@@ -1,6 +1,5 @@
-/** 参考 Bootstrap 的响应式设计将最大移动端宽度设置为 992 */
 /** https://element-plus.org/zh-CN/component/layout#col-attributes */
-const MAX_MOBILE_WIDTH = 992
+const MAX_MOBILE_WIDTH = 750
 
 /** 根据浏览器宽度变化，变换 Layout 布局 */
 export function useResize() {

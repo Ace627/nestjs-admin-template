@@ -14,6 +14,9 @@
           <el-button v-permissions="['system:file:create']" plain type="primary" @click="handleUpload">
             <template #icon><SvgIcon name="Upload" /></template><span>上传文件</span>
           </el-button>
+          <el-button v-permissions="['system:file:update']" plain type="primary" @click="handleMove()" :disabled="!isMultiple">
+            <template #icon><SvgIcon name="FileManagement" /></template><span>批量移动</span>
+          </el-button>
           <el-button v-permissions="['system:file:delete']" plain type="danger" @click="handleDelete()" :disabled="!isMultiple">
             <template #icon><SvgIcon name="Delete" /></template><span>批量删除</span>
           </el-button>
@@ -29,7 +32,7 @@
           <div class="flex items-center justify-center gap-4px">
             <SvgIcon :name="row.fileType === FILE_TYPE.FOLDER ? 'Resource' : 'Markdown'" class="shrink-0" />
             <span v-if="row.fileType === FILE_TYPE.FOLDER" class="cursor-pointer" @click="handleEnterFolder(row)">{{ row.fileName }}</span>
-            <span v-else class="cursor-pointer" @click="handleDownload(row)">{{ row.fileName }}</span>
+            <span v-else>{{ row.fileName }}</span>
           </div>
         </template>
         <template #fileType="{ row }">
@@ -41,6 +44,7 @@
         <template #action="{ row }">
           <el-link v-if="row.fileType === FILE_TYPE.FILE" type="primary" @click="handleDownload(row)">下载</el-link>
           <el-link v-else type="primary" @click="handleEnterFolder(row)">进入</el-link>
+          <el-link v-permissions="['system:file:update']" type="primary" @click="handleMove(row)">移动</el-link>
           <el-link v-permissions="['system:file:delete']" type="primary" @click="handleDelete(row)">删除</el-link>
         </template>
       </ProTable>
@@ -49,6 +53,7 @@
     </div>
 
     <FolderDialog ref="folderDialogRef" @success="handleFolderChanged" />
+    <FileMoveDialog ref="fileMoveDialogRef" @success="handleMoveChanged" />
     <FileUploadDialog ref="fileUploadDialogRef" @success="getList" />
     <RecycleDrawer ref="recycleDrawerRef" @changed="handleRecycleChanged" />
   </div>
@@ -61,6 +66,7 @@ import FolderTree from './components/FolderTree.vue'
 import { FileRequest } from '@/api/system/file.request'
 import FolderDialog from './components/FolderDialog.vue'
 import RecycleDrawer from './components/RecycleDrawer.vue'
+import FileMoveDialog from './components/FileMoveDialog.vue'
 import { formatFileSize, linkDownload } from '@/utils/file'
 import FileUploadDialog from './components/FileUploadDialog.vue'
 import type { File, ProSearchItem, ProTableColumn } from '@/types'
@@ -73,6 +79,7 @@ const isMultiple = computed(() => multipleSelection.value.length > 0)
 const tableRef = useTemplateRef('tableRef')
 const folderTreeRef = useTemplateRef('folderTreeRef')
 const folderDialogRef = useTemplateRef('folderDialogRef')
+const fileMoveDialogRef = useTemplateRef('fileMoveDialogRef')
 const fileUploadDialogRef = useTemplateRef('fileUploadDialogRef')
 const recycleDrawerRef = useTemplateRef('recycleDrawerRef')
 const queryParams = ref<File.Query>({ pageNo: 1, pageSize: 10, parentId: '0' })
@@ -194,6 +201,18 @@ async function handleDelete(row?: File.Item) {
     console.log('handleDelete errMsg: ', errMsg)
     return Promise.reject(error)
   }
+}
+
+/** 移动文件/目录入口（row 为单行移动，否则批量移动勾选项） */
+function handleMove(row?: File.Item) {
+  const ids = row ? row.id : multipleSelection.value.map((item) => item.id).join(',')
+  fileMoveDialogRef.value?.open(ids, queryParams.value.parentId)
+}
+
+/** 移动成功后可能影响当前列表与目录树 */
+function handleMoveChanged() {
+  folderTreeRef.value?.getTree()
+  getList()
 }
 
 /** 文件下载（流式接口，保留原始文件名） */
