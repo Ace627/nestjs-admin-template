@@ -22,8 +22,15 @@ export const useAppStore = defineStore('app', () => {
     withoutAnimation.value = hasAnimation
   }
 
+  /** 展开侧边栏（主要用于从移动端切回桌面端时恢复展开状态） */
+  function openSidebar() {
+    isCollapse.value = false
+    setSidebarStatus(isCollapse.value)
+    withoutAnimation.value = true
+  }
+
   const isMobile = computed(() => device.value === 'mobile')
   const isDesktop = computed(() => device.value === 'desktop')
 
-  return { device, isCollapse, isMobile, isDesktop, withoutAnimation, closeSidebar, toggleSidebar }
+  return { device, isCollapse, isMobile, isDesktop, withoutAnimation, openSidebar, closeSidebar, toggleSidebar }
 })

@@ -655,6 +655,12 @@ const defs = [
     data: str('修改成功'), example: '修改成功',
   },
   {
+    path: '/system/file/move', method: 'put', tag: '文件管理', sort: 4500, summary: '移动文件目录',
+    desc: '目录移入自身或其子目录会拒绝；目录移动事务内级联平移子孙 ancestors',
+    body: jsonBody({ ids: '8d1e6a90-3f2b-4c1d-9e8f-0a1b2c3d4e5f', targetParentId: '5f1e2a10-6f10-4c10-8a10-1e2f3a4b5c01' }),
+    data: str('移动成功'), example: '移动成功',
+  },
+  {
     path: '/system/file/delete', method: 'delete', tag: '文件管理', sort: 5000, summary: '删除文件目录', desc: '软删，进入回收站',
     params: [qReq('ids', '文件/目录 ID，多个逗号拼接', '8d1e6a90-3f2b-4c1d-9e8f-0a1b2c3d4e5f')],
     data: str('删除成功，已移入回收站'), example: '删除成功，已移入回收站',

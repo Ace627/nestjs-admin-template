@@ -15,9 +15,14 @@ export function useResize() {
   /** 用于处理窗口大小变化事件 */
   function _resizeHandler() {
     if (document.hidden) return
+    const wasMobile = appStore.isMobile
     appStore.device = _isMobile() ? 'mobile' : 'desktop'
     document.documentElement.dataset['device'] = appStore.device
-    if (appStore.isMobile) appStore.closeSidebar(true)
+    if (appStore.isMobile) {
+      appStore.closeSidebar(true)
+    } else if (wasMobile && appStore.isCollapse) {
+      appStore.openSidebar() // 从移动端切回桌面端时，恢复侧栏展开状态
+    }
   }
 
   /** 监听路由变化，根据设备类型调整布局 */
