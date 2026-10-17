@@ -1,4 +1,4 @@
-import { StorageCache } from '../storage-cache'
+import { StorageCache } from './storage-cache'
 
 const CACHE_KEY_PREFIX = 'columnHidden:'
 

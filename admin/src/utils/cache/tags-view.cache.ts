@@ -1,4 +1,4 @@
-import { StorageCache } from '../storage-cache'
+import { StorageCache } from './storage-cache'
 import type { RouteLocationNormalizedGeneric } from 'vue-router'
 
 export type TagView = Partial<RouteLocationNormalizedGeneric>

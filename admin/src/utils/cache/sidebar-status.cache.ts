@@ -1,5 +1,5 @@
 import { isBoolean } from '../validate'
-import { StorageCache } from '../storage-cache'
+import { StorageCache } from './storage-cache'
 
 /** 设置侧边栏状态 */
 export function setSidebarStatus(value: boolean): void {

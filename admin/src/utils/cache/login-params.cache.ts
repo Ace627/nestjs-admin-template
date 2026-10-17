@@ -1,5 +1,5 @@
 import type { Auth } from '@/types'
-import { StorageCache } from '../storage-cache'
+import { StorageCache } from './storage-cache'
 
 /** 记住密码时缓存的登录参数 */
 export type CachedLoginParams = Pick<Auth.LoginParams, 'username' | 'password'> & { rememberMe: boolean }

@@ -4,7 +4,7 @@
 </template>
 <script setup lang="ts">
 defineOptions({ name: 'ProChart' })
-import { echarts, isEmpty } from '@/utils'
+import { echarts, getCssVar, isEmpty } from '@/utils'
 import type { EChartsType, EChartsOption } from 'echarts'
 
 /**
@@ -50,7 +50,8 @@ function init() {
  */
 function updateChart() {
   if (!chartInstance) return
-  chartInstance.setOption({ backgroundColor: 'transparent', ...props.options }, false)
+  const fontFamily = getCssVar('--el-font-family')
+  chartInstance.setOption({ backgroundColor: 'transparent', textStyle: { fontFamily }, ...props.options }, false)
 }
 
 /**

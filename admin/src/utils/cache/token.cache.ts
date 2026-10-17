@@ -8,7 +8,7 @@
  * - 存储 key 统一走 StorageCache 的 `app:storage:` 前缀，不会污染同源下的其它 localStorage 数据。
  */
 
-import { StorageCache } from '../storage-cache'
+import { StorageCache } from './storage-cache'
 
 /** 写入 accessToken（短时凭证，每次请求通过 Authorization 头携带） */
 export function setAccessToken(token: string): boolean {

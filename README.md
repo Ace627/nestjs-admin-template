@@ -114,16 +114,16 @@ docker compose up -d --build
 
 <table>
   <tr>
-    <td><img src="https://cdn.phototourl.com/free/2026-09-17-940bcfe0-6949-4f6e-95f0-3c14b821057b.png" /></td>
-    <td><img src="https://cdn.phototourl.com/free/2026-09-14-712fbe3f-93ab-4c56-b2ae-341acb8feed0.png" /></td>
+    <td><img src="./resource/preview/系统管理 字典管理.png" /></td>
+    <td><img src="./resource/preview/系统管理 菜单管理.png" /></td>
   </tr>
   <tr>
-    <td><img src="https://cdn.phototourl.com/free/2026-09-21-7e4b8283-7d7e-4444-85db-60eeb1ab6b13.png" /></td>
-    <td><img src="https://cdn.phototourl.com/free/2026-09-21-838f6a1d-da4a-47e5-b2d4-81c26f93122e.png" /></td>
+    <td><img src="./resource/preview/效果案例 图表效果.png" /></td>
+    <td><img src="./resource/preview/系统工具 接口文档.png" /></td>
   </tr>
   <tr>
-    <td><img src="https://cdn.phototourl.com/free/2026-09-14-6e12e6b9-cbf3-455c-b40a-1ce15d538bfa.png" /></td>
-    <td><img src="https://cdn.phototourl.com/free/2026-09-14-d35f58a7-280e-4f22-a521-f0a9f30ebcc0.png" /></td>
+    <td><img src="./resource/preview/系统监控 定时任务.png" /></td>
+    <td><img src="./resource/preview/系统管理 参数设置.png" /></td>
   </tr>
 </table>
 

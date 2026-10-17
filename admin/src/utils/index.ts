@@ -2,10 +2,11 @@ export * from './file'
 export * from './time'
 export * from './common'
 export * from './convert'
+export * from './browser'
 export * from './validate'
 export * from './tip-modal'
 
-export * from './storage-cache'
+export * from './cache/storage-cache'
 
 export * from './cache/token.cache'
 export * from './cache/tags-view.cache'
