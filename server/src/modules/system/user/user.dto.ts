@@ -1,7 +1,7 @@
 import { PaginationDto } from '@/common'
 import { Exclude } from 'class-transformer'
 import { PartialType, PickType } from '@nestjs/mapped-types'
-import { IsArray, IsNotEmpty, IsOptional, IsString, Matches } from 'class-validator'
+import { IsArray, IsIn, IsNotEmpty, IsOptional, IsString, Matches } from 'class-validator'
 
 export class CreateUserDto {
   @IsNotEmpty({ message: '参数 $property  不能为空' })
@@ -60,6 +60,22 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
 
   @Exclude()
   createBy: string
+}
+
+export class ImportUserDto {
+  /** 是否覆盖已存在用户（FormData 布尔以字符串传输：'true'/'false'） */
+  @IsIn(['true', 'false'], { message: 'updateSupport 取值不合法' })
+  updateSupport: string
+
+  /** 归属部门 ID（本次导入的所有新用户共用） */
+  @IsNotEmpty({ message: '归属部门不能为空' })
+  @IsString()
+  deptId: string
+
+  /** 角色 ID（FormData 传逗号拼接字符串，Service 内拆分） */
+  @IsNotEmpty({ message: '用户角色不能为空' })
+  @IsString()
+  roleIds: string
 }
 
 export class QueryUserDto extends PaginationDto {

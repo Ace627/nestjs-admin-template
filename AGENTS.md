@@ -30,6 +30,7 @@
 - localStorage 须经 `src/utils/cache/*.cache.ts` 封装并在 `src/utils/index.ts` 统一导出，禁止裸调
 - 列表页的弹窗/抽屉一律拆分为 `components/XxxDialog.vue`、`components/XxxDrawer.vue` 子文件（参照 system/user 等既有范式），禁止内联在 index.vue 中；子组件通过 `defineExpose({ open })` 暴露打开方法，操作成功后 `emits('getList')` 刷新列表
 - 模板中 prop 名与变量名相同时使用同名简写（Vue 3.4+），如 `:columns` 而非 `:columns="columns"`；该简写仅适用于属性/prop，指令（v-loading 等）不适用
+- Element Plus 组件使用新 API，禁止使用已声明弃用的旧写法（如 el-link 用 `underline="never"|"hover"|"always"`，禁用 `:underline="false"`；弃用告警即报错对待，出现一次就要沉淀规则避免再犯）
 - ProTable 列配置了 `slot` 就不要再写 `prop`
 - 动态路由页面组件（后端菜单经 `router.helper.ts` 的 `loadView` 加载的 `src/views` 组件）内部禁止手写 `defineOptions({ name: 'xxx' })`：组件 name 由 `loadView` 按组件路径统一生成并与路由 name 对齐（如 `system/user/index` → `SystemUser`），手动命名与之一不一致会导致 tags-view 的 keep-alive 页面缓存失效，且多处手动命名易冲突、形成 name 双源维护。若 `defineOptions` 中还含 `inheritAttrs` 等其他选项，仅删 `name` 保留其余。适用边界：静态路由组件（首页、登录页、404、个人中心）、布局组件、独立弹窗/抽屉子组件不受此限，仍按需命名：
 
@@ -44,3 +45,5 @@
 
 - @Column 属性名含大写时，须显式指定 snake_case
   列名（name: 'user_name'），否则生成驼峰列
+
+- init.sql 禁止手工追加菜单行或按钮权限码行：菜单/按钮权限 SQL 一律由用户手动新增（菜单管理界面）；init.sql 只允许由导出生成这一种途径产生

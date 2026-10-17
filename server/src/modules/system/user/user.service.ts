@@ -4,11 +4,13 @@ import { RedisService } from '@/shared/redis.service'
 import { encryptPassword, verifyPassword } from '@/utils'
 import { DataSource, Equal, FindOptionsWhere, In, Like, Not, Repository } from 'typeorm'
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm'
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable, Logger, StreamableFile } from '@nestjs/common'
 import { resolve } from 'node:path'
 import { existsSync, rmSync } from 'node:fs'
 import { DeptService } from '../dept/dept.service'
-import { CreateUserDto, QueryUserDto, ResetUserPwdDto, UpdateProfileDto, UpdateUserDto, UpdateUserPwdDto } from './user.dto'
+import { ConfigService } from '../config/config.service'
+import { ExcelService } from '@/modules/common/excel/excel.service'
+import { CreateUserDto, ImportUserDto, QueryUserDto, ResetUserPwdDto, UpdateProfileDto, UpdateUserDto, UpdateUserPwdDto } from './user.dto'
 
 @Injectable()
 export class UserService {
@@ -21,6 +23,8 @@ export class UserService {
     @InjectRepository(FileEntity) private readonly fileRepository: Repository<FileEntity>,
     @InjectDataSource() private readonly dataSource: DataSource,
     private readonly deptService: DeptService,
+    private readonly configService: ConfigService,
+    private readonly excelService: ExcelService,
   ) {}
 
   /** 创建用户 */
@@ -128,6 +132,112 @@ export class UserService {
     // 6. 清除缓存 → 强制重新登录
     await this.cleanUserRelatedCache(userId)
     return '密码修改成功，请重新登录'
+  }
+
+  /** 下载用户导入模板 */
+  public async importTemplate(): Promise<StreamableFile> {
+    const fileReadableStream = await this.excelService.importTemplate(UserEntity)
+    const filename = encodeURIComponent('用户导入模板.xlsx')
+    const disposition = `attachment; filename="${filename}"; filename*=UTF-8''${filename}`
+    const type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    return new StreamableFile(fileReadableStream, { disposition, type })
+  }
+
+  /** 导入用户（首错即返；系统管理员账号禁止被导入修改；覆盖模式仅更新资料字段，不动密码/部门/角色） */
+  public async importData(file: ExpressMulterFile, importDto: ImportUserDto) {
+    this.validateImportFile(file)
+    const updateSupport = importDto.updateSupport === 'true'
+    const roleIds = importDto.roleIds.split(',').map((id) => id.trim()).filter(Boolean)
+    if (!roleIds.length) throw new BusinessException('用户角色不能为空')
+
+    const rows = await this.excelService.import(UserEntity, file)
+
+    // 文件内校验（不查库，首个错误立即抛出）：账号格式、文件内账号去重、年龄合法性
+    const usernameRegex = /^[a-zA-Z][a-zA-Z0-9]*$/
+    const seenUsernames = new Set<string>()
+    for (const row of rows) {
+      const { username, age } = row.data
+      if (!username || !usernameRegex.test(username)) throw new BusinessException(`第 ${row.rowNumber} 行：用户账号须以字母开头、仅含字母与数字`)
+      if (seenUsernames.has(username)) throw new BusinessException(`第 ${row.rowNumber} 行：用户账号「${username}」在文件中重复`)
+      seenUsernames.add(username)
+      if (age !== undefined && (!Number.isInteger(Number(age)) || Number(age) < 1 || Number(age) > 120)) throw new BusinessException(`第 ${row.rowNumber} 行：年龄「${age}」须为 1~120 的整数`)
+      row.data.age = age === undefined ? undefined : Number(age)
+    }
+
+    const result = await this.dataSource.transaction(async (manager) => {
+      const userRepository = manager.getRepository(UserEntity)
+      const roleRepository = manager.getRepository(RoleEntity)
+
+      const roles = await roleRepository.findBy({ id: In(roleIds) })
+      if (roles.length !== new Set(roleIds).size) throw new BusinessException('所选角色不存在或已被删除')
+
+      const usernames = rows.map((row) => row.data.username)
+      const existingUsers = await userRepository.find({ where: { username: In(usernames) }, relations: { roles: true } })
+      const existingMap = new Map(existingUsers.map((user) => [user.username, user]))
+
+      // 覆盖模式下命中系统管理员账号直接驳回（不跳过、不部分成功）；不覆盖模式下已存在即报错
+      if (updateSupport) {
+        const adminUsername = usernames.find((username) => existingMap.get(username)?.roles?.some((role) => role.roleCode === RbacConstant.SUPER_ROLE_CODE))
+        if (adminUsername) throw new BusinessException(`系统管理员账号「${adminUsername}」禁止导入修改`)
+      } else {
+        const firstExisting = usernames.find((username) => existingMap.has(username))
+        if (firstExisting) throw new BusinessException(`用户账号「${firstExisting}」已存在`)
+      }
+
+      // 手机号/邮箱唯一性：文件内去重 + 库内查重（覆盖模式下排除被更新用户自身）
+      const seenPhones = new Set<string>()
+      const seenEmails = new Set<string>()
+      for (const row of rows) {
+        const { phone, email } = row.data
+        const selfId = updateSupport ? existingMap.get(row.data.username)?.id : undefined
+        if (phone) {
+          if (seenPhones.has(phone)) throw new BusinessException(`第 ${row.rowNumber} 行：手机号「${phone}」在文件中重复`)
+          seenPhones.add(phone)
+          const where: FindOptionsWhere<UserEntity> = { phone: Equal(phone) }
+          if (selfId) where.id = Not(selfId)
+          if (await userRepository.existsBy(where)) throw new BusinessException(`第 ${row.rowNumber} 行：手机号「${phone}」已存在`)
+        }
+        if (email) {
+          if (seenEmails.has(email)) throw new BusinessException(`第 ${row.rowNumber} 行：邮箱「${email}」在文件中重复`)
+          seenEmails.add(email)
+          const where: FindOptionsWhere<UserEntity> = { email: Equal(email) }
+          if (selfId) where.id = Not(selfId)
+          if (await userRepository.existsBy(where)) throw new BusinessException(`第 ${row.rowNumber} 行：邮箱「${email}」已存在`)
+        }
+      }
+
+      // 清理同名软删墓碑（username 唯一索引被其占用，先物理删除；与 create() 口径一致）
+      const withDeletedUsers = await userRepository.find({ where: { username: In(usernames) }, withDeleted: true })
+      const activeUsernames = new Set(existingUsers.map((user) => user.username))
+      const tombstoneIds = withDeletedUsers.filter((user) => user.deleteTime && !activeUsernames.has(user.username)).map((user) => user.id)
+      if (tombstoneIds.length) await userRepository.delete(tombstoneIds)
+
+      // 入库：新用户初始密码取参数 sys.user.initPassword（缺失回退 123456）
+      const initialPassword = await encryptPassword(await this.configService.getStringConfig('sys.user.initPassword', '123456'))
+      const affectedIds: string[] = []
+      let createdCount = 0
+      let updatedCount = 0
+      for (const row of rows) {
+        const existing = existingMap.get(row.data.username)
+        if (existing) {
+          // 覆盖：仅更新 Excel 内的资料字段（密码/部门/角色保持不变）
+          Object.assign(existing, row.data)
+          await userRepository.save(existing)
+          updatedCount++
+          affectedIds.push(existing.id)
+        } else {
+          const entity = new UserEntity()
+          Object.assign(entity, row.data, { password: initialPassword, deptId: importDto.deptId, roles })
+          await userRepository.save(entity)
+          createdCount++
+          affectedIds.push(entity.id)
+        }
+      }
+      return { createdCount, updatedCount, affectedIds }
+    })
+
+    await Promise.all(result.affectedIds.map((userId) => this.cleanUserRelatedCache(userId)))
+    return `导入成功：新增 ${result.createdCount} 条、更新 ${result.updatedCount} 条`
   }
 
   /** 根据用户 ID 查询用户信息（含角色关联，供 getInfo 使用） */
@@ -251,6 +361,16 @@ export class UserService {
   /* -------------------------------------------------------------------------- */
   /*                               Private Handler                              */
   /* -------------------------------------------------------------------------- */
+
+  /** 导入文件校验：仅允许 .xlsx（旧版 .xls 引擎不支持；ZIP 魔数拦截改后缀的伪造文件） */
+  private validateImportFile(file: ExpressMulterFile): void {
+    if (!file?.buffer?.length) throw new BusinessException('导入文件不能为空')
+    const ext = (file.originalname ?? '').split('.').pop()?.toLowerCase()
+    if (ext === 'xls') throw new BusinessException('暂不支持旧版 .xls 格式，请将文件另存为 .xlsx 后重新上传')
+    if (ext !== 'xlsx') throw new BusinessException('仅支持 .xlsx 格式文件')
+    const isZipMagic = file.buffer[0] === 0x50 && file.buffer[1] === 0x4b
+    if (!isZipMagic) throw new BusinessException('导入文件不是有效的 .xlsx 文件')
+  }
 
   /** 检查手机号是否存在 */
   private async checkPhoneExists(phone?: string, userId?: string): Promise<boolean> {

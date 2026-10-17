@@ -301,7 +301,7 @@ const defs = [
     },
   },
 
-  /* ----------------------------- 用户管理（system/user，9 端点） ----------------------------- */
+  /* ----------------------------- 用户管理（system/user，11 端点） ----------------------------- */
   {
     path: '/system/user/create', method: 'post', tag: '用户管理', sort: 1000, summary: '新建用户',
     body: jsonBody({ username: 'zhangsan', password: '123456', roleIds: ['1967a8c5-63e4-4c2c-9902-2c7c32e365b3'], deptId: 'd2c17a9e-8e3c-4f9a-9f2a-6b7c8d9e0f1a', nickname: '张三', age: 25, status: '1', email: 'zhangsan@example.com', phone: '13800138000', gender: '1', remark: '' }),
@@ -316,6 +316,22 @@ const defs = [
     path: '/system/user/update', method: 'put', tag: '用户管理', sort: 3000, summary: '编辑用户',
     body: jsonBody({ id: '866b0232-507b-42a4-bdc1-47fc4a83616a', nickname: '张三三', phone: '13800138000', email: 'zhangsan@example.com', age: 26, status: '1', gender: '1', remark: '', deptId: 'd2c17a9e-8e3c-4f9a-9f2a-6b7c8d9e0f1a', roleIds: ['1967a8c5-63e4-4c2c-9902-2c7c32e365b3'] }),
     data: str('更新成功'), example: '更新成功',
+  },
+  {
+    path: '/system/user/importTemplate', method: 'post', tag: '用户管理', sort: 3500, summary: '下载导入模板',
+    desc: 'xlsx 流，列含：用户账号、手机号码、用户昵称、真实姓名、用户邮箱、状态（字典 sys_normal_disable）、性别（字典 sys_user_sex）、年龄、备注',
+    raw200: true,
+  },
+  {
+    path: '/system/user/importData', method: 'post', tag: '用户管理', sort: 3600, summary: '导入用户',
+    desc: '首错即返（账号格式、文件内账号/手机号/邮箱去重、年龄 1~120）；覆盖模式仅更新资料字段，不动密码/部门/角色；新用户部门与角色取表单参数，初始密码取参数 sys.user.initPassword（缺省 123456）',
+    body: multipartBody({
+      file: { type: 'string', format: 'binary', description: 'xlsx 用户数据文件' },
+      updateSupport: str('false', '是否覆盖已存在用户（FormData 布尔以字符串传输）'),
+      deptId: str('d2c17a9e-8e3c-4f9a-9f2a-6b7c8d9e0f1a', '归属部门ID（本次导入的所有新用户共用）'),
+      roleIds: str('1967a8c5-63e4-4c2c-9902-2c7c32e365b3', '角色ID，多个逗号拼接'),
+    }),
+    data: str('导入成功：新增 2 条、更新 1 条'), example: '导入成功：新增 2 条、更新 1 条',
   },
   {
     path: '/system/user/resetPassword', method: 'put', tag: '用户管理', sort: 4000, summary: '重置密码',

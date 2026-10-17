@@ -1,8 +1,9 @@
-import { Body, Controller, Delete, Get, ParseArrayPipe, Post, Put, Query } from '@nestjs/common'
+import { Body, Controller, Delete, Get, ParseArrayPipe, Post, Put, Query, UploadedFile, UseInterceptors } from '@nestjs/common'
+import { FileInterceptor } from '@nestjs/platform-express'
 import { UserService } from './user.service'
-import { BusinessType, CurrentUser, DataScope, DataScopeSql, Operlog, PaginationPipe, RequirePermissions } from '@/common'
+import { BusinessType, CurrentUser, DataScope, DataScopeSql, Operlog, PaginationPipe, RequirePermissions, SkipTransform } from '@/common'
 import type { DataScopeCondition } from '@/common'
-import { CreateUserDto, QueryUserDto, ResetUserPwdDto, UpdateProfileDto, UpdateUserDto, UpdateUserPwdDto } from './user.dto'
+import { CreateUserDto, ImportUserDto, QueryUserDto, ResetUserPwdDto, UpdateProfileDto, UpdateUserDto, UpdateUserPwdDto } from './user.dto'
 
 @Controller('system/user')
 export class UserController {
@@ -30,6 +31,23 @@ export class UserController {
   @Operlog({ title: '用户管理', businessType: BusinessType.UPDATE })
   update(@Body() updateDto: UpdateUserDto) {
     return this.userService.update(updateDto)
+  }
+
+  /** 下载用户导入模板（blob 响应） */
+  @SkipTransform()
+  @Post('importTemplate')
+  @RequirePermissions(['system:user:import'])
+  public importTemplate() {
+    return this.userService.importTemplate()
+  }
+
+  /** 导入用户（file 为 xlsx 文件；updateSupport 控制是否覆盖已存在用户） */
+  @Post('importData')
+  @RequirePermissions(['system:user:import'])
+  @Operlog({ title: '用户管理', businessType: BusinessType.IMPORT })
+  @UseInterceptors(FileInterceptor('file'))
+  public importData(@UploadedFile() file: ExpressMulterFile, @Body() importDto: ImportUserDto) {
+    return this.userService.importData(file, importDto)
   }
 
   /** 重置密码 */

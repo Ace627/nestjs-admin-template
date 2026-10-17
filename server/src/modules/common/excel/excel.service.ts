@@ -19,7 +19,7 @@ export class ExcelService {
    *
    * 职责边界：只做「文件结构校验 + 值逆变换」（表头比对、字典标签反查、日期逆解析），不做业务校验、不入库。
    *
-   * 错误策略（全有或全无）：表头不一致直接驳回；任何一行的字典标签 / 日期解析失败，汇总行错误后整体驳回，不返回部分数据。
+   * 错误策略（首错即返）：表头不一致直接驳回；任何一行的字典标签 / 日期解析失败立即抛出该条错误，不继续解析、不汇总。
    */
   public async import<TModel extends Type<any>>(model: TModel, file: ExpressMulterFile): Promise<ImportRow[]> {
     const workbook = new ExcelJS.Workbook()
@@ -48,8 +48,7 @@ export class ExcelService {
     })
     const optionArr: ExcelOptionAll[] = await Promise.all(optionPromiseArr)
 
-    // 逐行解析（跳过表头行，跳过全空行）
-    const rowErrors: string[] = []
+    // 逐行解析（跳过表头行，跳过全空行；首个错误立即抛出，不再继续解析）
     const rows: ImportRow[] = []
     worksheet.eachRow((row, rowNumber) => {
       if (rowNumber === 1) return
@@ -61,19 +60,13 @@ export class ExcelService {
         hasValue = true
         if (option.dictType) {
           const dictData = option.dictDataList.find((item) => item.dictLabel === text)
-          if (!dictData) {
-            rowErrors.push(`第 ${rowNumber} 行：${option.name}「${text}」不存在`)
-            return
-          }
+          if (!dictData) throw new BusinessException(`第 ${rowNumber} 行：${option.name}「${text}」不存在`)
           data[option.propertyKey] = dictData.dictValue
           return
         }
         if (option.dateFormat) {
           const dateValue = dayjs(text)
-          if (!dateValue.isValid()) {
-            rowErrors.push(`第 ${rowNumber} 行：${option.name}「${text}」日期格式错误`)
-            return
-          }
+          if (!dateValue.isValid()) throw new BusinessException(`第 ${rowNumber} 行：${option.name}「${text}」日期格式错误`)
           data[option.propertyKey] = dateValue.format(STORAGE_DATETIME_FORMAT)
           return
         }
@@ -81,12 +74,6 @@ export class ExcelService {
       })
       if (hasValue) rows.push({ rowNumber, data })
     })
-
-    if (rowErrors.length) {
-      const summary = rowErrors.slice(0, 10).join('；')
-      const suffix = rowErrors.length > 10 ? `（共 ${rowErrors.length} 处错误）` : ''
-      throw new BusinessException(`上传的文件存在错误，请修正后重新上传；${summary}${suffix}`)
-    }
     return rows
   }
 
@@ -123,11 +110,20 @@ export class ExcelService {
     return passThrough
   }
 
-  /* 导出模板 */
+  /* 导出模板（字典列自动生成下拉选项，与导入时标签反查口径一致） */
   public async importTemplate<TModel extends Type<any>>(model: TModel) {
     const passThrough = new stream.PassThrough()
     const importObjArr = Reflect.getMetadata(DecoratorConstant.EXCEL, model) ?? []
-    const headers = await this.formatImport(importObjArr)
+    const sortedImportObjArr = importObjArr
+      .filter((item) => item.type === ExcelType.ALL || item.type === ExcelType.IMPORT)
+      .sort((obj, obj2) => (obj.order ?? 1) - (obj2.order ?? 1))
+    // 预取字典数据，供下拉选项使用
+    const optionPromiseArr = sortedImportObjArr.map(async (item) => {
+      if (item.dictType) item.dictDataList = await this.dictDataService.findByType(item.dictType)
+      return item
+    })
+    const optionArr: ExcelOptionAll[] = await Promise.all(optionPromiseArr)
+    const headers: Partial<ExcelJS.Column>[] = optionArr.map((item) => ({ key: item.propertyKey, header: item.name }))
     const workbook = new ExcelJS.Workbook()
     const worksheet = workbook.addWorksheet('Sheet1', { views: [{ state: 'frozen', ySplit: 1 }] })
     for (const header of headers) {
@@ -136,17 +132,23 @@ export class ExcelService {
     }
     worksheet.getRow(1).font = { bold: true } // 单独设置表头行加粗（不影响数据行）
     worksheet.columns = headers
+    // 字典列添加下拉校验（第 2~1000 行），填表人直接选择合法取值
+    optionArr.forEach((option, index) => {
+      const labels = (option.dictDataList ?? []).map((item) => item.dictLabel)
+      if (!labels.length) return
+      for (let rowNumber = 2; rowNumber <= 1000; rowNumber++) {
+        worksheet.getCell(rowNumber, index + 1).dataValidation = {
+          type: 'list',
+          allowBlank: true,
+          formulae: [`"${labels.join(',')}"`],
+          showErrorMessage: true,
+          errorTitle: '输入不合法',
+          error: `请从下拉列表选择：${labels.join('、')}`,
+        }
+      }
+    })
     await workbook.xlsx.write(passThrough)
     return passThrough
-  }
-
-  /** 整理导入模板 */
-  private async formatImport(importObjArr: ExcelOptionAll[]): Promise<Partial<ExcelJS.Column>[]> {
-    const filtered = importObjArr.filter((item) => item.type === ExcelType.ALL || item.type === ExcelType.IMPORT)
-    const sorted = filtered.sort((obj, obj2) => (obj.order ?? 1) - (obj2.order ?? 1))
-    const propertyKeys = sorted.map((item) => item.propertyKey)
-    const names = sorted.map((item) => item.name)
-    return propertyKeys.map((key, index) => ({ key, header: names[index] }))
   }
 
   /* 整理导出数据 */

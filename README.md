@@ -31,6 +31,23 @@
 
 前后端放在**同一个仓库的两个独立工程**中（`admin/` 与 `server/`），**不是 monorepo**——两个工程各自 `pnpm install`，互不干扰，可以单独构建、单独部署；根目录的 `package.json` 仅提供 `dev:server` / `dev:admin` 一键启动脚本。
 
+## 🖼️ 演示图
+
+<table>
+  <tr>
+    <td><img src="./resource/preview/系统管理 字典管理.png" /></td>
+    <td><img src="./resource/preview/系统管理 菜单管理.png" /></td>
+  </tr>
+  <tr>
+    <td><img src="./resource/preview/效果案例 图表效果.png" /></td>
+    <td><img src="./resource/preview/系统工具 接口文档.png" /></td>
+  </tr>
+  <tr>
+    <td><img src="./resource/preview/系统监控 定时任务.png" /></td>
+    <td><img src="./resource/preview/系统管理 参数设置.png" /></td>
+  </tr>
+</table>
+
 ## 🎯 内置功能
 
 - **用户管理** — 用户的增删改查、重置密码、修改密码、角色分配、头像设置，支持按部门划分数据权限
@@ -109,23 +126,6 @@ docker compose up -d --build
 ├── Dockerfile.server    # 后端镜像构建文件
 └── AGENTS.md            # 开发协作约定
 ```
-
-## 🖼️ 演示图
-
-<table>
-  <tr>
-    <td><img src="./resource/preview/系统管理 字典管理.png" /></td>
-    <td><img src="./resource/preview/系统管理 菜单管理.png" /></td>
-  </tr>
-  <tr>
-    <td><img src="./resource/preview/效果案例 图表效果.png" /></td>
-    <td><img src="./resource/preview/系统工具 接口文档.png" /></td>
-  </tr>
-  <tr>
-    <td><img src="./resource/preview/系统监控 定时任务.png" /></td>
-    <td><img src="./resource/preview/系统管理 参数设置.png" /></td>
-  </tr>
-</table>
 
 ## 💬 前后端分离交流群
 

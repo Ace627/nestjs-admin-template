@@ -17,6 +17,16 @@ export class UserRequest {
     return request.put('/system/user/update', data)
   }
 
+  /** 下载用户导入模板（blob 响应，拦截器透传完整 axios response） */
+  static importTemplate() {
+    return request.post('/system/user/importTemplate', {}, { responseType: 'blob' })
+  }
+
+  /** 导入用户（FormData：file + updateSupport + deptId + roleIds） */
+  static importData(data: FormData): Promise<string> {
+    return request.post('/system/user/importData', data)
+  }
+
   /** 重置密码（按用户名定位，重置成功后强制该用户重新登录） */
   static resetPassword(data: { username: string; password: string }): Promise<string> {
     return request.put('/system/user/resetPassword', data)

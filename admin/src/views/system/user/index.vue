@@ -17,14 +17,11 @@
           <el-button v-permissions="['system:user:delete']" plain type="danger" @click="handleDelete()" :disabled="!isMultiple">
             <template #icon><SvgIcon name="Delete" /></template><span>批量删除</span>
           </el-button>
+          <el-button v-permissions="['system:user:import']" plain type="info" @click="handleImport">
+            <template #icon><SvgIcon name="Upload" /></template><span>导入</span>
+          </el-button>
         </div>
-        <RightToolbar
-          v-model:show-search="showSearch"
-          v-model:hidden-column-keys="hiddenColumnKeys"
-          :columns="columns"
-          storage-key="system:user"
-          @refresh="getList"
-        />
+        <RightToolbar v-model:show-search="showSearch" v-model:hidden-column-keys="hiddenColumnKeys" :columns="columns" storage-key="system:user" @refresh="getList" />
       </div>
 
       <ProTable ref="tableRef" v-loading="loading" :data="list" :columns="columns" :hidden-column-keys="hiddenColumnKeys" @selection-change="handleSelectionChange">
@@ -46,6 +43,8 @@
 
     <!-- 用户新增/编辑弹窗 -->
     <UserDialog ref="userDialogRef" @getList="getList" />
+    <!-- 用户导入弹窗 -->
+    <UserImportDialog ref="userImportDialogRef" @getList="getList" />
     <!-- 重置密码弹窗 -->
     <ResetPwdDialog ref="resetPwdDialogRef" />
   </div>
@@ -55,6 +54,7 @@
 import { TipModal } from '@/utils'
 import DeptTree from './components/DeptTree.vue'
 import UserDialog from './components/UserDialog.vue'
+import UserImportDialog from './components/UserImportDialog.vue'
 import { UserRequest } from '@/api/system/user.request'
 import ResetPwdDialog from './components/ResetPwdDialog.vue'
 import type { User, ProSearchItem, ProTableColumn } from '@/types'
@@ -66,6 +66,7 @@ const loading = ref(true)
 const isMultiple = computed(() => multipleSelection.value.length > 0)
 const tableRef = useTemplateRef('tableRef')
 const userDialogRef = useTemplateRef('userDialogRef')
+const userImportDialogRef = useTemplateRef('userImportDialogRef')
 const resetPwdDialogRef = useTemplateRef('resetPwdDialogRef')
 const deptTreeRef = useTemplateRef('deptTreeRef')
 const queryParams = ref<User.UserQuery>({ pageNo: 1, pageSize: 10 })
@@ -89,9 +90,9 @@ const columns: ProTableColumn<User.SysUser>[] = [
   { align: 'center', type: 'index', label: '序号', width: 64 },
   { align: 'center', prop: 'username', label: '用户账号', showOverflowTooltip: true, minWidth: 100 },
   { align: 'center', prop: 'nickname', label: '用户昵称', showOverflowTooltip: true, minWidth: 90 },
-  { align: 'center', prop: 'realname', label: '真实姓名', showOverflowTooltip: true, minWidth: 90 },
+  { align: 'center', prop: 'realname', label: '真实姓名', showOverflowTooltip: true, minWidth: 100 },
   { align: 'center', prop: 'phone', label: '手机号码', showOverflowTooltip: true, minWidth: 120 },
-  { align: 'center', prop: 'email', label: '用户邮箱', showOverflowTooltip: true, minWidth: 170 },
+  { align: 'center', prop: 'email', label: '用户邮箱', showOverflowTooltip: true, minWidth: 180 },
   { align: 'center', label: '性别', slot: 'gender', width: 80 },
   { align: 'center', label: '状态', slot: 'status', width: 80 },
   { align: 'center', prop: 'createTime', label: '创建时间', minWidth: 170 },
@@ -140,6 +141,10 @@ function handleDeptClick(deptId: string) {
 
 function handleCreate() {
   userDialogRef.value?.open(undefined, queryParams.value.deptId)
+}
+
+function handleImport() {
+  userImportDialogRef.value?.open()
 }
 
 function handleEdit(row: User.SysUser) {
