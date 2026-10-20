@@ -9,7 +9,7 @@
      * 增量构建信息文件输出路径
      * @description 指定 .tsbuildinfo 存放位置，开启增量编译以加速后续类型检查与构建
      */
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
+    "tsBuildInfoFile": "../../node_modules/.tmp/tsconfig.node.tsbuildinfo",
 
     /**
      * 编译目标 JS 版本
@@ -95,5 +95,5 @@
    * 编译包含的文件
    * @description 限定仅编译 vite.config.ts（Node 端配置/脚本），与编译 src 的 tsconfig.app.json 分工
    */
-  "include": ["vite.config.ts", "build/**/*.ts", "oxfmt.config.ts", "scripts/**/*.ts"]
+  "include": ["../../vite.config.ts", "../**/*.ts", "../../oxfmt.config.ts", "../../scripts/**/*.ts"]
 }

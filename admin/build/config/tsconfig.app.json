@@ -9,7 +9,7 @@
      * 增量构建信息文件输出路径
      * @description 指定 .tsbuildinfo 存放位置，开启增量编译以加速后续类型检查与构建
      */
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "tsBuildInfoFile": "../../node_modules/.tmp/tsconfig.app.tsbuildinfo",
 
     /**
      * 全局类型声明包
@@ -29,8 +29,8 @@
      * @note 需配合 Vite 配置文件中的 resolve.alias 同步配置，否则运行时会报错
      */
     "paths": {
-      "@/*": ["./src/*"],
-      "vue-cropper": ["./src/types/global/vue-cropper.d.ts"]
+      "@/*": ["../../src/*"],
+      "vue-cropper": ["../../src/types/global/vue-cropper.d.ts"]
     },
 
     /**
@@ -63,5 +63,5 @@
    * 编译包含的文件
    * @description 限定仅编译 src 下的 .ts/.tsx/.vue 源码，排除测试/配置等无关文件
    */
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"]
+  "include": ["../../src/**/*.ts", "../../src/**/*.tsx", "../../src/**/*.vue"]
 }

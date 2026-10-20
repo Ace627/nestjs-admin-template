@@ -29,21 +29,30 @@ export class StorageCache {
   /**
    * 读取存储
    * @param key 键
-   * @param defaultValue 不存在或已过期时的默认值
-   * @returns 存储值或默认值
+   * @returns 存储值，不存在或已过期时返回 null
    */
-  static get<T = any>(key: string, defaultValue: T | null = null): T | null {
+  static get<T = any>(key: string): T | null {
     try {
       const jsonStr = localStorage.getItem(STORAGE_PREFIX + key)
-      if (!jsonStr) return defaultValue
+      if (!jsonStr) return null
       const data = JSON.parse(jsonStr)
       if (Date.now() <= data.ttl || data.ttl === -1) return data.value as T
       localStorage.removeItem(STORAGE_PREFIX + key)
-      return defaultValue
+      return null
     } catch {
       localStorage.removeItem(STORAGE_PREFIX + key)
-      return defaultValue
+      return null
     }
+  }
+
+  /**
+   * 读取存储（带默认值）
+   * @param key 键
+   * @param defaultValue 不存在或已过期时的默认值
+   * @returns 存储值或默认值
+   */
+  static getWithDefault<T>(key: string, defaultValue: T): T {
+    return StorageCache.get<T>(key) ?? defaultValue
   }
 
   /** 删除指定键 */
