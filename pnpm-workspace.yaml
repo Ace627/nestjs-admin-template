@@ -1,0 +1,29 @@
+# 工作区子包目录（glob 匹配）
+packages:
+  - 'apps/*'
+
+# 允许执行安装构建脚本的依赖白名单
+allowBuilds:
+  '@parcel/watcher': true
+  argon2: true
+  esbuild: true
+  ip2region-ts: true
+  msgpackr-extract: true
+  unrs-resolver: true
+
+# 允许执行 pre/post 生命周期脚本
+enablePrePostScripts: true
+# 不严格校验 node 版本
+engineStrict: false
+# 网络请求失败重试次数
+fetchRetries: 2
+# 使用 pnpm-lock.yaml 锁定依赖
+lockfile: true
+# 不强制校验 packageManager 字段版本
+packageManagerStrict: false
+# npm 镜像源
+registry: https://registry.npmmirror.com
+# 安装依赖时锁定精确版本号（不带 ^ ~）
+saveExact: true
+# 依赖提升到根 node_modules（兼容幽灵依赖）
+shamefullyHoist: true

@@ -1,7 +1,7 @@
 /**
  * 批量清理 SVG 冗余属性（fill/class/version/t/p-id/width/height 等）
  * 用法：node scripts/clean-svg-icons.mjs [目录1 目录2 ...]
- * 不传目录时默认清理 admin/src/assets/svg-icons；相对路径基于项目根目录解析
+ * 不传目录时默认清理 apps/admin/src/assets/svg-icons；相对路径基于项目根目录解析
  */
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -9,7 +9,7 @@ import { readFile, writeFile, readdir } from 'node:fs/promises'
 
 const projectDir = path.dirname(path.dirname(fileURLToPath(import.meta.url)))
 // 项目内默认 SVG 图标目录
-const DEFAULT_ICON_DIRS = ['admin/src/assets/svg-icons']
+const DEFAULT_ICON_DIRS = ['apps/admin/src/assets/svg-icons']
 // 要移除的 SVG 冗余属性
 const REMOVE_ATTRS = ['fill', 'class', 'version', 't', 'p-id', 'width', 'height']
 

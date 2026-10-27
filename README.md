@@ -2,7 +2,7 @@
 
 <p align="center">
   基于 Vue 3 + NestJS 11 全 TypeScript 技术栈的中后台模板<br />
-  权限模型完整落地 · 容器化开箱可用 · 前后端同仓库独立工程
+  权限模型完整落地 · 容器化开箱可用 · pnpm monorepo 单仓双端
 </p>
 
 <p align="center">
@@ -29,7 +29,7 @@
 
 一套开箱可用的中后台模板：前端 **Vue 3 + TypeScript + Element Plus + Vite 8**，后端 **NestJS 11 + TypeORM + MySQL + Redis + BullMQ**。除登录鉴权外，还完整实现了用户、角色、菜单、部门、字典、参数、日志、缓存、定时任务、在线用户等中后台标配功能。
 
-前后端放在**同一个仓库的两个独立工程**中（`admin/` 与 `server/`），**不是 monorepo**——两个工程各自 `pnpm install`，互不干扰，可以单独构建、单独部署；根目录的 `package.json` 仅提供 `dev:server` / `dev:admin` 一键启动脚本。
+采用 **pnpm workspace monorepo** 结构：前后端分别位于 `apps/admin` 与 `apps/server`，共享依赖（axios、dayjs、lodash-es、TypeScript、Prettier 等）统一声明在根 `package.json`，全仓库共用一份 `pnpm-lock.yaml`，根目录一次 `pnpm install` 即可完成安装；根目录另提供 `dev:server` / `dev:admin` 一键启动脚本。
 
 ## 🖼️ 演示图
 
@@ -82,20 +82,19 @@
 git clone https://github.com/ace627/nestjs-admin-template.git
 cd nestjs-admin-template
 
-# 2. 安装依赖（前后端独立工程，各自安装）
-cd server && pnpm install && cd ..
-cd admin  && pnpm install && cd ..
+# 2. 安装依赖（workspace 根目录一次安装）
+pnpm install
 
 # 3. 初始化数据库：创建 nestdemo 库（utf8mb4），导入根目录 init.sql
 mysql -uroot -p -e "CREATE DATABASE nestdemo DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
 mysql -uroot -p nestdemo < init.sql
 
 # 4. 配置后端环境变量：复制模板后按需修改连接信息与 JWT_SECRET
-cp server/.env.example server/.env
+cp apps/server/.env.example apps/server/.env
 
 # 5. 启动（也可在根目录直接执行 pnpm dev:server / pnpm dev:admin）
-cd server && pnpm start:dev   # 后端 http://localhost:3000/api
-cd admin  && pnpm dev         # 前端 http://localhost:5173（开发代理已指向 3000）
+cd apps/server && pnpm start:dev   # 后端 http://localhost:3000/api
+cd apps/admin && pnpm dev          # 前端 http://localhost:5173（开发代理已指向 3000）
 ```
 
 启动完成后使用默认账号登录：**admin / 123456**（超级管理员，建议登录后修改密码）。
@@ -116,14 +115,16 @@ docker compose up -d --build
 ## 📂 目录结构
 
 ```
-├── admin/               # 前端工程（Vue 3 + TypeScript + Vite）
-├── server/              # 后端工程（NestJS + TypeORM）
-│   └── .env.example     # 环境变量模板
+├── apps/                # pnpm workspace 子包
+│   ├── admin/           # 前端工程（Vue 3 + TypeScript + Vite）
+│   └── server/          # 后端工程（NestJS + TypeORM）
+│       └── .env.example # 环境变量模板
 ├── scripts/             # 仓库级脚本（SVG 图标批量清理等）
 ├── docs/                # 本地文档
 ├── init.sql             # 数据库初始化脚本（建表 + 种子数据）
 ├── docker-compose.yml   # 后端一键编排（server + MySQL + Redis）
 ├── Dockerfile.server    # 后端镜像构建文件
+├── pnpm-workspace.yaml  # pnpm workspace 配置
 └── AGENTS.md            # 开发协作约定
 ```
 
