@@ -1,6 +1,7 @@
 {
   "name": "server",
   "version": "1.0.0",
+  "type": "module",
   "scripts": {
     "typeorm": "esno -r tsconfig-paths/register ./node_modules/typeorm/cli.js -d ormconfig.ts",
     "migration:generate": "npm run typeorm migration:generate src/database/migrations/init",
@@ -8,7 +9,6 @@
     "migration:revert": "npm run typeorm migration:revert",
     "db:init": "node scripts/init-db.js",
     "build": "cross-env NODE_ENV=production nest build",
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "cross-env NODE_ENV=development nest start",
     "start:dev": "cross-env NODE_ENV=development nest start --watch",
     "start:debug": "cross-env NODE_ENV=development nest start --debug --watch",
@@ -61,6 +61,7 @@
     "@nestjs/cli": "^12.0.11",
     "@nestjs/schematics": "^12.0.11",
     "@nestjs/testing": "^12.3.1",
+    "@rspack/cli": "2.2.9",
     "@rspack/core": "^2.2.9",
     "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",

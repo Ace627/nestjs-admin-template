@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
     // 设定编译后的 JavaScript 文件使用的模块化方案
-    "module": "nodenext",
+    "module": "preserve",
     // 模块解析策略，与 module 保持一致，按 Node.js 的解析规则查找模块
-    "moduleResolution": "nodenext",
+    "moduleResolution": "bundler",
     // 设定编译后的 JavaScript 文件的 ECMAScript 目标版本
     "target": "ES2023",
     // 解析包时遵循 package.json 的 exports 字段

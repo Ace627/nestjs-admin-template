@@ -5,7 +5,8 @@
   "license": "MIT",
   "scripts": {
     "dev:server": "cd apps/server && pnpm start:dev",
-    "dev:admin": "cd apps/admin && pnpm dev"
+    "dev:admin": "cd apps/admin && pnpm dev",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "axios": "^1.21.0",

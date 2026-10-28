@@ -5,8 +5,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
-    "preview": "vite preview",
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\""
+    "preview": "vite preview"
   },
   "dependencies": {
     "@vueuse/core": "^15.0.0",

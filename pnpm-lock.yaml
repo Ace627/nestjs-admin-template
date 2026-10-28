@@ -221,6 +221,9 @@ importers:
       '@nestjs/testing':
         specifier: ^12.3.1
         version: 12.3.1(@nestjs/common@12.3.1(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.3.1)(@nestjs/platform-express@12.3.1)
+      '@rspack/cli':
+        specifier: 2.2.9
+        version: 2.2.9(@rspack/core@2.2.9)
       '@rspack/core':
         specifier: ^2.2.9
         version: 2.2.9
@@ -1774,6 +1777,16 @@ packages:
 
   '@rspack/binding@2.2.9':
     resolution: {integrity: sha512-Y8wDJoRo8n0KXDGq6J3KGVekkUQcOcUHSppMHoJv8JLbNBEsyaaKiDx4ljNTGEDtTON0CRbMEWbSiLRe+bJxOQ==}
+
+  '@rspack/cli@2.2.9':
+    resolution: {integrity: sha512-oaFot9B5oensD70w2ikkVRugqpXlAOUYu034JMFsAIrwurEHnoYcUJo+nw06M3Fv4Tx48QCcO7bBh0ynDiDKtw==}
+    hasBin: true
+    peerDependencies:
+      '@rspack/core': ^2.0.0-0
+      '@rspack/dev-server': ^2.0.0-0
+    peerDependenciesMeta:
+      '@rspack/dev-server':
+        optional: true
 
   '@rspack/core@2.2.9':
     resolution: {integrity: sha512-Tp6/ZdM5UrGB3BeLfvh69l1iX03PZ46IgXjKqubVEuJVAhnOjpshooH/YAxcxR0AymcBLKA997Z4v+LV2aXzCw==}
@@ -7479,6 +7492,10 @@ snapshots:
       '@rspack/binding-win32-arm64-msvc': 2.2.9
       '@rspack/binding-win32-ia32-msvc': 2.2.9
       '@rspack/binding-win32-x64-msvc': 2.2.9
+
+  '@rspack/cli@2.2.9(@rspack/core@2.2.9)':
+    dependencies:
+      '@rspack/core': 2.2.9
 
   '@rspack/core@2.2.9':
     dependencies:
