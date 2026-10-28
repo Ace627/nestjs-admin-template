@@ -6,7 +6,6 @@ import nodeExternals from 'webpack-node-externals'
 export default defineConfig({
   // 打包出来的代码在 Node 里运行，不是给浏览器用的
   target: 'node',
-  // Node 内置模块（fs/path 等）不打包；target 设为 node 时已默认开启，这里写明是为了直观
   // Node 内置模块（fs/path/crypto 等）不打包，交给 Node 运行时；注释掉会报 Reading from "node:fs" is not handled
   externalsPresets: { node: true },
   // node_modules 里的依赖不打包进产物，运行时再由 Node 去加载

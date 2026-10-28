@@ -13,7 +13,7 @@ const STATUS_NORMAL = '1'
 const STATUS_DISABLE = '0'
 
 /** 预收集全部视图组件的懒加载器（vue3 动态路由不能用字符串拼接 import，必须先收集再按 key 匹配） */
-const views = import.meta.glob('@/views/**/*.vue')
+const views = import.meta.glob(['@/views/**/*.vue', '!@/views/core/iframe/**'])
 
 /**
  * 斜杠路径转大驼峰（system/user/index → SystemUser）
