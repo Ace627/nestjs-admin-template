@@ -1,3 +1,4 @@
+/* 全主题样式 */
 html {
   --el-sidebar-width: 220px;
   --el-sidebar-hide-width: 64px;
@@ -28,6 +29,11 @@ html {
   --el-theme-transition-easing: ease-out;
 }
 
+/* 浅色主题样式 */
+html:not(.dark) {
+}
+
+/* 深色主题样式 */
 html.dark {
   --el-sidebar-bg-color: #141414;
   --el-sidebar-nested-bg-color: #010101;
