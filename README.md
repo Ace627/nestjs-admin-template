@@ -1,13 +1,13 @@
 <h1 align="center">NestJS Admin Template</h1>
 
 <p align="center">
-  基于 Vue 3 + NestJS 11 全 TypeScript 技术栈的中后台模板<br />
+  基于 Vue 3 + NestJS 12 全 TypeScript 技术栈的中后台模板<br />
   权限模型完整落地 · 容器化开箱可用 · pnpm monorepo 单仓双端
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Vue-3.5.42-42b883?logo=vuedotjs&logoColor=white" alt="Vue" />
-  <img src="https://img.shields.io/badge/NestJS-11-E0234E?logo=nestjs&logoColor=white" alt="NestJS" />
+  <img src="https://img.shields.io/badge/Vue-3.5.44-42b883?logo=vuedotjs&logoColor=white" alt="Vue" />
+  <img src="https://img.shields.io/badge/NestJS-12-E0234E?logo=nestjs&logoColor=white" alt="NestJS" />
   <img src="https://img.shields.io/badge/TypeScript-6.0.3-3178C6?logo=typescript&logoColor=white" alt="TypeScript" />
   <img src="https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white" alt="Vite" />
   <img src="https://img.shields.io/badge/MySQL-8-4479A1?logo=mysql&logoColor=white" alt="MySQL" />
@@ -27,7 +27,7 @@
 
 ## 📖 简介
 
-一套开箱可用的中后台模板：前端 **Vue 3 + TypeScript + Element Plus + Vite 8**，后端 **NestJS 11 + TypeORM + MySQL + Redis + BullMQ**。除登录鉴权外，还完整实现了用户、角色、菜单、部门、字典、参数、日志、缓存、定时任务、在线用户等中后台标配功能。
+一套开箱可用的中后台模板：前端 **Vue 3 + TypeScript + Element Plus + Vite 8**，后端 **NestJS 12 + TypeORM + MySQL + Redis + BullMQ**。除登录鉴权外，还完整实现了用户、角色、菜单、部门、字典、参数、日志、缓存、定时任务、在线用户等中后台标配功能。
 
 采用 **pnpm workspace monorepo** 结构：前后端分别位于 `apps/admin` 与 `apps/server`，共享依赖（axios、dayjs、lodash-es、TypeScript、Prettier 等）统一声明在根 `package.json`，全仓库共用一份 `pnpm-lock.yaml`，根目录一次 `pnpm install` 即可完成安装；根目录另提供 `dev:server` / `dev:admin` 一键启动脚本。
 

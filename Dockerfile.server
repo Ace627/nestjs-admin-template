@@ -11,7 +11,6 @@ WORKDIR /app
 # 先拷依赖清单：只改业务代码时，下面两层缓存不会失效
 # 镜像源等配置在 pnpm-workspace.yaml（pnpm v10 起 npmrc 配置可写进 workspace 文件）
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
-COPY apps/admin/package.json ./apps/admin/
 COPY apps/server/package.json ./apps/server/
 RUN npm i -g pnpm@${PNPM_VERSION}
 RUN pnpm install --frozen-lockfile --filter server
@@ -21,20 +20,23 @@ COPY apps/server/nest-cli.json apps/server/tsconfig.json apps/server/tsconfig.bu
 COPY apps/server/src ./src
 RUN pnpm build
 
-# ==================== 阶段 2：只装生产依赖 ====================
-FROM node:${NODE_VERSION}-alpine AS prod-deps
+# ==================== 阶段 2：提取部署包 ====================
+FROM node:${NODE_VERSION}-alpine AS deployer
 
 ARG PNPM_VERSION
 
 WORKDIR /app
 
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
-COPY apps/admin/package.json ./apps/admin/
 COPY apps/server/package.json ./apps/server/
 RUN npm i -g pnpm@${PNPM_VERSION}
-# --prod 跳过 devDependencies；argon2 自带 linux-x64 的 glibc/musl 预编译产物，
-# 无需在镜像里准备 python3/make/g++（pnpm 默认拦截构建脚本也不影响运行时加载）
-RUN pnpm install --prod --frozen-lockfile --filter server
+# --prod 只带生产依赖；--legacy 走 v9 前的部署行为，shamefullyHoist 下
+# 根 importer 的 axios/dayjs/lodash-es 等也会随提升进入产物
+# argon2 自带 linux-x64 的 glibc/musl 预编译产物，无需准备 python3/make/g++
+RUN pnpm deploy --filter=server --prod --legacy /deploy
+
+# 构建产物合并进部署根目录，main.js 与 node_modules 同级
+COPY --from=builder /app/dist/ /deploy/
 
 # ==================== 阶段 3：运行 ====================
 FROM node:${NODE_VERSION}-alpine AS runner
@@ -59,11 +61,8 @@ RUN apk add --no-cache tzdata \
  && mkdir -p logs/info logs/error uploads \
  && chown -R node:node /app/logs /app/uploads
 
-# 生产依赖（pnpm 的 node_modules 内部是相对软链接，跨阶段 COPY 会原样保留）
-# 根 importer 的 axios/dayjs/lodash-es 也在其中，node dist/main.js 靠向上解析加载
-COPY --from=prod-deps --chown=node:node /app/node_modules ./node_modules
-COPY --from=builder --chown=node:node /app/dist ./dist
-COPY --chown=node:node apps/server/package.json ./
+# 平铺部署包（pnpm deploy 产物内部为相对软链接，跨阶段 COPY 原样保留）
+COPY --from=deployer --chown=node:node /deploy .
 # 探针脚本，配合下面的 HEALTHCHECK 使用
 COPY --chown=node:node apps/server/scripts/healthcheck.js ./scripts/healthcheck.js
 
@@ -77,4 +76,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
   CMD ["node", "scripts/healthcheck.js"]
 
 # exec 形式启动，node 直接收到 SIGTERM，配合 main.ts 的 enableShutdownHooks() 优雅退出
-CMD ["node", "dist/main.js"]
+CMD ["node", "main.js"]
