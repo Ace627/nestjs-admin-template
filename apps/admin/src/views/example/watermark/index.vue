@@ -34,11 +34,7 @@
           <template #header>
             <div class="watermark-page__card-header">图片水印</div>
           </template>
-          <el-watermark
-            image="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='none' stroke='rgba(64,158,255,0.3)' stroke-width='2'/%3E%3Ctext x='32' y='38' text-anchor='middle' fill='rgba(64,158,255,0.3)' font-size='14' font-family='sans-serif'%3ELOGO%3C/text%3E%3C/svg%3E"
-            :width="80"
-            :height="80"
-          >
+          <el-watermark :image="WATERMARK_IMAGE" :width="80" :height="80">
             <div class="watermark-page__demo-box">
               <p class="watermark-page__demo-text">水印类型：图片（SVG / PNG）</p>
               <p class="watermark-page__demo-text">尺寸：80 × 80 | 旋转：-22° | 间距：[100, 100]</p>
@@ -124,6 +120,9 @@ interface LoginRecord {
   status: string
 }
 
+const WATERMARK_IMAGE =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='none' stroke='rgba(64,158,255,0.3)' stroke-width='2'/%3E%3Ctext x='32' y='38' text-anchor='middle' fill='rgba(64,158,255,0.3)' font-size='14' font-family='sans-serif'%3ELOGO%3C/text%3E%3C/svg%3E"
+
 const columns: ProTableColumn<LoginRecord>[] = [
   { align: 'center', type: 'index', label: '序号', width: 60 },
   { align: 'center', prop: 'username', label: '用户名称', minWidth: 120 },
@@ -131,7 +130,7 @@ const columns: ProTableColumn<LoginRecord>[] = [
   { align: 'center', prop: 'location', label: '登录地点', minWidth: 120 },
   { align: 'center', prop: 'browser', label: '浏览器', minWidth: 140 },
   { align: 'center', prop: 'os', label: '操作系统', minWidth: 140 },
-  { align: 'center', prop: 'loginTime', label: '登录时间', minWidth: 170 },
+  { align: 'center', prop: 'loginTime', label: '访问时间', minWidth: 170 },
   { align: 'center', slot: 'status', label: '状态', width: 80 },
 ]
 
@@ -139,10 +138,7 @@ const customConfig = reactive({
   content: VITE_APP_TITLE,
   rotate: -22,
   gap: [100, 100] as [number, number],
-  font: {
-    color: 'rgba(64, 158, 255, 0.35)',
-    fontSize: 16,
-  },
+  font: { color: 'rgba(64, 158, 255, 0.35)', fontSize: 16 },
 })
 
 const tableData: LoginRecord[] = [
