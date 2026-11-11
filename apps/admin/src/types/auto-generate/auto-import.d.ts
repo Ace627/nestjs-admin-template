@@ -40,6 +40,7 @@ declare global {
   const eagerComputed: typeof import('@vueuse/core').eagerComputed
   const effectScope: typeof import('vue').effectScope
   const extendRef: typeof import('@vueuse/core').extendRef
+  const generateTableColumnKey: typeof import('../../hooks/useTablePrint').generateTableColumnKey
   const getActivePinia: typeof import('pinia').getActivePinia
   const getCurrentInstance: typeof import('vue').getCurrentInstance
   const getCurrentScope: typeof import('vue').getCurrentScope
@@ -100,6 +101,7 @@ declare global {
   const refManualReset: typeof import('@vueuse/core').refManualReset
   const refThrottled: typeof import('@vueuse/core').refThrottled
   const refWithControl: typeof import('@vueuse/core').refWithControl
+  const registerTablePrintContext: typeof import('../../hooks/useTablePrint').registerTablePrintContext
   const resetDictCache: typeof import('../../hooks/useDict').resetDictCache
   const resolveComponent: typeof import('vue').resolveComponent
   const setActivePinia: typeof import('pinia').setActivePinia
@@ -273,6 +275,7 @@ declare global {
   const useStyleTag: typeof import('@vueuse/core').useStyleTag
   const useSupported: typeof import('@vueuse/core').useSupported
   const useSwipe: typeof import('@vueuse/core').useSwipe
+  const useTablePrintContext: typeof import('../../hooks/useTablePrint').useTablePrintContext
   const useTagsViewStore: typeof import('../../store/modules/tags-view').useTagsViewStore
   const useTemplateRef: typeof import('vue').useTemplateRef
   const useTemplateRefsList: typeof import('@vueuse/core').useTemplateRefsList
@@ -336,4 +339,7 @@ declare global {
   // @ts-ignore
   export type { DictSelectItem } from '../../hooks/useDict'
   import('../../hooks/useDict')
+  // @ts-ignore
+  export type { TablePrintContext } from '../../hooks/useTablePrint'
+  import('../../hooks/useTablePrint')
 }

@@ -1,6 +1,8 @@
 import type { ProTableColumn } from '@/components/ProTable/types'
 
 export interface RightToolbarProps {
+  /** 是否显示「打印数据」按钮，默认 true；页面需调用 useTablePrint 提供打印上下文，未提供时按钮自动隐藏 */
+  printable?: boolean
   /** 是否显示「隐藏搜索」按钮，默认 true */
   search?: boolean
   /** 搜索区域显隐状态（v-model:showSearch，状态由父页面持有） */

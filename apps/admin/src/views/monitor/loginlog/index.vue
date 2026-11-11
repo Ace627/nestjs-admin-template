@@ -67,7 +67,7 @@ const columns: ProTableColumn<Loginlog.Item>[] = [
   { align: 'center', prop: 'location', label: '登录地点', showOverflowTooltip: true, minWidth: 150 },
   { align: 'center', prop: 'os', label: '操作系统', showOverflowTooltip: true, minWidth: 150 },
   { align: 'center', prop: 'browser', label: '浏览器', showOverflowTooltip: true, width: 180 },
-  { align: 'center', label: '登录状态', slot: 'status', width: 90 },
+  { align: 'center', label: '登录状态', slot: 'status', width: 90, printFormatter: (row) => sys_common_status.value.find((item) => item.dictValue === String(row.status))?.dictLabel ?? String(row.status ?? '') },
   { align: 'center', prop: 'message', label: '描述', showOverflowTooltip: true, width: 220 },
   { align: 'center', prop: 'loginTime', label: '登录时间', width: 170 },
   { align: 'center', slot: 'action', label: '操作', fixed: 'right', width: 80 },

@@ -3,3 +3,4 @@
 - 不要写兼容性代码，除非我主动要求；写完代码后，列出边缘情况并建议测试用例
 - `src/components/` 下的组件均为全局组件，模板中直接写标签使用，禁止 `import` 或局部注册
 - `build/plugins/auto-import-plugin.ts` 配置的 API 与模块导出直接使用，禁止 import
+- 变量命名必须见名知意，禁止缩写变量（如 v、v: unknown）；类型不明确时也用能表达业务含义的变量名

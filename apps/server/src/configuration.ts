@@ -1,4 +1,10 @@
+import { resolve } from 'node:path'
 import { toInteger, toBoolean } from './utils'
+
+/** env 文件加载顺序（靠前优先），供 Nest ConfigModule 与 TypeORM CLI 共用 */
+export function getEnvFilePaths(mode = process.env.NODE_ENV || 'development') {
+  return [`.env.${mode}.local`, '.env.local', `.env.${mode}`, '.env'].map((file) => resolve(process.cwd(), file))
+}
 
 export const configuration = () => {
   return {

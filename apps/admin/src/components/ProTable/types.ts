@@ -6,6 +6,8 @@ export interface ProTableColumn<T = any> extends Partial<TableColumnCtx> {
   prop?: string & keyof T
   /** 自定义插槽名称，用于自定义渲染列内容 */
   slot?: string
+  /** 打印格式化：把行数据转为打印文本（插槽列建议配置，否则打印 slot 名对应的原始字段值） */
+  printFormatter?: (row: T) => string
 }
 
 type NativeTableProps = ExtractPublicPropTypes<TableProps<Record<PropertyKey, any>>>

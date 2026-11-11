@@ -93,8 +93,8 @@ const columns: ProTableColumn<User.SysUser>[] = [
   { align: 'center', prop: 'realname', label: '真实姓名', showOverflowTooltip: true, minWidth: 100 },
   { align: 'center', prop: 'phone', label: '手机号码', showOverflowTooltip: true, minWidth: 120 },
   { align: 'center', prop: 'email', label: '用户邮箱', showOverflowTooltip: true, minWidth: 180 },
-  { align: 'center', label: '性别', slot: 'gender', width: 80 },
-  { align: 'center', label: '状态', slot: 'status', width: 80 },
+  { align: 'center', label: '性别', slot: 'gender', width: 80, printFormatter: (row) => sys_user_sex.value.find((item) => item.dictValue === String(row.gender))?.dictLabel ?? String(row.gender ?? '') },
+  { align: 'center', label: '状态', slot: 'status', width: 80, printFormatter: (row) => sys_normal_disable.value.find((item) => item.dictValue === String(row.status))?.dictLabel ?? String(row.status ?? '') },
   { align: 'center', prop: 'createTime', label: '创建时间', minWidth: 170 },
   { align: 'center', slot: 'action', label: '操作', fixed: 'right', width: 190 },
 ]

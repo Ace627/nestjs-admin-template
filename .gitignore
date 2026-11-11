@@ -7,6 +7,8 @@ admin/src/types/auto-generate
 /.env
 # server 工程密钥配置禁止提交；前端 admin/.env* 为纯 UI 配置，有意提交
 server/.env
+apps/server/.env*
+!apps/server/.env.example
 .env.local
 *.local
 

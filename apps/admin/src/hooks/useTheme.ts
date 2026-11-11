@@ -1,3 +1,5 @@
+import { setCssVar, delCssVar } from '@/utils'
+
 /**
  * 主题切换 hook
  * 统一导航栏 ThemeSwitch 与设置页的主题切换逻辑：
@@ -48,9 +50,9 @@ export function useTheme() {
 
     const transitionId = ++latestTransitionId
     root.dataset.themeTransition = nextDark ? 'to-dark' : 'to-light'
-    root.style.setProperty('--theme-transition-x', `${ratioX}%`)
-    root.style.setProperty('--theme-transition-y', `${ratioY}%`)
-    root.style.setProperty('--theme-transition-radius', `${ratioR}%`)
+    setCssVar('--theme-transition-x', `${ratioX}%`, root)
+    setCssVar('--theme-transition-y', `${ratioY}%`, root)
+    setCssVar('--theme-transition-radius', `${ratioR}%`, root)
 
     // 先更新数据层再切视觉类；且必须在主题值已更新后持久化，否则会保存成旧主题
     const transition = document.startViewTransition(() => {
@@ -62,9 +64,9 @@ export function useTheme() {
     transition.finished.finally(() => {
       if (transitionId !== latestTransitionId) return
       delete root.dataset.themeTransition
-      root.style.removeProperty('--theme-transition-x')
-      root.style.removeProperty('--theme-transition-y')
-      root.style.removeProperty('--theme-transition-radius')
+      delCssVar('--theme-transition-x', root)
+      delCssVar('--theme-transition-y', root)
+      delCssVar('--theme-transition-radius', root)
     })
   }
 

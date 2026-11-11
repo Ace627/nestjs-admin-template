@@ -77,14 +77,14 @@ const columns: ProTableColumn<Operlog.Item>[] = [
   { align: 'center', type: 'index', label: '序号', width: 64 },
   { align: 'center', prop: 'requestId', label: '请求ID', showOverflowTooltip: true, width: 100 },
   { align: 'center', prop: 'title', label: '系统模块', showOverflowTooltip: true, width: 120 },
-  { align: 'center', label: '操作类型', slot: 'businessType', width: 90 },
+  { align: 'center', label: '操作类型', slot: 'businessType', width: 90, printFormatter: (row) => sys_oper_type.value.find((item) => item.dictValue === String(row.businessType))?.dictLabel ?? String(row.businessType ?? '') },
   { align: 'center', prop: 'username', label: '操作人员', showOverflowTooltip: true },
   { align: 'center', prop: 'ip', label: '操作地址', showOverflowTooltip: true, width: 150 },
   { align: 'center', prop: 'location', label: '操作地点', showOverflowTooltip: true },
   { align: 'center', prop: 'requestMethod', label: '请求方法', width: 90 },
-  { align: 'center', label: '操作状态', slot: 'status', width: 90 },
+  { align: 'center', label: '操作状态', slot: 'status', width: 90, printFormatter: (row) => sys_common_status.value.find((item) => item.dictValue === String(row.status))?.dictLabel ?? String(row.status ?? '') },
   { align: 'center', prop: 'operTime', label: '操作时间', width: 170 },
-  { align: 'center', label: '消耗时间', slot: 'duration', width: 100 },
+  { align: 'center', label: '消耗时间', slot: 'duration', width: 100, printFormatter: (row) => `${row.duration}毫秒` },
   { align: 'center', slot: 'action', label: '操作', fixed: 'right', minWidth: 120 },
 ]
 

@@ -2,52 +2,35 @@
 /**
  * 本地数据库初始化
  *
- * 1. 按 .env 的 MYSQL_* 配置连接 MySQL（不指定库，因为库可能还不存在）
+ * 1. 按四层 env 文件（与 configuration.ts 的 getEnvFilePaths 一致）的 MYSQL_* 配置连接 MySQL（不指定库，因为库可能还不存在）
  * 2. 目标库不存在则创建，字符集 utf8mb4 / utf8mb4_unicode_ci
  * 3. 导入仓库根目录的 init.sql（建表 + 种子数据）
  *
  * 用法：
- *   node scripts/init-db.js            库不存在或为空时导入；已有表则中止
- *   node scripts/init-db.js --force    忽略已有表直接导入（init.sql 内含 DROP TABLE，会清空同名表）
- *   node scripts/init-db.js --dry-run  只检测并打印将要执行的动作，不写库
+ *   node scripts/init-db.mjs            库不存在或为空时导入；已有表则中止
+ *   node scripts/init-db.mjs --force    忽略已有表直接导入（init.sql 内含 DROP TABLE，会清空同名表）
+ *   node scripts/init-db.mjs --dry-run  只检测并打印将要执行的动作，不写库
  *
  * 注意：init.sql 自带 DROP TABLE IF EXISTS，导入即把同名表清空重建，不可撤销。
  */
 
-const fs = require('fs')
-const path = require('path')
-const mysql = require('mysql2/promise')
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import dotenv from 'dotenv'
+import mysql from 'mysql2/promise'
 
-const ENV_PATH = path.resolve(__dirname, '../.env')
-const SQL_PATH = path.resolve(__dirname, '../../init.sql')
+const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url))
+const SQL_PATH = path.resolve(SCRIPT_DIR, '../../../init.sql')
+
+// 与 configuration.ts 的 getEnvFilePaths 保持同一顺序：靠前优先，外部注入的 process.env 优先级最高
+const mode = process.env.NODE_ENV || 'development'
+const ENV_FILES = [`.env.${mode}.local`, '.env.local', `.env.${mode}`, '.env'].map((file) => path.resolve(SCRIPT_DIR, '..', file))
+dotenv.config({ path: ENV_FILES, quiet: true })
 
 const commandArgs = process.argv.slice(2)
 const isForce = commandArgs.includes('--force')
 const isDryRun = commandArgs.includes('--dry-run')
-
-/** 解析 .env，只取 KEY=VALUE 行，忽略注释、空行与成对引号 */
-function parseEnvFile(filePath) {
-  const result = {}
-  const content = fs.readFileSync(filePath, 'utf8')
-  for (const rawLine of content.split(/\r?\n/)) {
-    const line = rawLine.trim()
-    if (!line || line.startsWith('#')) continue
-    const equalIndex = line.indexOf('=')
-    if (equalIndex === -1) continue
-    const key = line.slice(0, equalIndex).trim()
-    let value = line.slice(equalIndex + 1).trim()
-    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
-      value = value.slice(1, -1)
-    }
-    result[key] = value
-  }
-  return result
-}
-
-/** 环境变量优先，其次 .env，最后默认值 */
-function createConfigReader(envFile) {
-  return (key, fallback) => process.env[key] || envFile[key] || fallback
-}
 
 /** 统计 init.sql 里的语句条数，用于结果摘要 */
 function countStatements(sqlText) {
@@ -64,8 +47,7 @@ async function main() {
     throw new Error(`找不到 init.sql：${SQL_PATH}`)
   }
 
-  const envFile = fs.existsSync(ENV_PATH) ? parseEnvFile(ENV_PATH) : {}
-  const readConfig = createConfigReader(envFile)
+  const readConfig = (key, fallback) => process.env[key] || fallback
 
   const host = readConfig('MYSQL_HOST', '127.0.0.1')
   const port = Number(readConfig('MYSQL_PORT', '3306'))
@@ -107,7 +89,7 @@ async function main() {
       console.error('')
       console.error(`中止：目标库已有 ${existingTableCount} 张表，直接导入会清空同名表的数据。`)
       console.error('确认要重置，请加 --force 重新执行：')
-      console.error('  node scripts/init-db.js --force')
+      console.error('  node scripts/init-db.mjs --force')
       process.exitCode = 1
       return
     }

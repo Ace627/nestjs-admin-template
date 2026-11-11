@@ -79,7 +79,7 @@ const columns: ProTableColumn<Dept.DeptItem>[] = [
   { align: 'center', prop: 'leader', label: '负责人', minWidth: 90 },
   { align: 'center', prop: 'phone', label: '联系电话', minWidth: 120 },
   { align: 'center', label: '显示排序', slot: 'deptSort', width: 130 },
-  { align: 'center', label: '状态', slot: 'status', width: 80 },
+  { align: 'center', label: '状态', slot: 'status', width: 80, printFormatter: (row) => sys_normal_disable.value.find((item) => item.dictValue === String(row.status))?.dictLabel ?? String(row.status ?? '') },
   { align: 'center', prop: 'createTime', label: '创建时间', minWidth: 170 },
   { align: 'center', label: '操作', slot: 'action', width: 180, fixed: 'right' },
 ]

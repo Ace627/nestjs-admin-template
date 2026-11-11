@@ -6,12 +6,14 @@
         <template #icon><SvgIcon name="Search" /></template>
       </el-button>
     </ProTooltip>
+
     <!-- 刷新列表 -->
     <ProTooltip content="刷新列表">
       <el-button circle @click="emit('refresh')">
         <template #icon><SvgIcon name="Refresh" /></template>
       </el-button>
     </ProTooltip>
+
     <!-- 配置展示列（ProTooltip 须包在 el-dropdown 外侧：el-dropdown 根节点是单一 div，事件/ref 才能透传） -->
     <ProTooltip v-if="selectableColumns.length" content="各列显隐">
       <el-dropdown trigger="click" :hide-on-click="false">
@@ -31,16 +33,28 @@
         </template>
       </el-dropdown>
     </ProTooltip>
+
+    <!-- 数据打印：页面接入 useTablePrint 后默认显示，点击弹出打印配置弹窗 -->
+    <ProTooltip v-if="printable && printContext" content="打印数据">
+      <el-button circle @click="printContext?.openDialog()">
+        <template #icon><SvgIcon name="Print" /></template>
+      </el-button>
+    </ProTooltip>
+
+    <!-- 打印配置弹窗（仅页面接入 useTablePrint 后渲染） -->
+    <PrintConfigDialog v-if="printContext" />
   </div>
 </template>
 
 <script setup lang="ts">
 defineOptions({ name: 'RightToolbar' })
-import { getColumnHidden, setColumnHidden } from '@/utils'
-import type { ProTableColumn, RightToolbarProps } from '@/types'
+import PrintConfigDialog from './PrintConfigDialog.vue'
+import { generateTableColumnKey, getColumnHidden, setColumnHidden, useTablePrintContext } from '@/utils'
+import type { RightToolbarProps } from '@/types'
 
 const props = withDefaults(defineProps<RightToolbarProps>(), {
   search: true,
+  printable: true,
   showSearch: true,
   columns: () => [],
   hiddenColumnKeys: () => [],
@@ -53,13 +67,8 @@ const emit = defineEmits<{
   refresh: []
 }>()
 
-/**
- * 生成列的唯一标识（与 ProTable 内同名函数逻辑一致，改动时须两处同步）
- * 优先级：type > prop > slot > column-${index}
- */
-function generateColumnKey(column: ProTableColumn, index: number) {
-  return column.type || column.prop || column.slot || `column-${index}`
-}
+/** 页面打印上下文：同页 ProTable 注册后才有值，打印按钮随之显示 */
+const printContext = useTablePrintContext()
 
 /** 可勾选列：排除 selection/index 系统列与操作列（slot 为 action 或固定右侧带插槽的末列） */
 const selectableColumns = computed(() => {
@@ -68,7 +77,7 @@ const selectableColumns = computed(() => {
     if (column.type === 'selection' || column.type === 'index') return
     if (column.slot === 'action') return
     if (column.fixed === 'right' && column.slot) return
-    const key = generateColumnKey(column, index)
+    const key = generateTableColumnKey(column, index)
     result.push({ key, label: column.label || column.prop || key })
   })
   return result

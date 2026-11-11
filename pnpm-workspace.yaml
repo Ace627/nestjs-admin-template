@@ -19,8 +19,6 @@ engineStrict: false
 fetchRetries: 2
 # 使用 pnpm-lock.yaml 锁定依赖
 lockfile: true
-# 不强制校验 packageManager 字段版本
-packageManagerStrict: false
 # npm 镜像源
 registry: https://registry.npmmirror.com
 # 安装依赖时锁定精确版本号（不带 ^ ~）

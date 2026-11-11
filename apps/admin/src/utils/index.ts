@@ -2,9 +2,12 @@ export * from './file'
 export * from './time'
 export * from './common'
 export * from './convert'
-export * from './browser'
 export * from './validate'
 export * from './tip-modal'
+
+export { printTable, generateTableColumnKey, registerTablePrintContext, useTablePrintContext } from './browser/print-table'
+export type { TablePrintOptions, TablePrintDensity, TablePrintContext } from './browser/print-table'
+export { setCssVar, getCssVar, delCssVar } from './browser/css-var'
 
 export * from './cache/storage-cache'
 

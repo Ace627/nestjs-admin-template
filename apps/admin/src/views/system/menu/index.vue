@@ -88,13 +88,13 @@ const items = computed<ProSearchItem[]>(() => [
 ])
 const columns: ProTableColumn<Menu.MenuItem>[] = [
   { align: 'left', label: '菜单名称', slot: 'menuName', minWidth: 180 },
-  { align: 'center', label: '菜单类型', slot: 'menuType', width: 90 },
+  { align: 'center', label: '菜单类型', slot: 'menuType', width: 90, printFormatter: (row) => menuTypeOptions.find((item) => item.value === row.menuType)?.label ?? String(row.menuType ?? '') },
   { align: 'center', label: '显示排序', slot: 'menuSort', width: 130 },
   { align: 'center', prop: 'permission', label: '权限字符', showOverflowTooltip: true, minWidth: 180 },
   { align: 'center', prop: 'path', label: '路由地址', showOverflowTooltip: true, minWidth: 140 },
   { align: 'center', prop: 'component', label: '组件路径', showOverflowTooltip: true, minWidth: 160 },
-  { align: 'center', label: '显示状态', slot: 'visible', width: 88 },
-  { align: 'center', label: '菜单状态', slot: 'status', width: 88 },
+  { align: 'center', label: '显示状态', slot: 'visible', width: 88, printFormatter: (row) => sys_menu_visible.value.find((item) => item.dictValue === String(row.visible))?.dictLabel ?? String(row.visible ?? '') },
+  { align: 'center', label: '菜单状态', slot: 'status', width: 88, printFormatter: (row) => sys_normal_disable.value.find((item) => item.dictValue === String(row.status))?.dictLabel ?? String(row.status ?? '') },
   { align: 'center', prop: 'updateTime', label: '最近更新', minWidth: 170 },
   { align: 'center', label: '操作', slot: 'action', width: 180, fixed: 'right' },
 ]

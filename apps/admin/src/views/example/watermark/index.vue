@@ -130,7 +130,7 @@ const columns: ProTableColumn<LoginRecord>[] = [
   { align: 'center', prop: 'location', label: '登录地点', minWidth: 120 },
   { align: 'center', prop: 'browser', label: '浏览器', minWidth: 140 },
   { align: 'center', prop: 'os', label: '操作系统', minWidth: 140 },
-  { align: 'center', prop: 'loginTime', label: '访问时间', minWidth: 170 },
+  { align: 'center', prop: 'loginTime', label: '登录时间', minWidth: 170 },
   { align: 'center', slot: 'status', label: '状态', width: 80 },
 ]
 

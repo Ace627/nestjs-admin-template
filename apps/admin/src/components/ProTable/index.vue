@@ -2,7 +2,7 @@
   <!-- ProTable - 基于 Element Plus Table 的封装组件 支持动态列配置、自定义插槽、加载状态等功能 -->
   <el-table ref="proTableRef" v-bind="mergeProps($attrs, nativeTableProps)" v-loading="loading" :element-loading-text :element-loading-background>
     <!-- 遍历所有列配置，动态生成表格列（渲染前按 hiddenColumnKeys 过滤隐藏列） -->
-    <template v-for="(column, index) in visibleColumns" :key="generateColumnKey(column, index)">
+    <template v-for="(column, index) in visibleColumns" :key="generateTableColumnKey(column, index)">
       <!-- 插槽列：当列配置了 slot 属性时，使用自定义插槽渲染内容 -->
       <el-table-column v-if="column.slot" v-bind="generateBindColumn(column)">
         <template #default="scope">
@@ -26,6 +26,7 @@
 defineOptions({ name: 'ProTable', inheritAttrs: false })
 import { mergeProps } from 'vue'
 import type { TableInstance } from 'element-plus'
+import { generateTableColumnKey, registerTablePrintContext } from '@/utils'
 import type { ProTableColumn, ProTableProps } from './types'
 
 // 接收组件属性，设置默认值
@@ -48,7 +49,7 @@ const nativeTableProps = computed(() => {
 const visibleColumns = computed(() => {
   const hiddenColumnKeys = props.hiddenColumnKeys
   if (!hiddenColumnKeys?.length) return props.columns
-  return props.columns.filter((column, index) => !hiddenColumnKeys.includes(generateColumnKey(column, index)))
+  return props.columns.filter((column, index) => !hiddenColumnKeys.includes(generateTableColumnKey(column, index)))
 })
 
 // 所有列配置里用到的 slot 名
@@ -61,14 +62,14 @@ const forwardSlotNames = computed(() => Object.keys(slots).filter((name) => !col
 // 存储 Table 实例的引用
 const proTableRef = shallowRef<TableInstance>()
 
-/**
- * 生成列的唯一标识
- * 优先级：type > prop > slot > column-${index}
- * 注意：RightToolbar 内有同逻辑副本，改动时须同步
- */
-function generateColumnKey(column: ProTableColumn, index: number) {
-  return column.type || column.prop || column.slot || `column-${index}`
-}
+// 注册表格打印上下文：同页 RightToolbar 据此显示「打印数据」按钮，点击弹出打印配置弹窗（页面无须写任何代码）
+registerTablePrintContext({
+  printTitle: (useRoute().meta.title as string | undefined) ?? '表格数据',
+  columns: props.columns,
+  currentRows: () => (props.data ?? []) as unknown[],
+  selectedRows: () => (proTableRef.value?.getSelectionRows() ?? []) as unknown[],
+  hiddenColumnKeys: () => props.hiddenColumnKeys ?? [],
+})
 
 /**
  * 过滤列配置中的非原生属性

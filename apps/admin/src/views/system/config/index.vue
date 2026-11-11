@@ -108,7 +108,7 @@ const columns: ProTableColumn<Config.Item>[] = [
   { align: 'center', prop: 'configName', label: '参数名称', showOverflowTooltip: true, minWidth: 120 },
   { align: 'center', prop: 'configKey', label: '参数键名', showOverflowTooltip: true, minWidth: 180 },
   { align: 'center', label: '参数键值', slot: 'configValue', showOverflowTooltip: true, minWidth: 120 },
-  { align: 'center', label: '系统内置', slot: 'configType', width: 90 },
+  { align: 'center', label: '系统内置', slot: 'configType', width: 90, printFormatter: (row) => (row.configType === 'Y' ? '内置' : '非内置') },
   { align: 'center', prop: 'remark', label: '备注', showOverflowTooltip: true, minWidth: 220 },
   { align: 'center', prop: 'createTime', label: '创建时间', minWidth: 170 },
   { align: 'center', slot: 'action', label: '操作', fixed: 'right', width: 120 },

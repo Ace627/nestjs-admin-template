@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white" alt="Vite" />
   <img src="https://img.shields.io/badge/MySQL-8-4479A1?logo=mysql&logoColor=white" alt="MySQL" />
   <img src="https://img.shields.io/badge/Redis-7-DC382D?logo=redis&logoColor=white" alt="Redis" />
-  <img src="https://img.shields.io/badge/pnpm-10-F69220?logo=pnpm&logoColor=white" alt="pnpm" />
+  <img src="https://img.shields.io/badge/pnpm-12-F69220?logo=pnpm&logoColor=white" alt="pnpm" />
   <img src="https://img.shields.io/badge/license-MIT-green" alt="License" />
 </p>
 
@@ -75,7 +75,9 @@
 
 ## 🚀 快速开始
 
-> 环境要求：Node.js ≥ 20 · pnpm 10 · MySQL 8 · Redis 7
+> 环境要求：Node.js ≥ 24 · pnpm 12 · MySQL 8 · Redis 7
+>
+> pnpm 版本由 `package.json` 的 `packageManager` 字段锁定，启用 corepack 时执行 `corepack enable` 后会自动使用对应版本。
 
 ```bash
 # 1. 克隆仓库
@@ -85,32 +87,113 @@ cd nestjs-admin-template
 # 2. 安装依赖（workspace 根目录一次安装）
 pnpm install
 
-# 3. 初始化数据库：创建 nestdemo 库（utf8mb4），导入根目录 init.sql
-mysql -uroot -p -e "CREATE DATABASE nestdemo DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
-mysql -uroot -p nestdemo < init.sql
-
-# 4. 配置后端环境变量：复制模板后按需修改连接信息与 JWT_SECRET
+# 3. 配置后端环境变量：复制模板后按需修改 MYSQL_* / REDIS_* / JWT_SECRET
 cp apps/server/.env.example apps/server/.env
 
-# 5. 启动（也可在根目录直接执行 pnpm dev:server / pnpm dev:admin）
-cd apps/server && pnpm start:dev   # 后端 http://localhost:3000/api
-cd apps/admin && pnpm dev          # 前端 http://localhost:5173（开发代理已指向 3000）
+# 4. 初始化数据库：按 .env 连接 MySQL，自动建库并导入根目录 init.sql
+pnpm --filter server db:init
+
+# 5. 启动
+pnpm dev:server   # 后端 http://localhost:3000/api
+pnpm dev:admin    # 前端 http://localhost:5173（开发代理已指向 3000）
 ```
 
 启动完成后使用默认账号登录：**admin / 123456**（超级管理员，建议登录后修改密码）。
 
-## 🐳 Docker 部署
+## 🗄️ 数据库教程
 
-后端三件套（NestJS 服务 + MySQL 8 + Redis 7）一键编排，MySQL 首次启动自动导入 `init.sql`，数据持久化在命名卷中：
+除快速开始中的 `pnpm --filter server db:init` 外，以下命令均在 `apps/server` 目录下执行，连接信息由 `apps/server/.env` 提供。
+
+### 新项目初始化数据库
 
 ```bash
-# 先在仓库根目录创建 .env 并写入：
-#   MYSQL_PASSWORD=your-strong-password
-#   JWT_SECRET=your-random-secret
+cd apps/server
+cp .env.example .env   # 按需修改 MYSQL_* / REDIS_* / JWT_SECRET
+pnpm db:init           # 自动建库并导入仓库根目录的 init.sql
+```
+
+脚本会创建 `MYSQL_DATABASE` 指定的库（utf8mb4 / utf8mb4_unicode_ci），并导入 `init.sql` 完成建表与种子数据写入。生产环境首次部署同样执行一次上述初始化（把 `.env` 指向生产库），之后的结构变更只走迁移。
+
+```bash
+node scripts/init-db.mjs --dry-run   # 只检测并打印将要执行的动作，不写库
+```
+
+> 目标库已有表时脚本会中止，避免 `init.sql` 里的 `DROP TABLE` 清空数据；确认要重置才执行 `node scripts/init-db.mjs --force`，该操作不可撤销。
+
+### 后续改字段：用 TypeORM 迁移同步数据库
+
+`.env` 中 `MYSQL_SYNCHRONIZE=false`，改实体后表结构不会自动变化，一律通过迁移同步：
+
+```bash
+# 1. 修改实体文件 apps/server/src/**/*.entity.ts
+
+# 2. 生成增量迁移（对比实体与当前连接的数据库）
+pnpm migration:generate
+#   生成 src/database/migrations/<时间戳>-init.ts
+#   自定义文件名：pnpm typeorm migration:generate src/database/migrations/add-user-status
+
+# 3. 检查生成的 up() / down()（数据变更的回滚逻辑需手写），提交该迁移文件
+
+# 4. 执行迁移（本地与生产执行同一条）
+pnpm migration:run
+
+# 5. 查看已执行 / 待执行
+pnpm typeorm migration:show
+
+# 6. 回滚最后一条
+pnpm migration:revert
+```
+
+- `migration:generate` 以当前连接的库为基准做 diff，必须在结构仍是上一版的库上生成；库已被手工改过会得到空迁移。
+- 首次执行 `migration:run` 时 TypeORM 会自动创建 `sys_migrations` 表记录执行历史；`migration:revert` 每次只回滚最后一条，且依赖 `down()` 写对。
+- 迁移命令依赖 `esno` 与 TypeScript 源码，请在本地或 CI 等具备完整依赖的环境执行；连接生产库时通过 `.env` / 环境变量指向生产地址，并保持 `MYSQL_SYNCHRONIZE=false`。
+- 初始化之后的结构变更一律走迁移，不要手工改表。
+
+## 🐳 Docker 部署
+
+只编排 NestJS 服务，MySQL / Redis 连接现成的容器或客户端。先在仓库根目录创建 `.env`（勿提交，与本地开发用的 `apps/server/.env` 是两份）配置连接信息：
+
+```bash
+# .env（仓库根目录）
+MYSQL_HOST=192.168.1.10   # 容器可访问的 MySQL IP（勿写 127.0.0.1）
+MYSQL_PORT=3306
+MYSQL_USERNAME=root
+MYSQL_PASSWORD=your-strong-password
+MYSQL_DATABASE=nestdemo
+REDIS_HOST=192.168.1.10   # 容器可访问的 Redis IP（勿写 127.0.0.1）
+REDIS_PORT=6379
+REDIS_PASSWORD=
+JWT_SECRET=your-random-secret
+```
+
+外部 MySQL 需先按上文「数据库教程」完成初始化，然后：
+
+```bash
 docker compose up -d --build
 ```
 
 服务启动后监听 `3000` 端口，健康探针为 `/api/monitor/health/live`；前端需另行 `pnpm build` 后部署静态产物。
+
+### 离线部署：构建并导出镜像 tar
+
+目标机器不能联网构建时，在联网的构建机上执行仓库根目录的脚本，一次完成构建与导出：
+
+```bash
+node scripts/build-server-image.mjs
+# 产物：dist/nest-admin-template-server.tar
+# 导出成功后脚本会删除本地同名镜像，不在 Docker 镜像列表留存
+```
+
+镜像名与产物路径统一在脚本顶部的 `config` 常量中修改（默认 `nest-admin-server:latest` / `dist/nest-admin-template-server.tar`）。把 tar 拷到目标机后导入并启动：
+
+```bash
+docker load -i nest-admin-template-server.tar
+docker run -d --name nest-admin-server --restart unless-stopped \
+  -p 3000:3000 --env-file .env nest-admin-server:latest
+```
+
+> - 镜像名 `nest-admin-server:latest` 与 `docker-compose.yml` 的 `image` 字段一致，导入后用 `docker compose up -d` 即可直接启动（无需 `--build`）。
+> - 镜像架构跟随构建机（默认 `linux/amd64`），目标机为 arm64 等架构时需在同架构机器上构建，否则导入后无法运行。
 
 ## 📂 目录结构
 
@@ -119,10 +202,11 @@ docker compose up -d --build
 │   ├── admin/           # 前端工程（Vue 3 + TypeScript + Vite）
 │   └── server/          # 后端工程（NestJS + TypeORM）
 │       └── .env.example # 环境变量模板
-├── scripts/             # 仓库级脚本（SVG 图标批量清理等）
+├── scripts/             # 仓库级脚本（SVG 图标清理、init.sql 生成、镜像构建导出）
 ├── docs/                # 本地文档
+├── dist/                # 构建产物目录（离线镜像 tar，不入库）
 ├── init.sql             # 数据库初始化脚本（建表 + 种子数据）
-├── docker-compose.yml   # 后端一键编排（server + MySQL + Redis）
+├── docker-compose.yml   # 后端服务编排（仅 server，连外部 MySQL / Redis）
 ├── Dockerfile.server    # 后端镜像构建文件
 ├── pnpm-workspace.yaml  # pnpm workspace 配置
 └── AGENTS.md            # 开发协作约定

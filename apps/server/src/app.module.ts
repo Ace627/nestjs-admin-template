@@ -1,6 +1,6 @@
 import { MiddlewareConsumer, Module, NestModule, ValidationPipe } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config' // 环境变量配置
-import { configuration } from './configuration'
+import { configuration, getEnvFilePaths } from './configuration'
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core'
 import { AllExceptionsFilter, BeforeEachMiddleware, DatabaseModule, TokenModule } from '@/common'
 import { ResponseCacheInterceptor, OperlogInterceptor, ResponseTransformInterceptor, DataScopeInterceptor } from '@/common'
@@ -14,7 +14,7 @@ import { CommonModule } from './modules/common/common.module'
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true, load: [configuration] }),
+    ConfigModule.forRoot({ isGlobal: true, load: [configuration], envFilePath: getEnvFilePaths() }),
     SharedModule, // 共享模块
     DatabaseModule, // 数据库模块
     TokenModule, // 令牌模块

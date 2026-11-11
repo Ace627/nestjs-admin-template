@@ -1,11 +1,12 @@
 {
   "name": "nestjs-admin-template",
   "private": true,
-  "packageManager": "pnpm@10.34.5",
+  "packageManager": "pnpm@12.18.0",
   "license": "MIT",
   "scripts": {
     "dev:server": "cd apps/server && pnpm start:dev",
     "dev:admin": "cd apps/admin && pnpm dev",
+    "build:server:image": "node scripts/build-server-image.mjs",
     "format": "prettier --write ."
   },
   "dependencies": {

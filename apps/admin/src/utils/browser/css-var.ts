@@ -17,3 +17,12 @@ export function getCssVar(name: string, element: Element = document.documentElem
 export function setCssVar(name: string, value: string, element: HTMLElement = document.documentElement) {
   element.style.setProperty(name, value)
 }
+
+/**
+ * 删除元素上的 CSS 变量，仅清除内联样式里的声明，默认删 <html>（:root）
+ * @param name CSS 变量名，需带 -- 前缀，如 '--el-font-family'
+ * @param element 目标元素，默认 document.documentElement
+ */
+export function delCssVar(name: string, element: HTMLElement = document.documentElement) {
+  element.style.removeProperty(name)
+}

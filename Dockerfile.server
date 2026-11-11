@@ -1,5 +1,5 @@
 ARG NODE_VERSION=24.18.0
-ARG PNPM_VERSION=10.34.5
+ARG PNPM_VERSION=12.18.0
 
 # ==================== 阶段 1：编译 ====================
 FROM node:${NODE_VERSION}-alpine AS builder
@@ -15,10 +15,16 @@ COPY apps/server/package.json ./apps/server/
 RUN npm i -g pnpm@${PNPM_VERSION}
 RUN pnpm install --frozen-lockfile --filter server
 
-# nest build 默认读 tsconfig.build.json，路径别名 @/* 由 rspack 侧解析
-COPY apps/server/nest-cli.json apps/server/tsconfig.json apps/server/tsconfig.build.json ./
-COPY apps/server/src ./src
-RUN pnpm build
+# 整个 server 工程落地到 apps/server（node_modules/dist/logs 已被 .dockerignore 排除）
+# nest-cli.json 的 rspack builder 依赖同目录的 rspack.config.ts，故不能只拷零散配置
+COPY apps/server/ ./apps/server/
+# 根 importer 没有 build 脚本，pnpm 不会自动递归，必须显式指定子包
+# @nestjs/cli 的 rspack 编译器硬编码 stats.toString({ colors: true })，
+# 容器内非 TTY 时 ANSI 转义码会原样打进构建日志变成乱码，故先捕获再剥离后输出
+RUN pnpm --filter server build > /tmp/build.log 2>&1; \
+    build_status=$?; \
+    node -e "const log = require('node:fs').readFileSync('/tmp/build.log', 'utf8').replace(/\u001b\[[0-9;]*m/g, ''); process.stdout.write(log)"; \
+    exit $build_status
 
 # ==================== 阶段 2：提取部署包 ====================
 FROM node:${NODE_VERSION}-alpine AS deployer
@@ -36,7 +42,7 @@ RUN npm i -g pnpm@${PNPM_VERSION}
 RUN pnpm deploy --filter=server --prod --legacy /deploy
 
 # 构建产物合并进部署根目录，main.js 与 node_modules 同级
-COPY --from=builder /app/dist/ /deploy/
+COPY --from=builder /app/apps/server/dist/ /deploy/
 
 # ==================== 阶段 3：运行 ====================
 FROM node:${NODE_VERSION}-alpine AS runner

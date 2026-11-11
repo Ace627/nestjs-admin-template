@@ -1,7 +1,8 @@
-import 'dotenv/config'
+import dotenv from 'dotenv'
 import { DataSource } from 'typeorm'
-import { configuration } from './src/configuration'
+import { configuration, getEnvFilePaths } from './src/configuration'
 
+dotenv.config({ path: getEnvFilePaths() })
 const config = configuration()
 
 export default new DataSource({
