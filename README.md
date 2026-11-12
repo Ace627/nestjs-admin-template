@@ -90,7 +90,7 @@ pnpm install
 # 3. 配置后端环境变量：复制模板后按需修改 MYSQL_* / REDIS_* / JWT_SECRET
 cp apps/server/.env.example apps/server/.env
 
-# 4. 初始化数据库：按 .env 连接 MySQL，自动建库并导入根目录 init.sql
+# 4. 初始化数据库：一键建库、生成并执行迁移、写入种子数据
 pnpm --filter server db:init
 
 # 5. 启动
@@ -104,21 +104,28 @@ pnpm dev:admin    # 前端 http://localhost:5173（开发代理已指向 3000）
 
 除快速开始中的 `pnpm --filter server db:init` 外，以下命令均在 `apps/server` 目录下执行，连接信息由 `apps/server/.env` 提供。
 
-### 新项目初始化数据库
+### 新项目初始化数据库（一键）
 
 ```bash
 cd apps/server
 cp .env.example .env   # 按需修改 MYSQL_* / REDIS_* / JWT_SECRET
-pnpm db:init           # 自动建库并导入仓库根目录的 init.sql
+pnpm db:init
 ```
 
-脚本会创建 `MYSQL_DATABASE` 指定的库（utf8mb4 / utf8mb4_unicode_ci），并导入 `init.sql` 完成建表与种子数据写入。生产环境首次部署同样执行一次上述初始化（把 `.env` 指向生产库），之后的结构变更只走迁移。
+一条命令按顺序完成四步：
+
+1. 创建 `MYSQL_DATABASE` 指定的库（utf8mb4 / utf8mb4_unicode_ci）。
+2. 仓库里还没有迁移文件时，在**空库**上执行 `migration:generate`，从实体 diff 出全部建表语句，生成 `src/database/migrations/<时间戳>-baseline.ts`；已有迁移文件则跳过此步。
+3. 执行 `migration:run`，跑完 baseline 与之后的全部增量迁移（首次会创建 `sys_migrations` 记录执行历史）。
+4. 从 `init.sql` 提取 `INSERT` 写入种子数据；脚本会补上显式列名，避免实体生成的列顺序与导出快照不一致导致数据错位。
+
+`init.sql` 现在只作为种子数据来源，`CREATE TABLE` / `DROP TABLE` 不再直接导入。生成的 baseline 迁移文件**必须提交进仓库**：之后执行初始化会跳过生成步骤，只跑仓库里已有的迁移，换机器也不会得到时间戳不同的基线。生产环境首次部署同样执行这一条命令（把 `.env` 指向生产库），之后的结构变更只走增量迁移。
 
 ```bash
-node scripts/init-db.mjs --dry-run   # 只检测并打印将要执行的动作，不写库
+node scripts/init-db.mjs --dry-run   # 只检测并打印将要执行的动作，不写库、不生成文件
 ```
 
-> 目标库已有表时脚本会中止，避免 `init.sql` 里的 `DROP TABLE` 清空数据；确认要重置才执行 `node scripts/init-db.mjs --force`，该操作不可撤销。
+> 目标库已有表时脚本会中止，避免破坏现有数据；确认要删库重建才执行 `node scripts/init-db.mjs --force`，该操作不可撤销。
 
 ### 后续改字段：用 TypeORM 迁移同步数据库
 
@@ -144,9 +151,9 @@ pnpm typeorm migration:show
 pnpm migration:revert
 ```
 
-- `migration:generate` 以当前连接的库为基准做 diff，必须在结构仍是上一版的库上生成；库已被手工改过会得到空迁移。
+- `migration:generate` 以当前连接的库为基准做 diff：空库上生成的是全量 baseline，结构仍是上一版的库上生成的是增量迁移。若实体与库结构完全一致，命令不会生成文件，而是打印 `No changes in database schema were found` 并以非零码退出。
 - 首次执行 `migration:run` 时 TypeORM 会自动创建 `sys_migrations` 表记录执行历史；`migration:revert` 每次只回滚最后一条，且依赖 `down()` 写对。
-- 迁移命令依赖 `esno` 与 TypeScript 源码，请在本地或 CI 等具备完整依赖的环境执行；连接生产库时通过 `.env` / 环境变量指向生产地址，并保持 `MYSQL_SYNCHRONIZE=false`。
+- 迁移命令依赖 `esno` 与 TypeScript 源码，请在本地或 CI 等具备完整依赖的环境执行；连接生产库时通过 `.env` / 环境变量指向生产地址，并保持 `MYSQL_SYNCHRONIZE=false`。baseline 应在本地生成并提交，生产环境执行时脚本会跳过生成步骤。
 - 初始化之后的结构变更一律走迁移，不要手工改表。
 
 ## 🐳 Docker 部署
@@ -205,7 +212,7 @@ docker run -d --name nest-admin-server --restart unless-stopped \
 ├── scripts/             # 仓库级脚本（SVG 图标清理、init.sql 生成、镜像构建导出）
 ├── docs/                # 本地文档
 ├── dist/                # 构建产物目录（离线镜像 tar，不入库）
-├── init.sql             # 数据库初始化脚本（建表 + 种子数据）
+├── init.sql             # 种子数据来源（脚本只提取 INSERT，建表由迁移负责）
 ├── docker-compose.yml   # 后端服务编排（仅 server，连外部 MySQL / Redis）
 ├── Dockerfile.server    # 后端镜像构建文件
 ├── pnpm-workspace.yaml  # pnpm workspace 配置
