@@ -339,7 +339,4 @@ declare global {
   // @ts-ignore
   export type { DictSelectItem } from '../../hooks/useDict'
   import('../../hooks/useDict')
-  // @ts-ignore
-  export type { TablePrintContext } from '../../hooks/useTablePrint'
-  import('../../hooks/useTablePrint')
 }

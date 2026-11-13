@@ -1,114 +1,490 @@
+/**
+ * 首屏加载页「冰封终端」—— 复古未来 × 极地冰原
+ * 透视网格地平线 + CRT 扫描线 + 旋转冰环结晶 + 等宽终端状态行
+ * 纯 CSS 实现，白屏阶段无 JS 依赖；入场均错峰编排
+ */
 .app-loading {
-  /* 浅色主题变量 */
-  --loading-bg: #eef3f8;
-  --loading-grid: rgb(0 101 204 / 9%);
-  --loading-glow-a: rgb(0 101 204 / 22%);
-  --loading-glow-b: rgb(0 101 204 / 18%);
-  --loading-title: rgb(0 0 0 / 85%);
-  --loading-bar: #0065cc;
-  --loading-bar-light: #7fb3e8;
+  /* 浅色主题变量：冰原白昼 */
+  --ice-bg-a: #eef5fc;
+  --ice-bg-b: #d9e9f9;
+  --ice-grid: rgb(0 119 255 / 16%);
+  --ice-crt: rgb(0 60 120 / 55%);
+  --ice-scan: rgb(0 119 255 / 8%);
+  --ice-ink: #16324f;
+  --ice-muted: rgb(22 50 79 / 68%);
+  --ice-accent: #0077ff;
+  --ice-halo: rgb(0 119 255 / 18%);
+  --ice-ring: rgb(0 119 255 / 40%);
+  --ice-block: rgb(0 119 255 / 20%);
+  --ice-block-lit: #0077ff;
+  --ice-snow: rgb(0 119 255 / 35%);
+  --ice-snow-soft: rgb(0 119 255 / 16%);
+  --ease-quint: cubic-bezier(0.16, 1, 0.3, 1);
 
   position: fixed;
-  left: 0;
-  top: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
+  overflow: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
-  background:
-    linear-gradient(var(--loading-grid) 1px, transparent 1px), linear-gradient(90deg, var(--loading-grid) 1px, transparent 1px), radial-gradient(circle 480px at 12% 8%, var(--loading-glow-a), transparent 70%),
-    radial-gradient(circle 560px at 88% 92%, var(--loading-glow-b), transparent 70%), var(--loading-bg);
-  background-size:
-    40px 40px,
-    40px 40px,
-    auto,
-    auto,
-    auto;
+  background: linear-gradient(180deg, var(--ice-bg-a) 0%, var(--ice-bg-b) 100%);
 }
 
-/* 深色主题变量（html.dark 由 index.html 内联脚本在白屏阶段点亮） */
+/* 深色主题变量（html.dark 由 index.html 内联脚本在白屏阶段点亮）：极夜冰原 */
 html.dark .app-loading {
-  --loading-bg: #141414;
-  --loading-grid: rgb(255 255 255 / 6%);
-  --loading-glow-a: rgb(0 101 204 / 35%);
-  --loading-glow-b: rgb(0 101 204 / 28%);
-  --loading-title: rgb(255 255 255 / 88%);
-  --loading-bar: #4d9fff;
-  --loading-bar-light: #8ec4ff;
+  --ice-bg-a: #0a1420;
+  --ice-bg-b: #0e1d30;
+  --ice-grid: rgb(77 159 255 / 15%);
+  --ice-crt: rgb(255 255 255 / 50%);
+  --ice-scan: rgb(142 196 255 / 7%);
+  --ice-ink: #eaf4ff;
+  --ice-muted: rgb(142 196 255 / 85%);
+  --ice-accent: #4d9fff;
+  --ice-halo: rgb(77 159 255 / 28%);
+  --ice-ring: rgb(77 159 255 / 55%);
+  --ice-block: rgb(77 159 255 / 16%);
+  --ice-block-lit: #4d9fff;
+  --ice-snow: rgb(255 255 255 / 50%);
+  --ice-snow-soft: rgb(255 255 255 / 24%);
+}
+
+/* CRT 扫描纹理 + 噪点颗粒，一层伪元素两种氛围叠加 */
+.app-loading::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    repeating-linear-gradient(0deg, var(--ice-crt) 0 1px, transparent 1px 3px);
+  opacity: 0.06;
+}
+
+/* 降雪层：影子点在 y-1080 复制一份，translate 循环无缝衔接 */
+.app-loading::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: snow-fall 15s linear infinite;
+  box-shadow:
+    140px 90px var(--ice-snow-soft),
+    360px 380px var(--ice-snow),
+    580px 40px var(--ice-snow-soft),
+    800px 560px var(--ice-snow),
+    1020px 220px var(--ice-snow-soft),
+    1240px 460px var(--ice-snow),
+    1480px 110px var(--ice-snow-soft),
+    1700px 340px var(--ice-snow),
+    1900px 640px var(--ice-snow-soft),
+    260px 800px var(--ice-snow),
+    520px 920px var(--ice-snow-soft),
+    1360px 1000px var(--ice-snow),
+    120px -990px var(--ice-snow-soft),
+    360px -700px var(--ice-snow),
+    580px -1040px var(--ice-snow-soft),
+    800px -520px var(--ice-snow),
+    1020px -860px var(--ice-snow-soft),
+    1240px -620px var(--ice-snow),
+    1480px -970px var(--ice-snow-soft),
+    1700px -740px var(--ice-snow),
+    1900px -440px var(--ice-snow-soft),
+    260px -280px var(--ice-snow),
+    520px -160px var(--ice-snow-soft),
+    1360px -80px var(--ice-snow);
+}
+
+@keyframes snow-fall {
+  from {
+    transform: translate3d(-30px, -1080px, 0);
+  }
+
+  50% {
+    transform: translate3d(30px, -540px, 0);
+  }
+
+  to {
+    transform: translate3d(-30px, 0, 0);
+  }
+}
+
+/* 透视网格地平线：冰原向观察者无限行进 */
+.app-loading-grid {
+  position: absolute;
+  left: -20%;
+  right: -20%;
+  bottom: 0;
+  height: 46vh;
+  background-image:
+    linear-gradient(var(--ice-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--ice-grid) 1px, transparent 1px);
+  background-size: 56px 56px;
+  transform: perspective(420px) rotateX(58deg) scale(1.7);
+  transform-origin: top center;
+  animation: grid-flow 2.6s linear infinite, grid-in 1.2s var(--ease-quint) backwards;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 45%);
+  mask-image: linear-gradient(to bottom, transparent, #000 45%);
+}
+
+@keyframes grid-flow {
+  from {
+    background-position: 0 0, 0 0;
+  }
+
+  to {
+    background-position: 0 56px, 0 56px;
+  }
+}
+
+@keyframes grid-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* CRT 扫描亮带：整屏周期掠过 */
+.app-loading-scan {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 26vh;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    var(--ice-scan) 45%,
+    var(--ice-scan) 55%,
+    transparent
+  );
+  animation: scan-sweep 5.2s ease-in-out infinite;
+}
+
+@keyframes scan-sweep {
+  from {
+    transform: translateY(-30vh);
+  }
+
+  to {
+    transform: translateY(130vh);
+  }
 }
 
 .app-loading .app-loading-wrap {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  animation: wrap-in 0.8s var(--ease-quint) backwards;
 }
 
+@keyframes wrap-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* 雪花 Logo：结晶浮现 + 缓慢自转 + 冰光呼吸（光晕内含周期闪晶尖峰） */
 .app-loading .app-loading-logo {
-  width: 96px;
+  width: 104px;
   border-radius: 50%;
-  filter: drop-shadow(0 12px 28px rgb(0 101 204 / 25%));
-  animation: logo-float 2.4s ease-in-out infinite;
+  animation:
+    crystal-in 0.9s var(--ease-quint) 0.15s backwards,
+    logo-spin 22s linear 0.9s infinite,
+    logo-halo 5.6s ease-in-out 0.9s infinite;
 }
 
-.app-loading .app-loading-item {
-  position: relative;
-  width: 60px;
-  height: 60px;
-  margin-top: 32px;
-}
-
-.app-loading .app-loading-outter {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border: 4px solid var(--loading-bar);
-  border-bottom: 0;
-  border-left-color: transparent;
-  border-radius: 50%;
-  animation: loader-outter 1s cubic-bezier(0.42, 0.61, 0.58, 0.41) infinite;
-}
-
-.app-loading .app-loading-inner {
-  position: absolute;
-  top: calc(50% - 20px);
-  left: calc(50% - 20px);
-  width: 40px;
-  height: 40px;
-  border: 4px solid var(--loading-bar-light);
-  border-right: 0;
-  border-top-color: transparent;
-  border-radius: 50%;
-  animation: loader-inner 1s cubic-bezier(0.42, 0.61, 0.58, 0.41) infinite;
-}
-
-.app-loading .app-loading-title {
-  margin-top: 24px;
-  color: var(--loading-title);
-  font-size: 28px;
-  font-weight: 600;
-  letter-spacing: 3px;
-}
-
-@keyframes logo-float {
-  0%,
-  100% {
-    transform: translateY(0);
+@keyframes crystal-in {
+  from {
+    opacity: 0;
+    transform: scale(0.45);
+    filter: blur(14px);
   }
-  50% {
-    transform: translateY(-6px);
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
   }
 }
 
-@keyframes loader-outter {
+@keyframes logo-spin {
   to {
     transform: rotate(360deg);
   }
 }
 
-@keyframes loader-inner {
+@keyframes logo-halo {
+  0%,
+  88%,
+  100% {
+    filter: drop-shadow(0 0 16px rgb(77 159 255 / 30%));
+  }
+
+  50% {
+    filter: drop-shadow(0 0 30px rgb(77 159 255 / 55%));
+  }
+
+  /* 每圈一次「闪晶」尖峰 */
+  94% {
+    filter: drop-shadow(0 0 42px rgb(160 208 255 / 85%)) brightness(1.35);
+  }
+}
+
+/* 旋转冰环：绝对定位套在雪花中心，双环反向旋转 */
+.app-loading .app-loading-item {
+  position: absolute;
+  left: 50%;
+  top: 52px;
+  width: 158px;
+  height: 158px;
+  margin: -79px 0 0 -79px;
+  animation: ring-in 0.9s var(--ease-quint) 0.3s backwards;
+}
+
+@keyframes ring-in {
+  from {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.app-loading .app-loading-outter {
+  position: absolute;
+  inset: 0;
+  border: 1px dashed var(--ice-ring);
+  border-radius: 50%;
+  animation: ring-spin 14s linear infinite;
+}
+
+/* 内环：conic 彗星弧，反向快转 */
+.app-loading .app-loading-inner {
+  position: absolute;
+  inset: 16px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0 68%,
+    rgb(77 159 255 / 10%) 78%,
+    var(--ice-accent) 92%,
+    transparent 100%
+  );
+  -webkit-mask-image: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+  mask-image: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+  animation: ring-spin-rev 7s linear infinite;
+}
+
+@keyframes ring-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes ring-spin-rev {
   to {
     transform: rotate(-360deg);
+  }
+}
+
+/* 标题：终端风等宽大写 + clip 揭示 + 流光 */
+.app-loading .app-loading-title {
+  margin-top: 84px;
+  max-width: 88vw;
+  font-family: 'JetBrains Mono', 'Cascadia Code', Consolas, ui-monospace, monospace, 'PingFang SC', 'Microsoft YaHei';
+  font-size: clamp(15px, 4vw, 21px);
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  background: linear-gradient(100deg, var(--ice-ink) 42%, var(--ice-accent) 50%, var(--ice-ink) 58%);
+  background-size: 220% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation:
+    title-reveal 0.9s var(--ease-quint) 0.4s backwards,
+    title-shine 3.2s linear 1.4s infinite;
+}
+
+@keyframes title-reveal {
+  from {
+    clip-path: inset(0 100% 0 0);
+    opacity: 0.4;
+  }
+
+  to {
+    clip-path: inset(0 -5% 0 0);
+    opacity: 1;
+  }
+}
+
+@keyframes title-shine {
+  from {
+    background-position: -60% 0;
+  }
+
+  to {
+    background-position: 160% 0;
+  }
+}
+
+/* 分段结晶进度：10 段小块逐段点亮循环 */
+.app-loading .app-loading-progress {
+  position: relative;
+  width: 240px;
+  height: 6px;
+  margin-top: 22px;
+  overflow: hidden;
+  animation: fade-up 0.7s var(--ease-quint) 0.5s backwards;
+}
+
+.app-loading .app-loading-progress::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--ice-block) 0 18px,
+    transparent 18px 24px
+  );
+}
+
+.app-loading .app-loading-progress::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--ice-block-lit) 0 18px,
+    transparent 18px 24px
+  );
+  animation: progress-fill 3.6s steps(10, jump-none) infinite;
+}
+
+@keyframes progress-fill {
+  from {
+    width: 0;
+  }
+
+  to {
+    width: 100%;
+  }
+}
+
+/* 终端状态行：阶段文字轮播 + ASCII 进度帧 */
+.app-loading .app-loading-status {
+  margin-top: 14px;
+  height: 18px;
+  font-family: 'JetBrains Mono', 'Cascadia Code', Consolas, ui-monospace, monospace, 'PingFang SC', 'Microsoft YaHei';
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--ice-muted);
+  animation: fade-up 0.7s var(--ease-quint) 0.6s backwards;
+}
+
+.app-loading .app-loading-status::before {
+  content: "▸ 正在唤醒系统";
+  animation: stage-cycle 12s steps(1) infinite;
+}
+
+.app-loading .app-loading-status::after {
+  content: "[░░░░░ 08%]";
+  margin-left: 14px;
+  color: var(--ice-accent);
+  animation: bar-cycle 12s steps(1) infinite;
+}
+
+@keyframes stage-cycle {
+  0%,
+  24% {
+    content: "▸ 正在唤醒系统";
+  }
+
+  25%,
+  49% {
+    content: "▸ 正在加载系统资源";
+  }
+
+  50%,
+  74% {
+    content: "▸ 正在初始化模块";
+  }
+
+  75%,
+  100% {
+    content: "▸ 正在启动系统";
+  }
+}
+
+@keyframes bar-cycle {
+  0%,
+  19% {
+    content: "[░░░░░ 08%]";
+  }
+
+  20%,
+  39% {
+    content: "[█░░░░ 27%]";
+  }
+
+  40%,
+  59% {
+    content: "[███░░ 46%]";
+  }
+
+  60%,
+  79% {
+    content: "[████░ 68%]";
+  }
+
+  80%,
+  100% {
+    content: "[█████ 93%]";
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* 用户偏好减少动效时全部静止 */
+@media (prefers-reduced-motion: reduce) {
+  .app-loading *,
+  .app-loading::before,
+  .app-loading::after {
+    animation: none;
+  }
+
+  /* 静止态下进度块全部点亮，避免假进度停在 0 */
+  .app-loading .app-loading-progress::after {
+    width: 100%;
   }
 }

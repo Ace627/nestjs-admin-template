@@ -1,9 +1,10 @@
 export * from './file'
-export * from './time'
-export * from './common'
 export * from './convert'
 export * from './validate'
 export * from './tip-modal'
+
+export * from './common/time'
+export * from './common/sleep'
 
 export { printTable, generateTableColumnKey, registerTablePrintContext, useTablePrintContext } from './browser/print-table'
 export type { TablePrintOptions, TablePrintDensity, TablePrintContext } from './browser/print-table'
