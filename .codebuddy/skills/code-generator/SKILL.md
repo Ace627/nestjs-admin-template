@@ -13,7 +13,7 @@ description: 生成标准业务 CRUD 模块（实体/DTO/Service/Controller/前�
 
 - **接口名**：Controller 注释一律纯汉字且 ≤8 字，禁标点/字母/数字/空格；补充语义写在注释第二行。
 - **权限与日志**：写操作端点必须同时挂 `@RequirePermissions(['system:<模块>:<动作>'])`（查询类权限码用 `:query`）与 `@Operlog({ title: '<功能名>', businessType })`。
-- **init.sql 口径**：表结构完全不归本技能管（开发库 `MYSQL_SYNCHRONIZE=true` 自动同步实体列结构），本技能只追加 `sys_menu` 菜单行与逐按钮权限码种子行。
+- **init.sql 与表结构口径**：`init.sql` 只作种子，本技能只追加 `sys_menu` 菜单行与逐按钮权限码种子行，禁止写 `CREATE TABLE` / `DROP TABLE`；新建或修改实体产生的表结构一律走 TypeORM 迁移（步骤见第 5 步），`MYSQL_SYNCHRONIZE=false` 全程保持，禁止依赖自动同步建表。
 - **确认前置**：字段配置未经用户逐字段确认前，禁止写任何代码。
 
 ## 工作流
@@ -71,7 +71,8 @@ node .codebuddy/skills/code-generator/scripts/checklist.mjs
 
 ### 5. 收尾提醒
 
-- 重启 server 服务（新实体/新模块生效）。
+- 表结构走迁移（在 `apps/server` 下执行）：改完实体生成增量迁移，新模块用 `pnpm typeorm migration:generate src/database/migrations/add-<模块>` 自定义文件名；检查生成的 `up()` / `down()`（数据变更的回滚逻辑需手写）并**提交迁移文件**，再执行 `pnpm migration:run`。`MYSQL_SYNCHRONIZE=false` 下不跑迁移就不会建表，禁止临时开自动同步代替。
+- 迁移执行完再重启 server 服务（新实体/新模块生效）。
 - 若第 2 步勾选了数据权限：重启后用 admin（全量数据范围）与一个非全量数据范围的角色各查一次列表，核对过滤效果；同时验证 Redis 缓存缺失时 fail-closed 返回空集的行为。
 - 执行 init.sql 追加的菜单 SQL（或由用户自行转储后重放）。
 - 前端验证跑 `pnpm build`（admin 的真实类型检查口径，裸跑 vue-tsc 等于没检查）。

@@ -8,8 +8,8 @@
  Target Server Type    : MySQL
  File Encoding         : 65001
 
- Date: 17/10/2026 16:28:33
- Tables: 15
+ Date: 13/11/2026 09:33:46
+ Tables: 12
 */
 
 SET NAMES utf8mb4;
@@ -204,53 +204,6 @@ CREATE TABLE `sys_job` (
 -- ----------------------------
 INSERT INTO `sys_job` VALUES ('2026-09-22 21:43:03', '2026-09-22 22:10:46', NULL, 'admin', 'admin', '571db7d1-c7e0-4bce-b8e4-d9ca8ea6f328', '日志清理', 'DEFAULT', 'LogService.cleanExpiredLogs(30)', '0 0 4 * * ?', '1', '0', '1', '每天凌晨 4 点清理 30 天前的操作日志、登录日志和任务调度日志');
 -- ----------------------------
--- Table structure for sys_job_log
--- ----------------------------
-DROP TABLE IF EXISTS `sys_job_log`;
-CREATE TABLE `sys_job_log` (
-  `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务日志ID',
-  `job_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '任务名称',
-  `job_group` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'DEFAULT' COMMENT '任务组名',
-  `invoke_target` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '调用目标字符串',
-  `job_message` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '日志信息',
-  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '1' COMMENT '执行状态',
-  `create_time` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '执行时间',
-  `job_id` varchar(36) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '关联任务ID',
-  PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
-
--- ----------------------------
--- Records of sys_job_log
--- ----------------------------
-INSERT INTO `sys_job_log` VALUES ('63b75139-e9de-464c-b103-ed4675654fc3', '日志清理', 'DEFAULT', 'LogService.cleanExpiredLogs(30)', '执行成功', '1', '2026-09-23 04:00:00', '571db7d1-c7e0-4bce-b8e4-d9ca8ea6f328');
-INSERT INTO `sys_job_log` VALUES ('6d550bdb-6cc4-440f-afcd-edaf4be16d77', '日志清理', 'DEFAULT', 'LogService.cleanExpiredLogs(30)', '执行成功', '1', '2026-09-26 04:00:00', '571db7d1-c7e0-4bce-b8e4-d9ca8ea6f328');
-INSERT INTO `sys_job_log` VALUES ('8b374c95-065f-426c-b5d9-0094c901e2e7', '日志清理', 'DEFAULT', 'LogService.cleanExpiredLogs(30)', '执行成功', '1', '2026-09-24 04:00:00', '571db7d1-c7e0-4bce-b8e4-d9ca8ea6f328');
-INSERT INTO `sys_job_log` VALUES ('b10eeb39-5b7f-4898-a7c8-16087294f3e8', '日志清理', 'DEFAULT', 'LogService.cleanExpiredLogs(30)', '执行成功', '1', '2026-09-29 04:00:00', '571db7d1-c7e0-4bce-b8e4-d9ca8ea6f328');
-INSERT INTO `sys_job_log` VALUES ('bf54bb5e-0f48-42aa-a350-dd392bfdafbb', '日志清理', 'DEFAULT', 'LogService.cleanExpiredLogs(30)', '执行成功', '1', '2026-09-28 04:00:00', '571db7d1-c7e0-4bce-b8e4-d9ca8ea6f328');
-INSERT INTO `sys_job_log` VALUES ('dbb31fc4-7d01-497f-8b76-5acf37371ecb', '日志清理', 'DEFAULT', 'LogService.cleanExpiredLogs(30)', '执行成功', '1', '2026-09-27 04:00:00', '571db7d1-c7e0-4bce-b8e4-d9ca8ea6f328');
--- ----------------------------
--- Table structure for sys_login_log
--- ----------------------------
-DROP TABLE IF EXISTS `sys_login_log`;
-CREATE TABLE `sys_login_log` (
-  `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '访问ID',
-  `username` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '用户账号',
-  `ip` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '登录IP地址',
-  `location` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '登录地点',
-  `browser` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '浏览器类型',
-  `os` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '操作系统',
-  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '1' COMMENT '登录状态',
-  `message` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '提示消息',
-  `login_time` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '登录日期',
-  `request_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '请求唯一标识',
-  `user_id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '用户ID',
-  PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
-
--- ----------------------------
--- Records of sys_login_log
--- ----------------------------
--- ----------------------------
 -- Table structure for sys_menu
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_menu`;
@@ -362,41 +315,6 @@ INSERT INTO `sys_menu` VALUES ('2026-09-04 19:16:00', '2026-09-04 19:16:00', NUL
 INSERT INTO `sys_menu` VALUES ('2026-09-04 19:17:40', '2026-09-04 19:17:40', NULL, 'admin', 'admin', 'f5f342d2-d8c4-448e-b779-aee07f42262f', '90ccc73f-9508-42d4-8f5e-f1d0c1da97c4', NULL, NULL, 'F', NULL, '角色编辑', '1', 'system:role:update', '1', 3, '0', '1');
 INSERT INTO `sys_menu` VALUES ('2026-09-13 21:40:56', '2026-09-13 21:46:36', NULL, 'admin', 'admin', 'f74c0978-415d-4c5f-beef-4c48c640d61d', '1e0c60bb-d20f-478b-b8a3-2ece6802238e', 'countdown', 'example/countdown/index', 'C', 'Resource', '数字滚动', '1', NULL, '1', 4, '0', '1');
 INSERT INTO `sys_menu` VALUES ('2026-09-05 15:18:26', '2026-09-05 15:18:26', NULL, 'admin', 'admin', 'f97c36b6-ff41-43fb-85d5-f1d1e8128cd6', '631474ec-7487-4039-aab3-fb120a627d90', NULL, NULL, 'F', NULL, '字典刷新', '1', 'system:dict:refresh', '1', 5, '0', '1');
--- ----------------------------
--- Table structure for sys_oper_log
--- ----------------------------
-DROP TABLE IF EXISTS `sys_oper_log`;
-CREATE TABLE `sys_oper_log` (
-  `id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `title` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '模块标题',
-  `username` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '操作人员',
-  `method` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '方法名称',
-  `request_method` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '请求方式',
-  `params` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT '请求参数',
-  `url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '请求接口',
-  `ip` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '请求IP',
-  `location` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '请求地址',
-  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '1' COMMENT '操作状态',
-  `oper_time` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '请求时间',
-  `request_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '请求唯一标识',
-  `duration` int DEFAULT NULL COMMENT '请求耗时',
-  `user_id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '操作人员ID',
-  `business_type` char(2) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '0' COMMENT '操作类型',
-  PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
-
--- ----------------------------
--- Records of sys_oper_log
--- ----------------------------
-INSERT INTO `sys_oper_log` VALUES ('69280719-59a4-4db4-af8d-6e4a7bf52067', '用户管理', 'admin', 'UserController.delete', 'DELETE', '{\n  \"query\": {\n    \"ids\": \"70d6727c-03f9-4bcb-9ef1-b03e4e2ef157,ec465133-039a-439a-b6c2-1580e17b85d6,ab7837fc-5443-4895-8115-61b5f4202dbe,a4a2cf1d-fc1b-4111-b0d8-bbffa17739ad,a094cd85-9804-4eb3-ab43-ce4fb4c8c009,9f87a5f1-8e1d-44c6-8fe3-7b0661b5d680,9e60873d-a9d7-461c-9145-5691df6ed606,9997f1fd-14d9-4126-b24c-b7ebc488bd22,9392e024-d00e-4190-8494-9412ecb73693,890fc252-dd8a-41ec-9137-ca78c27c4a75,82ee9eaa-f67d-4e6d-956e-e03f5917d65a,82eb90e9-ca0d-4c7d-8516-b18c7699f940,7dee336c-0ca0-4f8e-b0b6-35ed7a4ab52f,78bc6792-69a9-479b-9ae6-b06d04ce0a6a,778484a3-24ee-4b1e-b565-06414e06bd83,7168f867-ac7b-40f6-9f64-20a3f5135625,054d0685-f884-4db6-a85a-0d3ed32c2f9c,6b6d398e-cd42-4ac3-87ad-5c41ae7c8a12,67fe10cf-fcb5-4a9a-a5e1-c310534c094f,52c4dd05-8542-4dd8-848b-639ada360d5b,4d002160-e114-448b-a0b9-2984416f8ef4,4ae59a3e-f2aa-4015-931c-8453e8575089,47294949-473a-4b6e-92b4-08a8e8ab0e12,467debff-878b-4926-a053-d7ce5f508daa,31e589c9-7619-4a44-9a72-f44e424cc0c2,2beb0b82-fe71-4cab-b5a0-6a6abd68ce09,25e20ba1-ab30-4440-8306-6030df3807de,19ef0ef4-2948-4805-92c1-46cc31c3a79c,138e20f1-669d-46f4-b237-85f707e56b40,133b6e7a-6e4b-477a-b7f7-cac4c30a884f,1290da25-2262-4b00-9984-c0bd4fe4902b\"\n  }\n}', '/api/system/user/delete', '127.0.0.1', '内网IP', '1', '2026-10-17 15:44:54', '076073bb-3d55-4e92-bb0f-ff61602ef0a4', 63, '866b0232-507b-42a4-bdc1-47fc4a83616a', '3');
-INSERT INTO `sys_oper_log` VALUES ('71c26e7b-614f-4e6b-bffc-7d3c500e1718', '用户管理', 'admin', 'UserController.importData', 'POST', '{\n  \"query\": {},\n  \"body\": {\n    \"updateSupport\": \"true\",\n    \"deptId\": \"bb93a81a-039e-4cc3-a90d-9dce0857dde1\",\n    \"roleIds\": \"5e2db9ff-0913-4b92-91bc-ef329619842a\"\n  }\n}', '/api/system/user/importData', '127.0.0.1', '内网IP', '0', '2026-10-17 15:45:47', '58db8c35-1416-4675-b2ae-11b74b3696dd', 26, '866b0232-507b-42a4-bdc1-47fc4a83616a', '6');
-INSERT INTO `sys_oper_log` VALUES ('9c78eede-1fe3-4559-956f-8d17f18a7b2a', '用户管理', 'admin', 'UserController.importData', 'POST', '{\n  \"query\": {},\n  \"body\": {\n    \"updateSupport\": \"false\",\n    \"deptId\": \"bb93a81a-039e-4cc3-a90d-9dce0857dde1\",\n    \"roleIds\": \"5e2db9ff-0913-4b92-91bc-ef329619842a\"\n  }\n}', '/api/system/user/importData', '127.0.0.1', '内网IP', '0', '2026-10-17 15:45:42', 'd6bbb988-7e5d-4504-9830-9bcb395748b4', 45, '866b0232-507b-42a4-bdc1-47fc4a83616a', '6');
-INSERT INTO `sys_oper_log` VALUES ('a356006a-7792-4165-9548-a8c3cca26866', '用户管理', 'admin', 'UserController.importData', 'POST', '{\n  \"query\": {},\n  \"body\": {\n    \"updateSupport\": \"false\",\n    \"deptId\": \"d3e747cf-f705-4ac0-bef2-89b578f1a256\",\n    \"roleIds\": \"5e2db9ff-0913-4b92-91bc-ef329619842a\"\n  }\n}', '/api/system/user/importData', '127.0.0.1', '内网IP', '1', '2026-10-17 15:44:25', '3f6fb77f-76f2-42b1-a207-fda3c1753b24', 491, '866b0232-507b-42a4-bdc1-47fc4a83616a', '6');
-INSERT INTO `sys_oper_log` VALUES ('a7d22b88-061d-48f6-bcbe-c330c4ece2a7', '登录日志', 'admin', 'LogController.clearLoginlog', 'DELETE', '{\n  \"query\": {}\n}', '/api/monitor/log/loginlog/clear', '127.0.0.1', '内网IP', '1', '2026-10-14 20:15:28', '94bfd8d6-4940-4f1c-8506-c368b64650a6', 59, '866b0232-507b-42a4-bdc1-47fc4a83616a', '4');
-INSERT INTO `sys_oper_log` VALUES ('b68d8c7b-8e42-41ad-aebc-6916982b468a', '用户管理', 'admin', 'UserController.importData', 'POST', '{\n  \"query\": {},\n  \"body\": {\n    \"updateSupport\": \"false\",\n    \"deptId\": \"bb93a81a-039e-4cc3-a90d-9dce0857dde1\",\n    \"roleIds\": \"5e2db9ff-0913-4b92-91bc-ef329619842a\"\n  }\n}', '/api/system/user/importData', '127.0.0.1', '内网IP', '0', '2026-10-17 15:45:44', '91b028a3-fb39-416f-a782-0e2007d61a4a', 40, '866b0232-507b-42a4-bdc1-47fc4a83616a', '6');
-INSERT INTO `sys_oper_log` VALUES ('de961cd2-e6fc-4490-8126-239dcb3e502c', '菜单管理', 'admin', 'MenuController.create', 'POST', '{\n  \"query\": {},\n  \"body\": {\n    \"menuType\": \"F\",\n    \"parentId\": \"8762a399-1606-496c-98ee-1fed23bcedc7\",\n    \"menuSort\": 5,\n    \"status\": \"1\",\n    \"visible\": \"1\",\n    \"isCache\": \"0\",\n    \"target\": \"1\",\n    \"permission\": \"system:user:import\",\n    \"menuName\": \"用户导入\"\n  }\n}', '/api/system/menu/create', '127.0.0.1', '内网IP', '1', '2026-10-17 14:59:59', '9457b616-bc88-4ece-81d0-d7597a1748eb', 71, '866b0232-507b-42a4-bdc1-47fc4a83616a', '1');
-INSERT INTO `sys_oper_log` VALUES ('ed2a662e-f252-4866-aaf1-cda117f87892', '操作日志', 'admin', 'LogController.clearOperinfo', 'DELETE', '{\n  \"query\": {}\n}', '/api/monitor/log/operlog/clear', '127.0.0.1', '内网IP', '1', '2026-10-14 20:15:24', '8c7b93fc-1686-446a-b40b-abc498d3ecf9', 52, '866b0232-507b-42a4-bdc1-47fc4a83616a', '4');
-INSERT INTO `sys_oper_log` VALUES ('f56ae2ab-e9a7-4b8e-b041-c0dd6571dd50', '用户管理', 'admin', 'UserController.importData', 'POST', '{\n  \"query\": {},\n  \"body\": {\n    \"updateSupport\": \"false\",\n    \"deptId\": \"d3e747cf-f705-4ac0-bef2-89b578f1a256\",\n    \"roleIds\": \"5e2db9ff-0913-4b92-91bc-ef329619842a\"\n  }\n}', '/api/system/user/importData', '127.0.0.1', '内网IP', '0', '2026-10-17 15:25:39', '6ca48e34-1d7a-4275-9db3-7ed4899c6dcc', 275, '866b0232-507b-42a4-bdc1-47fc4a83616a', '6');
 -- ----------------------------
 -- Table structure for sys_role
 -- ----------------------------
@@ -550,7 +468,7 @@ CREATE TABLE `sys_user` (
 -- Records of sys_user
 -- ----------------------------
 INSERT INTO `sys_user` VALUES ('2026-09-21 21:22:21', '2026-09-23 17:06:41', 'admin', 'admin', '30bb5fcd-b6d0-45b4-979c-796a8d993cbf', 'test', '$argon2id$v=19$m=65536,p=4,t=3$XpZEKTRJkkmcDRHO4PpJSQ$QrR0JD1zHei7coSTLXdMeYFM/V77g0f+AHWZdcuDtQI', '13344445555', '测试', '13344445555@163.com', '1', '1', 18, NULL, NULL, NULL, 'bb93a81a-039e-4cc3-a90d-9dce0857dde1', NULL, '测试');
-INSERT INTO `sys_user` VALUES ('2026-08-29 22:01:32', '2026-10-14 19:59:12', 'admin', 'admin', '866b0232-507b-42a4-bdc1-47fc4a83616a', 'admin', '$argon2id$v=19$m=65536,p=4,t=3$9TpqdrZbWIjXxG3RWFla0w$VA9fL3QvLvB6yQxTzic9or9lbKAtq+IMm0CC8X6JhaQ', '16688889999', '天道', 'yunhe@163.com', '1', '1', 18, NULL, '2026-10-14 19:59:12', NULL, 'bb93a81a-039e-4cc3-a90d-9dce0857dde1', '', '超级管理员');
+INSERT INTO `sys_user` VALUES ('2026-08-29 22:01:32', '2026-11-11 08:51:53', 'admin', 'admin', '866b0232-507b-42a4-bdc1-47fc4a83616a', 'admin', '$argon2id$v=19$m=65536,p=4,t=3$9TpqdrZbWIjXxG3RWFla0w$VA9fL3QvLvB6yQxTzic9or9lbKAtq+IMm0CC8X6JhaQ', '16688889999', '天道', 'yunhe@163.com', '1', '1', 18, NULL, '2026-11-11 08:51:53', NULL, 'bb93a81a-039e-4cc3-a90d-9dce0857dde1', '', '超级管理员');
 -- ----------------------------
 -- Table structure for sys_user_role
 -- ----------------------------

@@ -37,7 +37,7 @@ services:
       MYSQL_USERNAME: ${MYSQL_USERNAME:-root}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:?请先在仓库根 .env 配置 MYSQL_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE:-nestdemo}
-      # 表结构由 init.sql / TypeORM 迁移负责，禁止 TypeORM 自动改表
+      # 表结构由 TypeORM 迁移负责，init.sql 只作种子，禁止 TypeORM 自动改表
       MYSQL_SYNCHRONIZE: 'false'
       REDIS_HOST: ${REDIS_HOST:?请先在仓库根 .env 配置 REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT:-6379}

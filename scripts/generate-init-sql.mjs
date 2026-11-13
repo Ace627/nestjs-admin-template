@@ -6,13 +6,16 @@
  */
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { readFile, writeFile } from 'node:fs/promises'
 import { createRequire } from 'node:module'
+import { readFile, writeFile } from 'node:fs/promises'
 
 const projectDir = path.dirname(path.dirname(fileURLToPath(import.meta.url)))
 const envFilePath = path.join(projectDir, 'apps', 'server', '.env')
 const outputFilePath = path.join(projectDir, 'init.sql')
 const EOL = '\r\n'
+
+/** 不随种子导出的表：迁移记录由 TypeORM 维护（导出后重灌必主键冲突），运行日志属环境噪音 */
+const EXCLUDED_TABLE_NAMES = new Set(['sys_migrations', 'sys_oper_log', 'sys_login_log', 'sys_job_log'])
 
 /**
  * 解析 .env 文件为键值对象（仅支持 KEY=VALUE 行与 # 注释）
@@ -94,16 +97,13 @@ async function bootstrap() {
   const connection = await mysql.createConnection({ ...config, dateStrings: true })
 
   try {
-    // 1. 取全量表名（SHOW TABLES 本身按名称排序，与现有文件一致）
+    // 1. 取全量表名（SHOW TABLES 本身按名称排序，与现有文件一致），剔除不随种子导出的表
     const [tableRows] = await connection.query('SHOW TABLES')
-    const tableNames = tableRows.map((row) => Object.values(row)[0])
-    if (tableNames.length === 0) throw new Error('数据库中没有任何表，请确认连接的是开发库')
+    const tableNames = tableRows.map((row) => Object.values(row)[0]).filter((tableName) => !EXCLUDED_TABLE_NAMES.has(tableName))
+    if (tableNames.length === 0) throw new Error('数据库中没有可导出的表，请确认连接的是开发库')
 
     // 2. 找出所有含软删除列（delete_time）的表，导出数据时过滤软删除行
-    const [softDeleteColumnRows] = await connection.query(
-      `SELECT TABLE_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = ? AND COLUMN_NAME = 'delete_time'`,
-      [config.database]
-    )
+    const [softDeleteColumnRows] = await connection.query(`SELECT TABLE_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = ? AND COLUMN_NAME = 'delete_time'`, [config.database])
     const softDeleteTableNames = new Set(softDeleteColumnRows.map((row) => row.TABLE_NAME))
 
     // 3. 读取全部外键关系，用于级联过滤悬空引用（如中间表引用已软删除的父记录）
@@ -111,7 +111,7 @@ async function bootstrap() {
       `SELECT TABLE_NAME, COLUMN_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME
        FROM information_schema.KEY_COLUMN_USAGE
        WHERE TABLE_SCHEMA = ? AND REFERENCED_TABLE_NAME IS NOT NULL`,
-      [config.database]
+      [config.database],
     )
     const foreignKeysByTable = new Map()
     for (const foreignKeyRow of foreignKeyRows) {
@@ -162,7 +162,9 @@ async function bootstrap() {
         `-- ----------------------------`,
       ]
       for (const dataRow of dataRows) {
-        const valuesText = Object.values(dataRow).map((value) => connection.escape(value)).join(', ')
+        const valuesText = Object.values(dataRow)
+          .map((value) => connection.escape(value))
+          .join(', ')
         sectionLines.push(`INSERT INTO \`${tableName}\` VALUES (${valuesText});`)
       }
       sections.push(sectionLines.join(EOL))
