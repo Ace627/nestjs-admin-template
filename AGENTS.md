@@ -5,3 +5,8 @@
 - `build/plugins/auto-import-plugin.ts` 配置的 API 与模块导出直接使用，禁止 import
 - 变量命名必须见名知意，禁止缩写变量（如 v、v: unknown）；类型不明确时也用能表达业务含义的变量名
 - 注释只加在关键地方；一眼能看明白的代码不加冗余注释
+
+## AI存档
+
+- skill 统一存放到 `.agents\skills` 下
+- 记忆文件统一存放到 `.agents\memory` 下，按日期迭代，有一份总 `MEMORY.md`
