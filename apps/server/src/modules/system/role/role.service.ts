@@ -46,9 +46,11 @@ export class RoleService {
       if (roleCode && roleCode !== record.roleCode) throw new BusinessException('系统管理员角色编码禁止修改')
       if (status && status !== record.status) throw new BusinessException('系统管理员角色状态禁止修改')
     }
+    const statusChanged = !!status && status !== record.status
+    const codeChanged = !!roleCode && roleCode !== record.roleCode
     Object.assign(record, updateDto)
     await this.roleRepository.save(record)
-    // 角色状态/编码变更对角色级缓存的影响延迟至缓存过期或重新登录生效（TTL 惰性重建）
+    if (statusChanged || codeChanged) await this.clearHolderRoleCache([id])
     return '修改成功'
   }
 
@@ -102,6 +104,7 @@ export class RoleService {
     if (!record) throw new BusinessException('角色不存在')
     if (record.roleCode === RbacConstant.SUPER_ROLE_CODE) throw new BusinessException('系统管理员角色状态禁止修改')
     await this.roleRepository.update(record.id, { status: changeDto.status })
+    await this.clearHolderRoleCache([record.id])
     return '状态修改成功'
   }
 
@@ -162,5 +165,18 @@ export class RoleService {
     const cache: AuthType.RoleScopeCache = { dataScope: role.dataScope, deptIds: roleDepts.map((item) => item.deptId) }
     await this.redisService.set(cacheKey, JSON.stringify(cache), 'EX', this.expiresIn)
     return cache
+  }
+
+  /** 按角色 ID 反查持有者并清 user:roles 缓存，使停用/改码立即对守卫生效 */
+  private async clearHolderRoleCache(roleIds: string[]): Promise<void> {
+    if (!roleIds.length) return
+    const rows = await this.dataSource
+      .createQueryBuilder()
+      .select('user_id', 'userId')
+      .from('sys_user_role')
+      .where('role_id IN (:...roleIds)', { roleIds })
+      .getRawMany<{ userId: string }>()
+    const userIds = [...new Set(rows.map((row) => row.userId))]
+    if (userIds.length) await this.redisService.del(...userIds.map((userId) => `${RedisConstant.ADMIN_USER_ROLES}:${userId}`))
   }
 }

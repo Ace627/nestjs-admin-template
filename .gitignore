@@ -24,3 +24,4 @@ apps/server/.env*
 .opencode
 .workbuddy
 .codebuddy/memory
+.test-tmp

@@ -20,17 +20,19 @@ export class UserController {
   /** 根据传入 id 组删除单个或者多个数据 */
   @Delete('delete')
   @RequirePermissions(['system:user:delete'])
+  @DataScope({ alias: 'user', userColumn: 'id' })
   @Operlog({ title: '用户管理', businessType: BusinessType.DELETE })
-  public delete(@Query('ids', new ParseArrayPipe()) ids: string[]) {
-    return this.userService.delete(ids)
+  public delete(@Query('ids', new ParseArrayPipe()) ids: string[], @DataScopeSql() ds: DataScopeCondition) {
+    return this.userService.delete(ids, ds)
   }
 
   /** 编辑用户 */
   @Put('update')
   @RequirePermissions(['system:user:update'])
+  @DataScope({ alias: 'user', userColumn: 'id' })
   @Operlog({ title: '用户管理', businessType: BusinessType.UPDATE })
-  update(@Body() updateDto: UpdateUserDto) {
-    return this.userService.update(updateDto)
+  update(@Body() updateDto: UpdateUserDto, @DataScopeSql() ds: DataScopeCondition) {
+    return this.userService.update(updateDto, ds)
   }
 
   /** 下载用户导入模板（blob 响应） */
@@ -77,8 +79,9 @@ export class UserController {
   /** 根据用户 ID 查找用户信息 */
   @Get('detail')
   @RequirePermissions(['system:user:query'])
-  public findOneById(@Query('id') id: string) {
-    return this.userService.findOneById(id)
+  @DataScope({ alias: 'user', userColumn: 'id' })
+  public findOneById(@Query('id') id: string, @DataScopeSql() ds: DataScopeCondition) {
+    return this.userService.findOneById(id, ds)
   }
 
   /** 查找用户个人资料 */

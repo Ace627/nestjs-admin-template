@@ -50,10 +50,11 @@ export class UserService {
   }
 
   /** 删除用户（持有超管角色的账号禁止删除，按角色判定而非固定 ID） */
-  public async delete(userIds: string[]) {
+  public async delete(userIds: string[], ds?: DataScopeCondition) {
+    await this.assertInScope(userIds, ds)
     // 校验目标用户全部存在且未删除（默认排除已软删行）
     const targets = await this.userRepository.findBy({ id: In(userIds) })
-    if (targets.length !== new Set(userIds).size) throw new BusinessException('该用户不存在')
+    if (targets.length !== new Set(userIds).size) throw new BusinessException('数据不存在或无权访问')
 
     const adminUsers = await this.userRepository
       .createQueryBuilder('user')
@@ -72,10 +73,11 @@ export class UserService {
   }
 
   /** 编辑用户（同步角色关联；按变更字段精准失效缓存，普通字段不踢下线） */
-  public async update(updateDto: UpdateUserDto) {
+  public async update(updateDto: UpdateUserDto, ds?: DataScopeCondition) {
     const { id, phone, email, roleIds, deptId, status } = updateDto
+    await this.assertInScope([id], ds)
     const entity = await this.userRepository.findOne({ where: { id: Equal(id) }, relations: { roles: true } })
-    if (!entity) throw new BusinessException('该用户不存在')
+    if (!entity) throw new BusinessException('数据不存在或无权访问')
     if (await this.checkPhoneExists(phone, id)) throw new BusinessException('该手机号已存在')
     if (await this.checkEmailExists(email, id)) throw new BusinessException('该邮箱已存在')
 
@@ -241,9 +243,10 @@ export class UserService {
   }
 
   /** 根据用户 ID 查询用户信息（含角色关联，供 getInfo 使用） */
-  public async findOneById(userId: string) {
+  public async findOneById(userId: string, ds?: DataScopeCondition) {
+    await this.assertInScope([userId], ds)
     const user = await this.userRepository.findOne({ where: { id: Equal(userId) }, relations: { roles: true } })
-    if (!user) throw new BusinessException(`该用户不存在`)
+    if (!user) throw new BusinessException('数据不存在或无权访问')
     return user
   }
 
@@ -361,6 +364,18 @@ export class UserService {
   /* -------------------------------------------------------------------------- */
   /*                               Private Handler                              */
   /* -------------------------------------------------------------------------- */
+
+  /** 数据权限校验：目标用户必须全部落在 ds 范围内；ds 为 undefined（超管）直接放行 */
+  private async assertInScope(targetIds: string[], ds?: DataScopeCondition): Promise<void> {
+    if (!ds) return
+    const uniqueIds = [...new Set(targetIds)]
+    if (!uniqueIds.length) return
+    const queryBuilder = this.userRepository.createQueryBuilder('user')
+    queryBuilder.where('user.id IN (:...targetIds)', { targetIds: uniqueIds })
+    queryBuilder.andWhere(ds.sql, ds.params)
+    const visibleCount = await queryBuilder.getCount()
+    if (visibleCount !== uniqueIds.length) throw new BusinessException('数据不存在或无权访问')
+  }
 
   /** 导入文件校验：仅允许 .xlsx（旧版 .xls 引擎不支持；ZIP 魔数拦截改后缀的伪造文件） */
   private validateImportFile(file: ExpressMulterFile): void {

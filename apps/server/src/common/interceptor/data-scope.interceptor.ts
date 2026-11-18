@@ -2,22 +2,15 @@ import { Reflector } from '@nestjs/core'
 import type { AuthType } from '@/types'
 import { RedisService } from '@/shared/redis.service'
 import { DeptService } from '@/modules/system/dept/dept.service'
-import { CallHandler, ExecutionContext, Injectable, Logger, NestInterceptor } from '@nestjs/common'
-import { ConfigService } from '@nestjs/config'
+import { RoleService } from '@/modules/system/role/role.service'
+import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common'
 import { concat, Observable } from 'rxjs'
-import { CommonConstant, ConfigConstant, DataScopeCondition, DataScopeOptionsResolved, DataScopeType, DecoratorConstant, RedisConstant } from '@/common'
+import { CommonConstant, DataScopeCondition, DataScopeOptionsResolved, DataScopeType, DecoratorConstant, RedisConstant } from '@/common'
 
 /** user:roles:{userId} 缓存结构（AuthService.getInfo 写入） */
 interface UserRoleCacheItem {
   id: string
   roleCode: string
-}
-
-/** sys:role:depts:{roleId} 缓存结构（RoleService 维护） */
-interface RoleScopeCache {
-  dataScope: string
-  /** 仅 dataScope = '2'（自定义）时有值，来源 sys_role_dept */
-  deptIds: string[]
 }
 
 /**
@@ -28,19 +21,12 @@ interface RoleScopeCache {
  */
 @Injectable()
 export class DataScopeInterceptor implements NestInterceptor {
-  private readonly logger = new Logger(DataScopeInterceptor.name)
-
   constructor(
     private readonly reflector: Reflector,
     private readonly redisService: RedisService,
     private readonly deptService: DeptService,
-    private readonly configService: ConfigService,
+    private readonly roleService: RoleService,
   ) {}
-
-  /** JWT 过期时间（秒），与角色级缓存写入 TTL 同源 */
-  private get expiresIn(): number {
-    return this.configService.get<number>(ConfigConstant.JWT_EXPIRES_IN, 1800)
-  }
 
   public intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     // 获取数据权限元数据（方法优先于类）；未标注 → 直接放行
@@ -76,18 +62,14 @@ export class DataScopeInterceptor implements NestInterceptor {
     const parts: string[] = []
     const params: Record<string, unknown> = {}
     let index = 0
+    // 用户可见部门：多角色惰性复用，仅遇到部门档位时回源一次，避免循环内重复读 Redis
+    let userDepts: string[] | null | undefined
 
     for (const role of roles) {
-      // 角色数据范围缓存缺失 → fail-closed（由 RoleService 回源重建）
-      const scopeCacheKey = `${RedisConstant.ROLE_DATA_SCOPE}:${role.id}`
-      const scopeJson = await this.redisService.get(scopeCacheKey)
-      if (!scopeJson) return { sql: '1 = 0', params: {} }
-      // 读时续期（best-effort）：与守卫同策略，避免活跃会话中途缓存过期导致列表被 fail-closed 查空
-      this.redisService.expire(scopeCacheKey, this.expiresIn).catch((error: unknown) => {
-        const errMsg = error instanceof Error ? error.message : '未知错误'
-        this.logger.warn(`角色数据范围缓存续期失败（不影响本次请求）: ${errMsg}`)
-      })
-      const { dataScope, deptIds } = JSON.parse(scopeJson) as RoleScopeCache
+      // 读不到先回源重建；角色已删（null）或重建异常才 fail-closed
+      const scope = await this.roleService.getRoleScopeCache(role.id)
+      if (!scope) return { sql: '1 = 0', params: {} }
+      const { dataScope, deptIds } = scope
 
       if (dataScope === DataScopeType.ALL) return undefined
 
@@ -98,7 +80,7 @@ export class DataScopeInterceptor implements NestInterceptor {
       }
 
       if (dataScope === DataScopeType.DEPT || dataScope === DataScopeType.DEPT_AND_BELOW) {
-        const userDepts = await this.getUserDepts(user.userId)
+        if (userDepts === undefined) userDepts = await this.getUserDepts(user.userId)
         if (!userDepts) return { sql: '1 = 0', params: {} }
         const ids = dataScope === DataScopeType.DEPT ? userDepts : await this.deptService.findDescendants(userDepts)
         if (ids.length) {
