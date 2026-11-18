@@ -8,7 +8,7 @@
  Target Server Type    : MySQL
  File Encoding         : 65001
 
- Date: 13/11/2026 09:33:46
+ Date: 18/11/2026 17:06:49
  Tables: 12
 */
 
@@ -259,6 +259,7 @@ INSERT INTO `sys_menu` VALUES ('2026-09-17 22:53:20', '2026-09-17 22:53:20', NUL
 INSERT INTO `sys_menu` VALUES ('2026-09-04 19:17:49', '2026-09-04 19:17:49', NULL, 'admin', 'admin', '360de6d6-3e66-469c-a2c4-f81acdd7b473', '90ccc73f-9508-42d4-8f5e-f1d0c1da97c4', NULL, NULL, 'F', NULL, '角色删除', '1', 'system:role:delete', '1', 4, '0', '1');
 INSERT INTO `sys_menu` VALUES ('2026-09-13 21:49:06', '2026-09-16 22:02:52', NULL, 'admin', 'admin', '39a3b5a3-7e03-42dc-aa69-85d998cad25b', '1e0c60bb-d20f-478b-b8a3-2ece6802238e', 'upload', 'example/upload/index', 'C', 'Resource', '大文件上传', '1', NULL, '1', 55, '0', '1');
 INSERT INTO `sys_menu` VALUES ('2026-09-04 19:29:39', '2026-09-29 10:52:11', NULL, 'admin', 'admin', '41a045fd-5077-4694-ae65-78e4f7120a7f', '760c23de-73fa-4d69-8d1c-674a235d3799', 'loginlog', 'monitor/loginlog/index', 'C', 'Loginlog', '登录日志', '1', NULL, '1', 8, '0', '1');
+INSERT INTO `sys_menu` VALUES ('2026-11-18 16:55:11', '2026-11-18 16:55:11', NULL, 'admin', 'admin', '42d4c2e1-7465-4e98-a8df-59b5a350ecf8', '1e0c60bb-d20f-478b-b8a3-2ece6802238e', 'loading', 'example/loading/index', 'C', 'TaiChi', '首屏加载效果', '1', NULL, '1', 5, '0', '1');
 INSERT INTO `sys_menu` VALUES ('2026-09-05 23:39:57', '2026-09-05 23:39:57', NULL, 'admin', 'admin', '43aeefe8-3704-471b-a494-bf0b1c4a6446', '41a045fd-5077-4694-ae65-78e4f7120a7f', NULL, NULL, 'F', NULL, '登录日志导入', '1', 'monitor:loginlog:import', '1', 4, '0', '1');
 INSERT INTO `sys_menu` VALUES ('2026-09-05 15:11:14', '2026-09-05 15:52:38', NULL, 'admin', 'admin', '4534a44e-8baa-4ed2-8545-1ae11fde5538', '656742cc-c81b-4d5d-8a33-524469e84cfc', NULL, NULL, 'F', NULL, '缓存删除', '1', 'monitor:cache:delete', '1', 2, '0', '1');
 INSERT INTO `sys_menu` VALUES ('2026-09-04 19:15:34', '2026-09-04 19:15:34', NULL, 'admin', 'admin', '4bf51da7-9633-432b-8fab-5f40051dd4eb', '8762a399-1606-496c-98ee-1fed23bcedc7', NULL, NULL, 'F', NULL, '用户查询', '1', 'system:user:query', '1', 1, '0', '1');
@@ -468,7 +469,7 @@ CREATE TABLE `sys_user` (
 -- Records of sys_user
 -- ----------------------------
 INSERT INTO `sys_user` VALUES ('2026-09-21 21:22:21', '2026-09-23 17:06:41', 'admin', 'admin', '30bb5fcd-b6d0-45b4-979c-796a8d993cbf', 'test', '$argon2id$v=19$m=65536,p=4,t=3$XpZEKTRJkkmcDRHO4PpJSQ$QrR0JD1zHei7coSTLXdMeYFM/V77g0f+AHWZdcuDtQI', '13344445555', '测试', '13344445555@163.com', '1', '1', 18, NULL, NULL, NULL, 'bb93a81a-039e-4cc3-a90d-9dce0857dde1', NULL, '测试');
-INSERT INTO `sys_user` VALUES ('2026-08-29 22:01:32', '2026-11-11 08:51:53', 'admin', 'admin', '866b0232-507b-42a4-bdc1-47fc4a83616a', 'admin', '$argon2id$v=19$m=65536,p=4,t=3$9TpqdrZbWIjXxG3RWFla0w$VA9fL3QvLvB6yQxTzic9or9lbKAtq+IMm0CC8X6JhaQ', '16688889999', '天道', 'yunhe@163.com', '1', '1', 18, NULL, '2026-11-11 08:51:53', NULL, 'bb93a81a-039e-4cc3-a90d-9dce0857dde1', '', '超级管理员');
+INSERT INTO `sys_user` VALUES ('2026-08-29 22:01:32', '2026-11-18 16:36:42', 'admin', 'admin', '866b0232-507b-42a4-bdc1-47fc4a83616a', 'admin', '$argon2id$v=19$m=65536,p=4,t=3$9TpqdrZbWIjXxG3RWFla0w$VA9fL3QvLvB6yQxTzic9or9lbKAtq+IMm0CC8X6JhaQ', '16688889999', '天道', 'yunhe@163.com', '1', '1', 18, NULL, '2026-11-18 16:36:42', NULL, 'bb93a81a-039e-4cc3-a90d-9dce0857dde1', '', '超级管理员');
 -- ----------------------------
 -- Table structure for sys_user_role
 -- ----------------------------

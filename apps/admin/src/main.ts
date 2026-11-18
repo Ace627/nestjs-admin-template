@@ -6,7 +6,6 @@ import { setupPlugins } from '@/plugins'
 import { setupDirectives } from './directives'
 import 'virtual:uno.css'
 import 'virtual:svg-icons-register'
-import { sleep } from './utils'
 
 async function bootstrap() {
   // 创建 Vue 应用实例
@@ -23,8 +22,6 @@ async function bootstrap() {
 
   // 配置 Router https://router.vuejs.org/zh
   await setupRouter(app)
-
-  await sleep(3000)
 
   // 挂载应用实例到 DOM 元素 #app 中
   app.mount('#app')
