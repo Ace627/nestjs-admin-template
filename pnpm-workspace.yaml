@@ -20,6 +20,8 @@ fetchRetries: 2
 # 使用 pnpm-lock.yaml 锁定依赖
 lockfile: true
 # npm 镜像源
+minimumReleaseAgeExclude:
+  - cronstrue@3.43.0
 registry: https://registry.npmmirror.com
 # 安装依赖时锁定精确版本号（不带 ^ ~）
 saveExact: true

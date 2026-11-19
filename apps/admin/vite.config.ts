@@ -34,7 +34,8 @@ export default defineConfig(({ mode }) => {
       copyPublicDir: true,
       rolldownOptions: {
         checks: {
-          pluginTimings: false, // 禁用插件计时器检查，以提高构建性能
+          // 关闭构建耗时诊断输出（PLUGIN_TIMINGS），仅影响日志提示不影响实际构建（禁用插件计时器检查，以提高构建性能）
+          bundlerTimings: false,
         },
         output: {
           // 引入文件名的名称
@@ -44,13 +45,18 @@ export default defineConfig(({ mode }) => {
           // 打包的文件进行拆包处理
           codeSplitting: {
             groups: [
-              { name: 'vue', test: /node_modules[\\/](vue|@vue)[\\/]/, priority: 16 },
-              { name: 'pinia', test: /node_modules[\\/]pinia[\\/]/, priority: 15 },
-              { name: 'vue-router', test: /node_modules[\\/]vue-router[\\/]/, priority: 14 },
-              { name: 'axios', test: /node_modules[\\/]axios[\\/]/, priority: 13 },
-              { name: 'dayjs', test: /node_modules[\\/]dayjs[\\/]/, priority: 12 },
-              { name: 'echarts', test: /node_modules[\\/](echarts|zrender)/ },
-              { name: 'element-plus', test: /node_modules[\\/]element-plus[\\/]/ },
+              // zrender 是 echarts 的渲染引擎，priority 必须高于 echarts，否则会被 echarts-core 一并收走
+              { name: 'zrender', test: /node_modules[\\/]zrender[\\/]/, priority: 30 },
+              // echarts 为按需引入，图表与组件分别成块，避免单个 chunk 过大
+              { name: 'echarts-charts', test: /node_modules[\\/]echarts[\\/](lib[\\/]chart[\\/]|charts\.js)/, priority: 29 },
+              { name: 'echarts-components', test: /node_modules[\\/]echarts[\\/](lib[\\/]component[\\/]|components\.js)/, priority: 28 },
+              { name: 'echarts-core', test: /node_modules[\\/]echarts[\\/]/, priority: 27 },
+              { name: 'element-plus', test: /node_modules[\\/](@element-plus[\\/]|element-plus[\\/])/, priority: 26 },
+              { name: 'vue', test: /node_modules[\\/](vue|@vue)[\\/]/, priority: 25 },
+              { name: 'pinia', test: /node_modules[\\/]pinia[\\/]/, priority: 24 },
+              { name: 'vue-router', test: /node_modules[\\/]vue-router[\\/]/, priority: 23 },
+              { name: 'axios', test: /node_modules[\\/]axios[\\/]/, priority: 22 },
+              { name: 'dayjs', test: /node_modules[\\/]dayjs[\\/]/, priority: 21 },
             ],
           },
           minify: {

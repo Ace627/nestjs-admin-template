@@ -40,20 +40,14 @@ watch(
   () => settingStore.showBreadcrumb,
   (showBreadcrumb) => {
     if (!showBreadcrumb) settingStore.showBreadcrumbIcon = false
-  }
+  },
 )
 watch(
   () => settingStore.showTagsView,
   (showTagsView) => {
     if (!showTagsView) settingStore.showTagsViewIcon = false
-  }
+  },
 )
-
-const SIZE_OPTIONS = [
-  { label: '大号尺寸', value: 'large' },
-  { label: '默认尺寸', value: 'default' },
-  { label: '小号尺寸', value: 'small' },
-]
 
 const TRANSITION_OPTIONS = [
   { label: '淡入淡出', value: 'el-fade-in' },
@@ -82,7 +76,6 @@ const items: SettingItem[] = [
   { type: 'switch', label: '面包屑图标', prop: 'showBreadcrumbIcon', disabledWhen: 'showBreadcrumb' },
   { type: 'switch', label: '多标签模式', prop: 'showTagsView' },
   { type: 'switch', label: '显示页签图标', prop: 'showTagsViewIcon', disabledWhen: 'showTagsView' },
-  { type: 'select', label: '组件尺寸', prop: 'size', options: SIZE_OPTIONS },
   { type: 'select', label: '页面转场动效', prop: 'transition', options: TRANSITION_OPTIONS },
 ]
 </script>
