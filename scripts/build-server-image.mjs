@@ -1,23 +1,24 @@
 /**
  * 构建 server 生产镜像，并用 docker save 导出为 dist 下的离线 tar 包
  *
- * 构建上下文 = 仓库根（与 Dockerfile.server / .dockerignore 同级）
+ * 构建上下文 = 仓库根（Dockerfile 位于 config/docker，绝对路径需相对上下文根书写）
+ * .dockerignore 必须留在仓库根才生效，不随 Dockerfile 一起移动
  * 用法：node scripts/build-server-image.mjs
  * 镜像名与产物路径统一在下方 config 中修改
  * 导出成功后自动删除本地镜像，Docker Desktop 镜像列表不留存
  */
-import { spawnSync } from 'node:child_process'
-import { mkdir, stat, unlink } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { spawnSync } from 'node:child_process'
+import { mkdir, stat, unlink } from 'node:fs/promises'
 
 const projectRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)))
 
 // 镜像名与产物路径统一在此修改
 const config = {
   // 构建使用的 Dockerfile，相对仓库根
-  dockerfileName: 'Dockerfile.server',
-  // 构建出的镜像名与标签，save 时导出同一个；与 docker-compose.yml 的 image 保持一致
+  dockerfileName: 'config/docker/Dockerfile.server',
+  // 构建出的镜像名与标签，save 时导出同一个
   imageTag: 'nest-admin-server:latest',
   // 离线 tar 包的产物路径
   outputPath: path.join(projectRoot, 'dist', 'nest-admin-template-server.tar'),

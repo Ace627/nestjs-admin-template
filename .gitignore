@@ -23,5 +23,5 @@ apps/server/.env*
 .gemini
 .opencode
 .workbuddy
-.codebuddy/memory
+.codebuddy
 .test-tmp

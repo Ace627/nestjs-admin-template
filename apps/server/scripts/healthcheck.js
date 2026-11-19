@@ -1,6 +1,9 @@
-const http = require('http')
+import http from 'node:http'
 
-const request = http.request('http://127.0.0.1:3000/api/monitor/health/live', (response) => {
+// 端口跟随容器环境变量，避免改了 SERVER_PORT 后探针仍探 3000 导致误判
+const port = process.env.SERVER_PORT ?? 3000
+
+const request = http.request(`http://127.0.0.1:${port}/api/monitor/health/live`, (response) => {
   process.exit(response.statusCode === 200 ? 0 : 1)
 })
 

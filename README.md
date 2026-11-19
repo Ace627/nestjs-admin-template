@@ -2,7 +2,7 @@
 
 <p align="center">
   基于 Vue 3 + NestJS 12 全 TypeScript 技术栈的中后台模板<br />
-  权限模型完整落地 · 容器化开箱可用 · pnpm monorepo 单仓双端
+  权限模型完整落地 · 容器化开箱可用 · 单仓双端 · 前后端各自独立安装
 </p>
 
 <p align="center">
@@ -29,7 +29,7 @@
 
 一套开箱可用的中后台模板：前端 **Vue 3 + TypeScript + Element Plus + Vite 8**，后端 **NestJS 12 + TypeORM + MySQL + Redis + BullMQ**。除登录鉴权外，还完整实现了用户、角色、菜单、部门、字典、参数、日志、缓存、定时任务、在线用户等中后台标配功能。
 
-采用 **pnpm workspace monorepo** 结构：前后端分别位于 `apps/admin` 与 `apps/server`，共享依赖（axios、dayjs、lodash-es、TypeScript、Prettier 等）统一声明在根 `package.json`，全仓库共用一份 `pnpm-lock.yaml`，根目录一次 `pnpm install` 即可完成安装；根目录另提供 `dev:server` / `dev:admin` 一键启动脚本。
+采用 **单仓双工程** 结构：前端 `apps/admin`、后端 `apps/server` 各自持有独立的 `package.json`、`pnpm-lock.yaml` 与 `pnpm-workspace.yaml`（后者仅承载镜像源、`saveExact`、构建脚本白名单等 pnpm 配置，不含 `packages` 子包声明）。两端互不引用，安装、启动、构建、单独拷走都在各自目录内完成，没有 monorepo 的依赖提升与幽灵依赖问题。
 
 ## 🖼️ 演示图
 
@@ -45,6 +45,10 @@
   <tr>
     <td><img src="./resource/preview/系统监控 定时任务.png" /></td>
     <td><img src="./resource/preview/系统管理 参数设置.png" /></td>
+  </tr>
+  <tr>
+    <td><img src="./resource/preview/系统工具 列表打印.png" /></td>
+    <td><img src="./resource/preview/效果案例 首屏加载.png" /></td>
   </tr>
 </table>
 
@@ -77,32 +81,33 @@
 
 > 环境要求：Node.js ≥ 24 · pnpm 12 · MySQL 8 · Redis 7
 >
-> pnpm 版本由 `package.json` 的 `packageManager` 字段锁定，启用 corepack 时执行 `corepack enable` 后会自动使用对应版本。
+> pnpm 版本由 `apps/admin` 与 `apps/server` 各自的 `packageManager` 字段锁定，启用 corepack 时执行 `corepack enable` 后会自动使用对应版本。
 
 ```bash
 # 1. 克隆仓库
 git clone https://github.com/ace627/nestjs-admin-template.git
 cd nestjs-admin-template
 
-# 2. 安装依赖（workspace 根目录一次安装）
-pnpm install
+# 2. 安装依赖：前后端各自独立安装（只用一端可只装一个）
+cd apps/admin && pnpm install && cd ../..
+cd apps/server && pnpm install && cd ../..
 
 # 3. 配置后端环境变量：复制模板后按需修改 MYSQL_* / REDIS_* / JWT_SECRET
 cp apps/server/.env.example apps/server/.env
 
 # 4. 初始化数据库：一键建库、生成并执行迁移、写入种子数据
-pnpm --filter server db:init
+cd apps/server && pnpm db:init && cd ../..
 
-# 5. 启动
-pnpm dev:server   # 后端 http://localhost:3000/api
-pnpm dev:admin    # 前端 http://localhost:5173（开发代理已指向 3000）
+# 5. 启动（两个终端分别执行）
+cd apps/server && pnpm start:dev   # 后端 http://localhost:3000/api
+cd apps/admin && pnpm dev          # 前端 http://localhost:5173（开发代理已指向 3000）
 ```
 
 启动完成后使用默认账号登录：**admin / 123456**（超级管理员，建议登录后修改密码）。
 
 ## 🗄️ 数据库教程
 
-除快速开始中的 `pnpm --filter server db:init` 外，以下命令均在 `apps/server` 目录下执行，连接信息由 `apps/server/.env` 提供。
+以下命令均在 `apps/server` 目录下执行（快速开始里的 `pnpm db:init` 也是其中之一），连接信息由 `apps/server/.env` 提供。
 
 ### 新项目初始化数据库（一键）
 
@@ -117,9 +122,9 @@ pnpm db:init
 1. 创建 `MYSQL_DATABASE` 指定的库（utf8mb4 / utf8mb4_unicode_ci）。
 2. 仓库里还没有迁移文件时，在**空库**上执行 `migration:generate`，从实体 diff 出全部建表语句，生成 `src/database/migrations/<时间戳>-baseline.ts`；已有迁移文件则跳过此步。
 3. 执行 `migration:run`，跑完 baseline 与之后的全部增量迁移（首次会创建 `sys_migrations` 记录执行历史）。
-4. 从 `init.sql` 提取 `INSERT` 写入种子数据；脚本会补上显式列名，避免实体生成的列顺序与导出快照不一致导致数据错位。
+4. 从 `resource/init.sql` 提取 `INSERT` 写入种子数据；脚本会补上显式列名，避免实体生成的列顺序与导出快照不一致导致数据错位。
 
-`init.sql` 现在只作为种子数据来源，`CREATE TABLE` / `DROP TABLE` 不再直接导入。生成的 baseline 迁移文件**必须提交进仓库**：之后执行初始化会跳过生成步骤，只跑仓库里已有的迁移，换机器也不会得到时间戳不同的基线。生产环境首次部署同样执行这一条命令（把 `.env` 指向生产库），之后的结构变更只走增量迁移。
+`resource/init.sql` 现在只作为种子数据来源，`CREATE TABLE` / `DROP TABLE` 不再直接导入。生成的 baseline 迁移文件**必须提交进仓库**：之后执行初始化会跳过生成步骤，只跑仓库里已有的迁移，换机器也不会得到时间戳不同的基线。生产环境首次部署同样执行这一条命令（把 `.env` 指向生产库），之后的结构变更只走增量迁移。
 
 ```bash
 node scripts/init-db.mjs --dry-run   # 只检测并打印将要执行的动作，不写库、不生成文件
@@ -158,7 +163,7 @@ pnpm migration:revert
 
 ## 🐳 Docker 部署
 
-只编排 NestJS 服务，MySQL / Redis 连接现成的容器或客户端。先在仓库根目录创建 `.env`（勿提交，与本地开发用的 `apps/server/.env` 是两份）配置连接信息：
+只构建 NestJS 服务镜像，MySQL / Redis 连接现成的容器或外部服务。先在仓库根目录创建 `.env`（勿提交，与本地开发用的 `apps/server/.env` 是两份）配置连接信息：
 
 ```bash
 # .env（仓库根目录）
@@ -173,17 +178,7 @@ REDIS_PASSWORD=
 JWT_SECRET=your-random-secret
 ```
 
-外部 MySQL 需先按上文「数据库教程」完成初始化，然后：
-
-```bash
-docker compose up -d --build
-```
-
-服务启动后监听 `3000` 端口，健康探针为 `/api/monitor/health/live`；前端需另行 `pnpm build` 后部署静态产物。
-
-### 离线部署：构建并导出镜像 tar
-
-目标机器不能联网构建时，在联网的构建机上执行仓库根目录的脚本，一次完成构建与导出：
+外部 MySQL 需先按上文「数据库教程」完成初始化。镜像构建与导出由仓库根目录的脚本一次完成（目标机不能联网构建时，在联网的构建机上执行，再把 tar 拷过去）：
 
 ```bash
 node scripts/build-server-image.mjs
@@ -199,24 +194,33 @@ docker run -d --name nest-admin-server --restart unless-stopped \
   -p 3000:3000 --env-file .env nest-admin-server:latest
 ```
 
-> - 镜像名 `nest-admin-server:latest` 与 `docker-compose.yml` 的 `image` 字段一致，导入后用 `docker compose up -d` 即可直接启动（无需 `--build`）。
+> - Dockerfile 位于 `config/docker/Dockerfile.server`；`.dockerignore` 必须留在仓库根，Docker 只从构建上下文根读取它。
+> - 服务启动后监听 `3000` 端口，健康探针为 `/api/monitor/health/live`（容器内每 30 秒探一次，`docker ps` 的 STATUS 会显示 healthy / unhealthy）；前端需另行 `cd apps/admin && pnpm build` 后部署静态产物。
 > - 镜像架构跟随构建机（默认 `linux/amd64`），目标机为 arm64 等架构时需在同架构机器上构建，否则导入后无法运行。
 
 ## 📂 目录结构
 
 ```
-├── apps/                # pnpm workspace 子包
-│   ├── admin/           # 前端工程（Vue 3 + TypeScript + Vite）
-│   └── server/          # 后端工程（NestJS + TypeORM）
-│       └── .env.example # 环境变量模板
-├── scripts/             # 仓库级脚本（SVG 图标清理、init.sql 生成、镜像构建导出）
-├── docs/                # 本地文档
-├── dist/                # 构建产物目录（离线镜像 tar，不入库）
-├── init.sql             # 种子数据来源（脚本只提取 INSERT，建表由迁移负责）
-├── docker-compose.yml   # 后端服务编排（仅 server，连外部 MySQL / Redis）
-├── Dockerfile.server    # 后端镜像构建文件
-├── pnpm-workspace.yaml  # pnpm workspace 配置
-└── AGENTS.md            # 开发协作约定
+├── apps/                        # 两个独立工程，各自 install / build / 运行
+│   ├── admin/                   # 前端工程（Vue 3 + TypeScript + Vite）
+│   │   ├── pnpm-lock.yaml       # 独立锁文件
+│   │   └── pnpm-workspace.yaml  # 仅 pnpm 配置，无 packages 子包声明
+│   └── server/                  # 后端工程（NestJS + TypeORM）
+│       ├── .env.example         # 环境变量模板
+│       ├── pnpm-lock.yaml       # 独立锁文件
+│       └── pnpm-workspace.yaml  # 仅 pnpm 配置，无 packages 子包声明
+├── config/
+│   └── docker/
+│       └── Dockerfile.server    # 后端镜像构建文件
+├── scripts/                     # 仓库级脚本（SVG 图标清理、init.sql 生成、镜像构建导出）
+├── docs/                        # 本地文档
+├── dist/                        # 构建产物目录（离线镜像 tar，不入库）
+├── resource/
+│   ├── init.sql                 # 种子数据来源（脚本只提取 INSERT，建表由迁移负责）
+│   └── preview/                 # README 预览截图
+├── .dockerignore                # 镜像构建忽略规则（必须留在仓库根）
+├── prettier.config.cjs          # 代码格式化配置
+└── AGENTS.md                    # 开发协作约定
 ```
 
 ## 💬 前后端分离交流群

@@ -1,10 +1,22 @@
 /**
+ * 把日期入参统一转为 Date，无效日期直接抛错
+ * @description 避免 Invalid Date 让 getHours()/getDay() 得到 NaN，静默产出「星期undefined」这类错误结果
+ * @throws {TypeError} 入参无法解析为有效日期时抛出
+ */
+function toValidDate(input: Date | string | number): Date {
+  const targetDate = input instanceof Date ? input : new Date(input)
+  if (Number.isNaN(targetDate.getTime())) throw new TypeError(`无效的日期入参：${String(input)}`)
+  return targetDate
+}
+
+/**
  * 根据当前时间生成问候语
  * @example 上午好 / 中午好 / 下午好 / 晚上好
  * @param date 可选参数，指定时间，默认当前系统时间
+ * @throws {TypeError} date 为无效日期时抛出
  */
 export function getTimeGreeting(date?: Date) {
-  const hour = date ? new Date(date).getHours() : new Date().getHours()
+  const hour = date ? toValidDate(date).getHours() : new Date().getHours()
   if (hour >= 0 && hour < 6) return '凌晨好'
   if (hour >= 6 && hour < 12) return '上午好'
   if (hour >= 12 && hour < 14) return '中午好'
@@ -17,10 +29,11 @@ export function getTimeGreeting(date?: Date) {
  * @param options.prefix 前缀，支持 '星期' | '周' | '礼拜'，默认 '星期'
  * @param options.date 目标时间，支持 Date 或时间戳/日期字符串，默认当前时间
  * @returns 如 '星期三'、'周三'、'礼拜三'
+ * @throws {TypeError} options.date 为无效日期时抛出（如空字符串、无法解析的字符串）
  */
 export function getWeekDay(options: { prefix?: '星期' | '周' | '礼拜'; date?: Date | string | number } = {}): string {
   const { prefix = '星期', date = new Date() } = options
-  const target = date instanceof Date ? date : new Date(date)
+  const target = toValidDate(date)
   const days = ['日', '一', '二', '三', '四', '五', '六'] as const
   return `${prefix}${days[target.getDay()]}`
 }

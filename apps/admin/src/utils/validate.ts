@@ -15,12 +15,12 @@ export function isExternal(value: unknown): boolean {
   if (typeof value !== 'string') return false
   const trimmedValue = value.trim()
   if (trimmedValue === '') return false
-  return /^(https?:|mailto:|tel:)/.test(trimmedValue)
+  return /^(https?:|mailto:|tel:)/i.test(trimmedValue)
 }
 
 /**
  * 判断字符串是否为有效的数字格式
- * 支持整数、小数、负数和科学计数法
+ * 支持整数、小数和负数；不支持科学计数法、正号、千分位与进制前缀
  * @param value - 待判断的值
  * @returns boolean
  */

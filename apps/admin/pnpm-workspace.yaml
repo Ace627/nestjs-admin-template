@@ -1,0 +1,24 @@
+# 本目录为独立工程（不含子包），此文件仅承载 pnpm 配置
+# 依赖安装与锁文件均在本目录独立维护
+
+# npm 镜像源
+registry: https://registry.npmmirror.com
+# 安装时锁定精确版本号（不带 ^ ~）
+saveExact: true
+# 不严格校验 node 版本
+engineStrict: false
+# 网络请求失败重试次数
+fetchRetries: 2
+# 使用 pnpm-lock.yaml 锁定依赖
+lockfile: true
+# cronstrue@3.43.0 发布时间不足最小间隔，需显式放行
+minimumReleaseAgeExclude:
+  - cronstrue@3.43.0
+# 允许执行安装构建脚本的依赖白名单
+allowBuilds:
+  '@parcel/watcher': true
+  argon2: true
+  esbuild: true
+  ip2region-ts: true
+  msgpackr-extract: true
+  unrs-resolver: true

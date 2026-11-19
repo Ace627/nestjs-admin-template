@@ -1,5 +1,5 @@
 /**
- * 连接开发库，自动生成最新的 init.sql（覆盖仓库根目录同名文件）
+ * 连接开发库，自动生成最新的 init.sql（覆盖 resource/init.sql）
  *
  * 连接参数读取 apps/server/.env（进程环境变量优先），复用 server 的 mysql2 依赖
  * 用法：node scripts/generate-init-sql.mjs
@@ -7,11 +7,12 @@
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createRequire } from 'node:module'
-import { readFile, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
 
 const projectDir = path.dirname(path.dirname(fileURLToPath(import.meta.url)))
 const envFilePath = path.join(projectDir, 'apps', 'server', '.env')
-const outputFilePath = path.join(projectDir, 'init.sql')
+const outputDirPath = path.join(projectDir, 'resource')
+const outputFilePath = path.join(outputDirPath, 'init.sql')
 const EOL = '\r\n'
 
 /** 不随种子导出的表：迁移记录由 TypeORM 维护（导出后重灌必主键冲突），运行日志属环境噪音 */
@@ -85,7 +86,7 @@ function buildHeader(config, tableCount) {
 }
 
 /**
- * 启动：连接数据库，逐表导出结构与数据，覆盖写入 init.sql
+ * 启动：连接数据库，逐表导出结构与数据，覆盖写入 resource/init.sql
  */
 async function bootstrap() {
   const config = await resolveConnectionConfig()
@@ -171,8 +172,9 @@ async function bootstrap() {
       console.log(`✅ 已导出：${tableName}（${dataRows.length} 行${filterConditions.length > 0 ? '，已过滤软删除及无效引用' : ''}）`)
     }
 
-    // 5. 拼装并覆盖写入 init.sql
+    // 5. 拼装并覆盖写入 resource/init.sql
     const content = buildHeader(config, tableNames.length) + sections.join(EOL) + `${EOL}SET FOREIGN_KEY_CHECKS = 1;${EOL}`
+    await mkdir(outputDirPath, { recursive: true })
     await writeFile(outputFilePath, content, 'utf8')
     console.log(`\n🎉 已生成 ${outputFilePath}（共 ${tableNames.length} 张表）`)
   } finally {

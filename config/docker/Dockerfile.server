@@ -8,41 +8,43 @@ ARG PNPM_VERSION
 
 WORKDIR /app
 
-# 先拷依赖清单：只改业务代码时，下面两层缓存不会失效
-# 镜像源等配置在 pnpm-workspace.yaml（pnpm v10 起 npmrc 配置可写进 workspace 文件）
-COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
-COPY apps/server/package.json ./apps/server/
-RUN npm i -g pnpm@${PNPM_VERSION}
-RUN pnpm install --frozen-lockfile --filter server
+# 先拷依赖清单与 pnpm 配置：只改业务代码时，下面两层缓存不会失效
+# 工程已改为独立安装，不再有 workspace，故只需 server 自己的清单与锁文件
+COPY apps/server/package.json apps/server/pnpm-lock.yaml apps/server/pnpm-workspace.yaml ./
+# npm 全局安装不读 pnpm-workspace.yaml 里的 registry，必须显式指定，否则国内会卡在 npmjs
+RUN npm i -g pnpm@${PNPM_VERSION} --registry=https://registry.npmmirror.com
+# store 走 BuildKit cache mount：依赖包跨构建复用，且挂载内容不进镜像层
+RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
+    pnpm install --frozen-lockfile
 
-# 整个 server 工程落地到 apps/server（node_modules/dist/logs 已被 .dockerignore 排除）
+# 整个 server 工程落地到 /app（node_modules/dist/logs 已被 .dockerignore 排除）
 # nest-cli.json 的 rspack builder 依赖同目录的 rspack.config.ts，故不能只拷零散配置
-COPY apps/server/ ./apps/server/
-# 根 importer 没有 build 脚本，pnpm 不会自动递归，必须显式指定子包
+COPY apps/server/ ./
 # @nestjs/cli 的 rspack 编译器硬编码 stats.toString({ colors: true })，
 # 容器内非 TTY 时 ANSI 转义码会原样打进构建日志变成乱码，故先捕获再剥离后输出
-RUN pnpm --filter server build > /tmp/build.log 2>&1; \
+RUN pnpm build > /tmp/build.log 2>&1; \
     build_status=$?; \
     node -e "const log = require('node:fs').readFileSync('/tmp/build.log', 'utf8').replace(/\u001b\[[0-9;]*m/g, ''); process.stdout.write(log)"; \
     exit $build_status
 
-# ==================== 阶段 2：提取部署包 ====================
+# ==================== 阶段 2：生产依赖 + 产物 ====================
 FROM node:${NODE_VERSION}-alpine AS deployer
 
 ARG PNPM_VERSION
 
-WORKDIR /app
+WORKDIR /deploy
 
-COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
-COPY apps/server/package.json ./apps/server/
-RUN npm i -g pnpm@${PNPM_VERSION}
-# --prod 只带生产依赖；--legacy 走 v9 前的部署行为，shamefullyHoist 下
-# 根 importer 的 axios/dayjs/lodash-es 等也会随提升进入产物
-# argon2 自带 linux-x64 的 glibc/musl 预编译产物，无需准备 python3/make/g++
-RUN pnpm deploy --filter=server --prod --legacy /deploy
+# pnpm deploy 仅适用于 workspace，工程已改为独立安装，故直接装生产依赖
+COPY apps/server/package.json apps/server/pnpm-lock.yaml apps/server/pnpm-workspace.yaml ./
+RUN npm i -g pnpm@${PNPM_VERSION} --registry=https://registry.npmmirror.com
+# store 走 BuildKit cache mount：与 builder 阶段共用缓存，且内容不进镜像层
+# node_modules 是指向 store 的硬链接，挂载卸载后链接依然有效，最终只剩实际依赖的体积
+RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
+    pnpm install --prod --frozen-lockfile \
+ && npm rm -g pnpm
 
 # 构建产物合并进部署根目录，main.js 与 node_modules 同级
-COPY --from=builder /app/apps/server/dist/ /deploy/
+COPY --from=builder /app/dist/ ./
 
 # ==================== 阶段 3：运行 ====================
 FROM node:${NODE_VERSION}-alpine AS runner
@@ -67,7 +69,7 @@ RUN apk add --no-cache tzdata \
  && mkdir -p logs/info logs/error uploads \
  && chown -R node:node /app/logs /app/uploads
 
-# 平铺部署包（pnpm deploy 产物内部为相对软链接，跨阶段 COPY 原样保留）
+# 平铺部署包（生产依赖 + 构建产物）
 COPY --from=deployer --chown=node:node /deploy .
 # 探针脚本，配合下面的 HEALTHCHECK 使用
 COPY --chown=node:node apps/server/scripts/healthcheck.js ./scripts/healthcheck.js

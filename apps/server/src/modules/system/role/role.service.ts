@@ -170,12 +170,7 @@ export class RoleService {
   /** 按角色 ID 反查持有者并清 user:roles 缓存，使停用/改码立即对守卫生效 */
   private async clearHolderRoleCache(roleIds: string[]): Promise<void> {
     if (!roleIds.length) return
-    const rows = await this.dataSource
-      .createQueryBuilder()
-      .select('user_id', 'userId')
-      .from('sys_user_role')
-      .where('role_id IN (:...roleIds)', { roleIds })
-      .getRawMany<{ userId: string }>()
+    const rows = await this.dataSource.createQueryBuilder().select('user_id', 'userId').from('sys_user_role', 'user_role').where('role_id IN (:...roleIds)', { roleIds }).getRawMany<{ userId: string }>()
     const userIds = [...new Set(rows.map((row) => row.userId))]
     if (userIds.length) await this.redisService.del(...userIds.map((userId) => `${RedisConstant.ADMIN_USER_ROLES}:${userId}`))
   }

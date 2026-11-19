@@ -1,5 +1,3 @@
-import { toNumber as _toNumber } from 'lodash-es'
-
 /**
  * 将字符串数字转换为 number，缺失或非法时返回默认值
  * @param value - 待转换的值
@@ -8,7 +6,7 @@ import { toNumber as _toNumber } from 'lodash-es'
  */
 export function toNumber(value: unknown, defaultValue: number): number {
   if (typeof value !== 'string' || value.trim() === '') return defaultValue
-  const result = _toNumber(value)
+  const result = Number(value)
   return Number.isFinite(result) ? result : defaultValue
 }
 
@@ -19,8 +17,11 @@ export function toNumber(value: unknown, defaultValue: number): number {
  * @returns 转换后的布尔值或默认值
  */
 export function toBoolean(value: unknown, defaultValue: boolean = false): boolean {
+  if (typeof value === 'boolean') return value
   if (typeof value !== 'string') return defaultValue
-  return value === 'true'
+  const text = value.trim()
+  if (text === '') return defaultValue
+  return text === 'true'
 }
 
 /**

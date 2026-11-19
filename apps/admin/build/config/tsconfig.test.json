@@ -1,0 +1,21 @@
+{
+  /**
+   * 测试端 TS 配置
+   * @description 供 test 目录下的 *.spec.ts 使用，仅做类型检查不产出 JS；
+   *             与编译 src 的 tsconfig.app.json 分离，避免构建项目依赖测试代码
+   */
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    /**
+     * 增量构建信息文件输出路径
+     * @description 必须与 app 项目区分开，否则继承来的路径会让两个项目共用同一 tsbuildinfo 导致缓存互相覆盖；
+     */
+    "tsBuildInfoFile": "../../node_modules/.tmp/tsconfig.test.tsbuildinfo"
+  },
+
+  /**
+   * 编译包含的文件
+   * @description 仅测试目录；@ 别名沿用 tsconfig.app.json 中指向 src 的映射
+   */
+  "include": ["../../test/**/*.ts"]
+}

@@ -25,7 +25,7 @@ import mysql from 'mysql2/promise'
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url))
 const SERVER_DIR = path.resolve(SCRIPT_DIR, '..')
-const SQL_PATH = path.resolve(SERVER_DIR, '../../init.sql')
+const SQL_PATH = path.resolve(SERVER_DIR, '../../resource/init.sql')
 const MIGRATIONS_DIR = path.resolve(SERVER_DIR, 'src/database/migrations')
 const BASELINE_MIGRATION_PATH = 'src/database/migrations/baseline'
 // 用当前 Node 直接执行 esno 入口加载 TypeScript，绕开 pnpm + shell
