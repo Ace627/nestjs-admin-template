@@ -212,7 +212,7 @@ docker run -d --name nest-admin-server --restart unless-stopped \
 ├── config/
 │   └── docker/
 │       └── Dockerfile.server    # 后端镜像构建文件
-├── scripts/                     # 仓库级脚本（SVG 图标清理、init.sql 生成、镜像构建导出）
+├── scripts/                     # 仓库级脚本（SVG 图标清理、init.sql 生成、int 主键转换、镜像构建导出）
 ├── docs/                        # 本地文档
 ├── dist/                        # 构建产物目录（离线镜像 tar，不入库）
 ├── resource/
@@ -222,6 +222,30 @@ docker run -d --name nest-admin-server --restart unless-stopped \
 ├── prettier.config.cjs          # 代码格式化配置
 └── AGENTS.md                    # 开发协作约定
 ```
+
+## ❓ 常见问题
+
+### 如何把主键从 UUID 切换为 int？
+
+模板默认使用 UUID 主键。如果新项目希望数据库和代码统一使用 `int` 自增主键，可在**新克隆且尚未初始化数据库**时执行：
+
+```bash
+# 预览将要修改的文件与种子主键映射
+node scripts/convert-pk-to-int.mjs --dry-run
+
+# 执行转换（二选一）
+node scripts/convert-pk-to-int.mjs --apply
+
+# 或：依赖已安装时，转换后立即执行前后端构建验证
+node scripts/convert-pk-to-int.mjs --apply --verify
+```
+
+脚本会同时修改后端实体、DTO、Controller、Service、前端 API 类型与页面中的 ID 处理，以及 `resource/init.sql` 的主键列、外键列、种子数据和 `ancestors` 链。
+
+> - 仅支持新克隆 + 空库。已经执行过 `pnpm db:init`、仓库中已有迁移文件，或数据库中已有 UUID 数据时，脚本会拒绝执行。
+> - 执行顺序必须是：先转换，再 `pnpm install` 和 `pnpm db:init`。
+> - 转换前请保持工作区没有未提交的已跟踪改动，便于用 `git checkout -- .` 回滚。
+> - 详细限制与脚本行为见 `scripts/convert-pk-to-int.mjs` 顶部说明。
 
 ## 💬 前后端分离交流群
 
