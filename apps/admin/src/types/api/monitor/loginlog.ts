@@ -16,6 +16,8 @@ export interface Item {
   id: string
   /** 登录账号 */
   username: string
+  /** 用户ID */
+  userId: string | null
   /** 登录地点 */
   location: string
   /** 登录状态 */
@@ -24,12 +26,14 @@ export interface Item {
   browser: string
   /** 操作系统 */
   os: string
-  /** 登录时间 */
-  loginTime: string
+  /** 访问时间 */
+  accessTime: string
   /** 登录IP */
   ip: string
   /** 登录消息 */
   message: string
   /** 请求ID */
   requestId: string
+  /** 浏览器 User Agent */
+  userAgent: string
 }

@@ -24,8 +24,8 @@ export class DashboardService {
       this.redisService.scan(`${RedisConstant.ACCESS_TOKEN_KEY}:*`),
       this.loginlogRepository
         .createQueryBuilder('loginlog')
-        .select(['SUBSTRING(loginlog.loginTime, 1, 10) AS date', 'loginlog.status AS status', 'COUNT(*) AS count'])
-        .where('loginlog.loginTime >= :startTime', { startTime })
+        .select(['SUBSTRING(loginlog.accessTime, 1, 10) AS date', 'loginlog.status AS status', 'COUNT(*) AS count'])
+        .where('loginlog.accessTime >= :startTime', { startTime })
         .groupBy('date')
         .addGroupBy('loginlog.status')
         .getRawMany<{ date: string; status: string; count: string }>(),
@@ -39,8 +39,7 @@ export class DashboardService {
 
     const loginTrend = this.getRecentDayList().map((day) => {
       const date = day.format('YYYY-MM-DD')
-      const countByStatus = (status: string) =>
-        Number(loginGroups.find((item) => item.date === date && item.status === status)?.count ?? 0)
+      const countByStatus = (status: string) => Number(loginGroups.find((item) => item.date === date && item.status === status)?.count ?? 0)
       return {
         date,
         successCount: countByStatus(CommonConstant.STATUS_NORMAL),

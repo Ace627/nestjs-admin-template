@@ -23,17 +23,20 @@ export class LogService {
   /* -------------------------------------------------------------------------- */
   /*                                  Login Log                                 */
   /* -------------------------------------------------------------------------- */
-  /** 新增登录日志 */
-  public async createLoginlog(request: ExpressRequest, message: string, userId?: string, accessTokenKey?: string) {
-    const { browser, os } = this.parseUserAgent(request.headers['user-agent'] || '') //获取用户电脑信息
+  /** 新增登录日志（username 用于刷新令牌等请求体无账号的场景） */
+  public async createLoginlog(request: ExpressRequest, message: string, options: { userId?: string; accessTokenKey?: string; username?: string } = {}) {
+    const { userId, accessTokenKey, username } = options
+    const userAgent = (request.headers['user-agent'] || '').slice(0, 512)
+    const { browser, os } = this.parseUserAgent(userAgent) //获取用户电脑信息
     const loginlog = new LoginLogEntity()
-    loginlog.username = request.body.username
+    loginlog.userAgent = userAgent
+    loginlog.username = username ?? (request.body as { username?: string } | undefined)?.username ?? ''
     loginlog.userId = userId ?? null
     loginlog.ip = getRequestIp(request)
     loginlog.location = await getLocationByIP(loginlog.ip)
     loginlog.status = userId ? CommonConstant.STATUS_NORMAL : CommonConstant.STATUS_DISABLE
     loginlog.message = message
-    loginlog.loginTime = formatTime()
+    loginlog.accessTime = formatTime()
     loginlog.browser = browser
     loginlog.os = os
     loginlog.requestId = request[CommonConstant.REQUEST_ID] // 从请求上下文获取请求 ID
@@ -68,7 +71,7 @@ export class LogService {
   public async exportLogininfo(queryParams: QueryLoginlogDto) {
     const queryBuilder = this.loginlogRepository.createQueryBuilder('logininfor')
     queryBuilder.where(this.buildLoginlogWhere(queryParams))
-    queryBuilder.orderBy('logininfor.loginTime', 'DESC') // 排序
+    queryBuilder.orderBy('logininfor.accessTime', 'DESC') // 排序
     const records = await queryBuilder.getMany()
     const fileReadableStream = await this.excelService.export(LoginLogEntity, records)
     const filename = encodeURIComponent(`登录日志-${formatTime(new Date(), 'YYYYMMDDHHmmss')}.xlsx`)
@@ -96,7 +99,7 @@ export class LogService {
   public async findLoginlogList(queryParams: QueryLoginlogDto, userId?: string) {
     const queryBuilder = this.loginlogRepository.createQueryBuilder('loginlog')
     queryBuilder.where(this.buildLoginlogWhere(queryParams, userId))
-    queryBuilder.orderBy('loginlog.loginTime', 'DESC') // 排序
+    queryBuilder.orderBy('loginlog.accessTime', 'DESC') // 排序
     queryBuilder.skip(queryParams.skip).take(queryParams.take) // 分页
     const [records, total] = await queryBuilder.getManyAndCount() //  一次性获取数据和总数
     return { total, records }
@@ -157,7 +160,7 @@ export class LogService {
     // varchar 存的 'YYYY-MM-DD HH:mm:ss' 字典序即时间序，字符串比较即可
     const cutoff = formatTime(new Date(Date.now() - validDays * 24 * 60 * 60 * 1000))
     const oper = await this.operRepository.delete({ operTime: LessThan(cutoff) })
-    const login = await this.loginlogRepository.delete({ loginTime: LessThan(cutoff) })
+    const login = await this.loginlogRepository.delete({ accessTime: LessThan(cutoff) })
     const job = await this.jobLogRepository.delete({ createTime: LessThan(cutoff) })
     return `清理成功：操作日志 ${oper.affected ?? 0} 条、登录日志 ${login.affected ?? 0} 条、调度日志 ${job.affected ?? 0} 条`
   }

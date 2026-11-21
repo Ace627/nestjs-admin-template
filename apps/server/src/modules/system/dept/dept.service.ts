@@ -83,9 +83,7 @@ export class DeptService {
     if (all.some((dept) => ids.includes(dept.parentId))) throw new BusinessException('存在下级部门，不允许删除')
 
     const placeholders = ids.map(() => '?').join(',')
-    const [userRows] = (await Promise.all([
-      this.dataSource.query(`SELECT COUNT(*) AS count FROM sys_user WHERE dept_id IN (${placeholders}) AND delete_time IS NULL`, ids),
-    ])) as [{ count: number }[]]
+    const [userRows] = (await Promise.all([this.dataSource.query(`SELECT COUNT(*) AS count FROM sys_user WHERE dept_id IN (${placeholders}) AND delete_time IS NULL`, ids)])) as [{ count: number }[]]
     if (Number(userRows[0]?.count) > 0) throw new BusinessException('部门下存在用户，不允许删除')
 
     await this.deptRepository.softDelete(ids)

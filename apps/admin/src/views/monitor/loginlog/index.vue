@@ -25,15 +25,19 @@
         <DictTag :options="sys_common_status" :value="row.status" />
       </template>
       <template #action="{ row }">
+        <el-link type="primary" @click="handleView(row)">详细</el-link>
         <el-link v-permissions="['monitor:loginlog:delete']" type="primary" @click="handleDelete(row)">删除</el-link>
       </template>
     </ProTable>
 
     <ProPagination :total v-model:current-page="queryParams.pageNo" v-model:page-size="queryParams.pageSize" @pagination="getList" />
+
+    <LoginlogDetailDialog ref="loginlogDetailDialogRef" />
   </div>
 </template>
 
 <script setup lang="ts">
+import LoginlogDetailDialog from './detail.vue'
 import { linkDownload, TipModal } from '@/utils'
 import { LoginlogRequest } from '@/api/monitor/loginlog.request'
 import type { ProTableColumn, ProSearchItem, Loginlog } from '@/types'
@@ -46,6 +50,7 @@ const exportLoading = ref<boolean>(false)
 const loading = ref<boolean>(true)
 const isMultiple = computed(() => multipleSelection.value.length > 0)
 const tableRef = useTemplateRef('tableRef')
+const loginlogDetailDialogRef = useTemplateRef('loginlogDetailDialogRef')
 const queryParams = ref<Loginlog.QueryParams>({ pageNo: 1, pageSize: 10 })
 
 /** 搜索区域显隐（RightToolbar v-model 控制） */
@@ -61,16 +66,15 @@ const items = computed<ProSearchItem[]>(() => [
 const columns: ProTableColumn<Loginlog.Item>[] = [
   { align: 'center', type: 'selection' },
   { align: 'center', type: 'index', label: '序号', width: 64 },
-  // { align: 'center', prop: 'requestId', label: '访问编号', showOverflowTooltip: true },
   { align: 'center', prop: 'username', label: '用户名称', showOverflowTooltip: true },
   { align: 'center', prop: 'ip', label: '地址', showOverflowTooltip: true, width: 150 },
   { align: 'center', prop: 'location', label: '登录地点', showOverflowTooltip: true, minWidth: 150 },
   { align: 'center', prop: 'os', label: '操作系统', showOverflowTooltip: true, minWidth: 150 },
   { align: 'center', prop: 'browser', label: '浏览器', showOverflowTooltip: true, width: 180 },
   { align: 'center', label: '登录状态', slot: 'status', width: 90, printFormatter: (row) => sys_common_status.value.find((item) => item.dictValue === String(row.status))?.dictLabel ?? String(row.status ?? '') },
-  { align: 'center', prop: 'message', label: '描述', showOverflowTooltip: true, width: 220 },
-  { align: 'center', prop: 'loginTime', label: '登录时间', width: 170 },
-  { align: 'center', slot: 'action', label: '操作', fixed: 'right', width: 80 },
+  { align: 'center', prop: 'message', label: '访问描述', showOverflowTooltip: true, width: 220 },
+  { align: 'center', prop: 'accessTime', label: '访问时间', width: 170 },
+  { align: 'center', slot: 'action', label: '操作', fixed: 'right', minWidth: 120 },
 ]
 
 async function getList() {
@@ -89,6 +93,10 @@ async function getList() {
 
 function handleSelectionChange(row: Loginlog.Item[]) {
   multipleSelection.value = row
+}
+
+function handleView(record: Loginlog.Item) {
+  loginlogDetailDialogRef.value?.open(record)
 }
 
 /** 处理表格数据删除（支持单条删除与批量删除） */

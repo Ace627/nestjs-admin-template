@@ -82,7 +82,12 @@ export class UserService {
     if (await this.checkEmailExists(email, id)) throw new BusinessException('该邮箱已存在')
 
     const statusChangedToDisabled = status === CommonConstant.STATUS_DISABLE && entity.status !== CommonConstant.STATUS_DISABLE
-    const rolesChanged = !!roleIds && entity.roles.map((role) => role.id).sort().join() !== [...roleIds].sort().join()
+    const rolesChanged =
+      !!roleIds &&
+      entity.roles
+        .map((role) => role.id)
+        .sort()
+        .join() !== [...roleIds].sort().join()
     const deptChanged = !!deptId && deptId !== entity.deptId
 
     if (roleIds) entity.roles = await this.roleRepository.findBy({ id: In(roleIds) })
@@ -149,7 +154,10 @@ export class UserService {
   public async importData(file: ExpressMulterFile, importDto: ImportUserDto) {
     this.validateImportFile(file)
     const updateSupport = importDto.updateSupport === 'true'
-    const roleIds = importDto.roleIds.split(',').map((id) => id.trim()).filter(Boolean)
+    const roleIds = importDto.roleIds
+      .split(',')
+      .map((id) => id.trim())
+      .filter(Boolean)
     if (!roleIds.length) throw new BusinessException('用户角色不能为空')
 
     const rows = await this.excelService.import(UserEntity, file)
@@ -415,7 +423,13 @@ export class UserService {
   /** 清除用户级缓存（access/refresh token / 在线状态 / 角色 / 可见部门） */
   private async cleanUserRelatedCache(userId: string) {
     if (!userId?.trim()) return
-    const patterns = [`${RedisConstant.ACCESS_TOKEN_KEY}:${userId}:*`, `${RedisConstant.REFRESH_TOKEN_KEY}:${userId}:*`, `${RedisConstant.ADMIN_USER_ONLINE_KEY}:${userId}:*`, `${RedisConstant.ADMIN_USER_ROLES}:${userId}`, `${RedisConstant.ADMIN_USER_DEPTS}:${userId}`]
+    const patterns = [
+      `${RedisConstant.ACCESS_TOKEN_KEY}:${userId}:*`,
+      `${RedisConstant.REFRESH_TOKEN_KEY}:${userId}:*`,
+      `${RedisConstant.ADMIN_USER_ONLINE_KEY}:${userId}:*`,
+      `${RedisConstant.ADMIN_USER_ROLES}:${userId}`,
+      `${RedisConstant.ADMIN_USER_DEPTS}:${userId}`,
+    ]
     const keys = (await Promise.all(patterns.map((pattern) => this.redisService.scan(pattern)))).flat()
     if (!keys.length) return
     await this.redisService.del(...keys)

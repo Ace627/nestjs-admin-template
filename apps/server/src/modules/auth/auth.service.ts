@@ -62,7 +62,7 @@ export class AuthService {
       const { accessTokenKey, accessToken, refreshToken } = await this.generateTokenPair(user)
       // 6. 更新登录时间
       this.userService.getRepository().update(userId, { loginTime: formatTime() })
-      this.logService.createLoginlog(request, '登录成功', userId, accessTokenKey)
+      this.logService.createLoginlog(request, '登录成功', { userId, accessTokenKey })
       // 7. 记录日志
       return { accessToken, refreshToken, expiresIn: this.expiresIn }
     } catch (error: unknown) {
@@ -121,6 +121,8 @@ export class AuthService {
     await this.redisService.set(`${RedisConstant.ACCESS_TOKEN_KEY}:${userId}:${uuid}`, accessToken, 'EX', this.expiresIn)
     // 在线记录覆盖重建（原记录可能已过期，EXPIRE 对缺失键无效）
     await this.logService.saveOnlineRecord(request, userId, username, uuid)
+    // 续签成功写一条访问日志（不 await：IP 归属查询失败不能拖慢续签）
+    this.logService.createLoginlog(request, '刷新令牌成功', { userId, username }).catch((error) => this.logger.warn(`写入续签日志失败：${error instanceof Error ? error.message : error}`))
     return { accessToken, refreshToken: newRefreshToken, expiresIn: this.expiresIn }
   }
 

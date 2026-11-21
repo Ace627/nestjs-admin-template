@@ -38,11 +38,14 @@ export class LoginLogEntity {
   @Column({ type: 'varchar', comment: '提示消息', length: 255, default: null })
   message: string
 
-  @Excel({ name: '登录日期', width: 25 })
-  @Column({ type: 'varchar', length: 20, name: 'login_time', comment: '登录日期', default: null })
-  loginTime: string
+  @Excel({ name: '访问时间', width: 25 })
+  @Column({ type: 'varchar', length: 20, name: 'access_time', comment: '访问时间', default: null })
+  accessTime: string
 
   @Excel({ name: '请求标识', width: 40 })
   @Column({ comment: '请求唯一标识', type: 'varchar', length: 64, default: null, name: 'request_id' })
   requestId: string
+
+  @Column({ comment: 'User Agent', type: 'varchar', length: 512, name: 'user_agent', default: null })
+  userAgent: string
 }

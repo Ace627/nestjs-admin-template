@@ -6,7 +6,7 @@
       <el-table-column label="登录地点" prop="location" align="center" min-width="150" show-overflow-tooltip />
       <el-table-column label="浏览器" prop="browser" align="center" width="180" show-overflow-tooltip />
       <el-table-column label="操作系统" prop="os" align="center" min-width="150" show-overflow-tooltip />
-      <el-table-column label="登录时间" prop="loginTime" align="center" width="170" />
+      <el-table-column label="访问时间" prop="accessTime" align="center" width="170" />
       <el-table-column label="状态" align="center" width="90">
         <template #default="{ row }">
           <DictTag :options="sys_common_status" :value="row.status" />

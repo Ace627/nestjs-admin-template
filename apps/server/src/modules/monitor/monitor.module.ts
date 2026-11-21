@@ -4,8 +4,8 @@ import { OnlineModule } from './online/online.module'
 import { ServerModule } from './server/server.module'
 import { CacheModule } from './cache/cache.module'
 import { JobModule } from './job/job.module'
-import { HealthModule } from './health/health.module';
-import { LoginlockModule } from './loginlock/loginlock.module';
+import { HealthModule } from './health/health.module'
+import { LoginlockModule } from './loginlock/loginlock.module'
 
 @Module({
   imports: [LogModule, OnlineModule, ServerModule, CacheModule, JobModule, HealthModule, LoginlockModule],

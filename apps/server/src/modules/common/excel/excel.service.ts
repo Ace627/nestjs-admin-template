@@ -28,9 +28,7 @@ export class ExcelService {
     if (!worksheet) throw new BusinessException('文件缺少工作表')
 
     const importObjArr: ExcelOptionAll[] = Reflect.getMetadata(DecoratorConstant.EXCEL, model) ?? []
-    const sortedImportObjArr = importObjArr
-      .filter((item) => item.type === ExcelType.ALL || item.type === ExcelType.IMPORT)
-      .sort((obj, obj2) => (obj.order ?? 1) - (obj2.order ?? 1))
+    const sortedImportObjArr = importObjArr.filter((item) => item.type === ExcelType.ALL || item.type === ExcelType.IMPORT).sort((obj, obj2) => (obj.order ?? 1) - (obj2.order ?? 1))
     if (!sortedImportObjArr.length) throw new BusinessException('该数据模型未配置可导入的字段')
 
     // 表头强校验：列名、顺序、数量必须与模板完全一致，防止用户篡改模板后列错位
@@ -84,7 +82,13 @@ export class ExcelService {
     if (typeof value !== 'object') return String(value).trim() || null
     if (value instanceof Date) return dayjs(value).format(STORAGE_DATETIME_FORMAT)
     const richText = (value as CellRichTextValue).richText
-    if (richText) return richText.map((item) => item.text).join('').trim() || null
+    if (richText)
+      return (
+        richText
+          .map((item) => item.text)
+          .join('')
+          .trim() || null
+      )
     const text = (value as CellHyperlinkValue).text ?? (value as CellFormulaValue).result
     if (text === null || text === undefined || text === '') return null
     return String(text).trim() || null
@@ -114,9 +118,7 @@ export class ExcelService {
   public async importTemplate<TModel extends Type<any>>(model: TModel) {
     const passThrough = new stream.PassThrough()
     const importObjArr = Reflect.getMetadata(DecoratorConstant.EXCEL, model) ?? []
-    const sortedImportObjArr = importObjArr
-      .filter((item) => item.type === ExcelType.ALL || item.type === ExcelType.IMPORT)
-      .sort((obj, obj2) => (obj.order ?? 1) - (obj2.order ?? 1))
+    const sortedImportObjArr = importObjArr.filter((item) => item.type === ExcelType.ALL || item.type === ExcelType.IMPORT).sort((obj, obj2) => (obj.order ?? 1) - (obj2.order ?? 1))
     // 预取字典数据，供下拉选项使用
     const optionPromiseArr = sortedImportObjArr.map(async (item) => {
       if (item.dictType) item.dictDataList = await this.dictDataService.findByType(item.dictType)
