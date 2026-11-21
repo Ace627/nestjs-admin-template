@@ -8,7 +8,7 @@
  Target Server Type    : MySQL
  File Encoding         : 65001
 
- Date: 18/11/2026 17:06:49
+ Date: 21/11/2026 19:08:01
  Tables: 12
 */
 
@@ -469,7 +469,7 @@ CREATE TABLE `sys_user` (
 -- Records of sys_user
 -- ----------------------------
 INSERT INTO `sys_user` VALUES ('2026-09-21 21:22:21', '2026-09-23 17:06:41', 'admin', 'admin', '30bb5fcd-b6d0-45b4-979c-796a8d993cbf', 'test', '$argon2id$v=19$m=65536,p=4,t=3$XpZEKTRJkkmcDRHO4PpJSQ$QrR0JD1zHei7coSTLXdMeYFM/V77g0f+AHWZdcuDtQI', '13344445555', '测试', '13344445555@163.com', '1', '1', 18, NULL, NULL, NULL, 'bb93a81a-039e-4cc3-a90d-9dce0857dde1', NULL, '测试');
-INSERT INTO `sys_user` VALUES ('2026-08-29 22:01:32', '2026-11-18 16:36:42', 'admin', 'admin', '866b0232-507b-42a4-bdc1-47fc4a83616a', 'admin', '$argon2id$v=19$m=65536,p=4,t=3$9TpqdrZbWIjXxG3RWFla0w$VA9fL3QvLvB6yQxTzic9or9lbKAtq+IMm0CC8X6JhaQ', '16688889999', '天道', 'yunhe@163.com', '1', '1', 18, NULL, '2026-11-18 16:36:42', NULL, 'bb93a81a-039e-4cc3-a90d-9dce0857dde1', '', '超级管理员');
+INSERT INTO `sys_user` VALUES ('2026-08-29 22:01:32', '2026-11-20 14:44:53', 'admin', 'admin', '866b0232-507b-42a4-bdc1-47fc4a83616a', 'admin', '$argon2id$v=19$m=65536,p=4,t=3$9TpqdrZbWIjXxG3RWFla0w$VA9fL3QvLvB6yQxTzic9or9lbKAtq+IMm0CC8X6JhaQ', '16688889999', '天道', 'yunhe@163.com', '1', '1', 18, NULL, '2026-11-20 14:44:53', NULL, 'bb93a81a-039e-4cc3-a90d-9dce0857dde1', '', '超级管理员');
 -- ----------------------------
 -- Table structure for sys_user_role
 -- ----------------------------

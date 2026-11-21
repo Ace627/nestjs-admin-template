@@ -1,11 +1,11 @@
 import { Observable } from 'rxjs'
 import { tap } from 'rxjs/operators'
 import { Reflector } from '@nestjs/core'
-import { getLocationByIP, getRequestIp, formatTime } from '@/utils'
+import { getLocationByIP, getRequestIp, formatTime, maskSensitiveData, truncateText } from '@/utils'
 import { LogService } from '@/modules/monitor/log/log.service'
 import { OperlogOption } from '../decorator/operlog.decorator'
 import { AjaxResult, AllExceptionsFilter, OperlogEntity, DecoratorConstant, CommonConstant } from '..'
-import { CallHandler, ExecutionContext, HttpStatus, Injectable, Logger, NestInterceptor, StreamableFile } from '@nestjs/common'
+import { CallHandler, ExecutionContext, HttpStatus, Injectable, Logger, NestInterceptor } from '@nestjs/common'
 import { AuthType } from '@/types'
 
 @Injectable()
@@ -51,11 +51,14 @@ export class OperlogInterceptor implements NestInterceptor {
     if (paylaod.userId) record.userId = paylaod.userId
     // 请求参数
     const params = {}
+    if (request.params) params['params'] = request.params
     if (request.query) params['query'] = request.query
     if (request.body) params['body'] = request.body
-    record.params = JSON.stringify(params, null, 2)
+    record.params = JSON.stringify(maskSensitiveData(params), null, 2)
     // 操作状态
-    record.status = isSuccess || data instanceof StreamableFile ? CommonConstant.STATUS_NORMAL : CommonConstant.STATUS_DISABLE
+    record.status = isSuccess || this._isFileStream(data) ? CommonConstant.STATUS_NORMAL : CommonConstant.STATUS_DISABLE
+    // 返回参数（完整响应体，脱敏 + 截断，文件流不记录）
+    record.result = this._toResultText(data)
     // 请求地址
     record.url = request.path
     // 业务类型
@@ -71,5 +74,21 @@ export class OperlogInterceptor implements NestInterceptor {
     // 请求时间
     record.operTime = formatTime()
     this.logService.createOperLog(record).catch((error: unknown) => this.logger.error(error instanceof Error ? error.message + ';' + error.stack : String(error)))
+  }
+
+  /** 判断是否为文件流响应（instanceof 在打包/ESM 混载下不可靠，按 getStream 能力判断） */
+  private _isFileStream(value: unknown): boolean {
+    return typeof value === 'object' && value !== null && 'getStream' in value && typeof value.getStream === 'function'
+  }
+
+  /** 序列化完整响应体：文件流不记录，敏感字段掩码，超长截断 */
+  private _toResultText(data: AjaxResult): string | null {
+    try {
+      if (!data) return null
+      if (this._isFileStream(data) || this._isFileStream(data.data)) return '文件流未记录'
+      return truncateText(JSON.stringify(maskSensitiveData(data), null, 2))
+    } catch {
+      return '返回数据无法序列化'
+    }
   }
 }

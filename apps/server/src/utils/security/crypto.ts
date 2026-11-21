@@ -1,6 +1,6 @@
 import argon2 from 'argon2'
 import crypto from 'node:crypto'
-import { isString } from './validate'
+import { isString } from '../validate'
 
 /**
  * 生成 RFC4122 标准 UUID v4

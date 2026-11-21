@@ -77,6 +77,7 @@
 <script setup lang="ts">
 defineOptions({ name: 'UserDialog' })
 import { TipModal } from '@/utils'
+import { omit } from 'lodash-es'
 import type { FormRules } from 'element-plus'
 import type { User, Dept, Role } from '@/types'
 import { UserRequest } from '@/api/system/user.request'
@@ -140,7 +141,7 @@ async function resetForm(userId?: string, defaultDeptId?: string) {
   if (userId) {
     const data = await UserRequest.findDetail({ id: userId })
     const deptId = data.deptId && data.deptId !== '0' ? data.deptId : undefined
-    form.value = { ...data, deptId, roleIds: (data.roles ?? []).map((item) => item.id) }
+    form.value = { ...omit(data, ['roles']), deptId, roleIds: (data.roles ?? []).map((item) => item.id) }
   } else {
     form.value = { status: '1', gender: '2', password: initPassword.value, deptId: defaultDeptId }
   }

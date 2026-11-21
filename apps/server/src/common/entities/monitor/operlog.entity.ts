@@ -30,6 +30,9 @@ export class OperlogEntity {
   @Column({ type: 'text', comment: '请求参数', default: null })
   params: string
 
+  @Column({ type: 'text', comment: '响应数据', default: null })
+  result: string | null
+
   @Excel({ name: '请求接口', width: 40 })
   @Column({ type: 'varchar', comment: '请求接口', default: null })
   url: string

@@ -26,6 +26,8 @@ export interface Item {
   requestMethod: string
   /** 请求参数 */
   params: string
+  /** 响应数据 */
+  result: string
   /** 请求URL */
   url: string
   /** 请求IP */
