@@ -1,7 +1,10 @@
 import { MenuType } from '@/common'
 import { PartialType } from '@nestjs/mapped-types'
-import { Type } from 'class-transformer'
+import { Transform, Type } from 'class-transformer'
 import { IsIn, IsInt, IsNotEmpty, IsOptional, IsString, Length, Matches } from 'class-validator'
+
+/** 空字符串转 null：@IsOptional 只跳过 null/undefined，前端按类型清空字段时传空串会命中 @Length(1, n) 校验 */
+const emptyStringToNull = ({ value }: { value: unknown }): unknown => (value === '' ? null : value)
 
 export class CreateMenuDto {
   /** 上级菜单ID（空则挂根节点） */
@@ -17,21 +20,25 @@ export class CreateMenuDto {
   @IsIn([MenuType.DIRECTORY, MenuType.MENU, MenuType.BUTTON], { message: '菜单类型取值仅限 M/C/F' })
   menuType: string
 
+  @Transform(emptyStringToNull)
   @IsOptional()
   @IsString()
   @Length(1, 200, { message: '路由地址长度须在 1~200 之间' })
   path: string
 
+  @Transform(emptyStringToNull)
   @IsOptional()
   @IsString()
   @Length(1, 255, { message: '组件路径长度须在 1~255 之间' })
   component: string
 
+  @Transform(emptyStringToNull)
   @IsOptional()
   @IsString()
   @Length(1, 64, { message: '菜单图标长度须在 1~64 之间' })
   icon: string
 
+  @Transform(emptyStringToNull)
   @IsOptional()
   @IsString()
   @Length(1, 100, { message: '权限字符长度须在 1~100 之间' })

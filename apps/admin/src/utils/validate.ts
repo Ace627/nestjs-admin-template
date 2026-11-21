@@ -19,6 +19,18 @@ export function isExternal(value: unknown): boolean {
 }
 
 /**
+ * 判断链接是否为 http(s) 外部地址（内嵌 iframe 与外链菜单的判定依据）
+ * @param value - 待判断的链接/路径
+ * @returns boolean
+ */
+export function isHttpUrl(value: unknown): boolean {
+  if (typeof value !== 'string') return false
+  const trimmedValue = value.trim()
+  if (trimmedValue === '') return false
+  return /^https?:\/\//i.test(trimmedValue)
+}
+
+/**
  * 判断字符串是否为有效的数字格式
  * 支持整数、小数和负数；不支持科学计数法、正号、千分位与进制前缀
  * @param value - 待判断的值

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { isArray, isBoolean, isEmpty, isExternal, isJsonString, isNil, isNumber, isPlainObject, isString, isStringNumber } from '@/utils/validate'
+import { isArray, isBoolean, isEmpty, isExternal, isHttpUrl, isJsonString, isNil, isNumber, isPlainObject, isString, isStringNumber } from '@/utils/validate'
 
 describe('isExternal', () => {
   it('识别 http / https 链接', () => {
@@ -37,6 +37,41 @@ describe('isExternal', () => {
     expect(isExternal('   ')).toBe(false)
     expect(isExternal(123)).toBe(false)
     expect(isExternal(null)).toBe(false)
+  })
+})
+
+describe('isHttpUrl', () => {
+  it('识别 http 与 https 链接', () => {
+    expect(isHttpUrl('http://example.com')).toBe(true)
+    expect(isHttpUrl('https://example.com/path?query=1')).toBe(true)
+  })
+
+  it('协议名大小写不敏感', () => {
+    expect(isHttpUrl('HTTP://EXAMPLE.COM')).toBe(true)
+    expect(isHttpUrl('Https://example.com')).toBe(true)
+  })
+
+  it('去除首尾空白后再判断', () => {
+    expect(isHttpUrl('  https://example.com  ')).toBe(true)
+  })
+
+  it('mailto 与 tel 不算 http 地址', () => {
+    expect(isHttpUrl('mailto:admin@example.com')).toBe(false)
+    expect(isHttpUrl('tel:10086')).toBe(false)
+  })
+
+  it('站内路径与无协议地址不算 http 地址', () => {
+    expect(isHttpUrl('/system/user')).toBe(false)
+    expect(isHttpUrl('system/user/index')).toBe(false)
+    expect(isHttpUrl('//example.com')).toBe(false)
+    expect(isHttpUrl('example.com')).toBe(false)
+  })
+
+  it('空字符串与非字符串返回 false', () => {
+    expect(isHttpUrl('')).toBe(false)
+    expect(isHttpUrl('   ')).toBe(false)
+    expect(isHttpUrl(undefined)).toBe(false)
+    expect(isHttpUrl(null)).toBe(false)
   })
 })
 

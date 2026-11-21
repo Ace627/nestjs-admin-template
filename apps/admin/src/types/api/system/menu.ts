@@ -40,6 +40,8 @@ export interface ParentItem {
   id: string
   parentId: string
   menuName: string
+  /** 路由地址（http(s) 开头表示内嵌/外链，不可作为上级菜单） */
+  path?: string
   children: ParentItem[]
 }
 

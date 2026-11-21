@@ -23,9 +23,7 @@
         <span>{{ row.menuName }}</span>
       </template>
       <template #menuType="{ row }">
-        <el-tag v-if="row.menuType === 'M'" type="primary">目录</el-tag>
-        <el-tag v-else-if="row.menuType === 'C'" type="success">菜单</el-tag>
-        <el-tag v-else type="warning">按钮</el-tag>
+        <el-tag :type="resolveMenuTypeTag(row).type">{{ resolveMenuTypeTag(row).label }}</el-tag>
       </template>
       <template #menuSort="{ row }">
         <el-input-number v-permissions="['system:menu:update']" v-model="row.menuSort" controls-position="right" :min="0" size="small" style="width: 72px" @change="handleSortChange(row)" />
@@ -37,7 +35,7 @@
         <DictTag :options="sys_normal_disable" :value="row.status" />
       </template>
       <template #action="{ row }">
-        <el-link v-permissions="['system:menu:create']" type="primary" @click="handleCreate(row)">新增下级</el-link>
+        <el-link v-if="!isHttpUrl(row.path)" v-permissions="['system:menu:create']" type="primary" @click="handleCreate(row)">新增下级</el-link>
         <el-link v-permissions="['system:menu:update']" type="primary" @click="handleEdit(row)">修改</el-link>
         <el-link v-permissions="['system:menu:delete']" type="primary" @click="handleDelete(row)">删除</el-link>
       </template>
@@ -49,7 +47,7 @@
 </template>
 
 <script setup lang="ts">
-import { TipModal } from '@/utils'
+import { TipModal, isHttpUrl } from '@/utils'
 import MenuDialog from './components/MenuDialog.vue'
 import { MenuRequest } from '@/api/system/menu.request'
 import type { Menu, ProSearchItem, ProTableColumn } from '@/types'
@@ -79,6 +77,15 @@ const menuTypeOptions = [
   { label: '按钮', value: 'F' },
 ]
 
+/** 菜单类型标签（内嵌/外链是 menuType=C 的两种外部地址形态，靠 path 与 target 区分） */
+type MenuTypeTagType = 'primary' | 'success' | 'warning' | 'info' | 'danger'
+function resolveMenuTypeTag(row: Menu.MenuItem): { label: string; type: MenuTypeTagType } {
+  if (row.menuType === 'M') return { label: '目录', type: 'primary' }
+  if (row.menuType === 'F') return { label: '按钮', type: 'warning' }
+  if (!isHttpUrl(row.path)) return { label: '菜单', type: 'success' }
+  return row.target === '2' ? { label: '外链', type: 'danger' } : { label: '内嵌', type: 'info' }
+}
+
 const { sys_normal_disable, sys_menu_visible } = useDict('sys_normal_disable', 'sys_menu_visible')
 
 const items = computed<ProSearchItem[]>(() => [
@@ -88,7 +95,7 @@ const items = computed<ProSearchItem[]>(() => [
 ])
 const columns: ProTableColumn<Menu.MenuItem>[] = [
   { align: 'left', label: '菜单名称', slot: 'menuName', minWidth: 180 },
-  { align: 'center', label: '菜单类型', slot: 'menuType', width: 90, printFormatter: (row) => menuTypeOptions.find((item) => item.value === row.menuType)?.label ?? String(row.menuType ?? '') },
+  { align: 'center', label: '菜单类型', slot: 'menuType', width: 90, printFormatter: (row) => resolveMenuTypeTag(row).label },
   { align: 'center', label: '显示排序', slot: 'menuSort', width: 130 },
   { align: 'center', prop: 'permission', label: '权限字符', showOverflowTooltip: true, minWidth: 180 },
   { align: 'center', prop: 'path', label: '路由地址', showOverflowTooltip: true, minWidth: 140 },

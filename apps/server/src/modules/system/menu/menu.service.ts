@@ -1,6 +1,6 @@
 import { BusinessException, CommonConstant, ConfigConstant, MenuEntity, MenuType, RedisConstant } from '@/common'
 import { RedisService } from '@/shared/redis.service'
-import { isExternal, listToTree } from '@/utils'
+import { hasProtocolPrefix, isHttpUrl, listToTree } from '@/utils'
 import { DataSource, Equal, In } from 'typeorm'
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm'
 import { ConfigService } from '@nestjs/config'
@@ -26,6 +26,7 @@ export class MenuService {
   public async create(createDto: CreateMenuDto): Promise<string> {
     const parentId = createDto.parentId || CommonConstant.DEFAULT_PARENT_ID
     await this.checkParentMenuType(parentId, createDto.menuType)
+    this.checkPathByMenuType(createDto.menuType, createDto.path)
     if (createDto.menuType === MenuType.BUTTON) await this.checkPermissionExists(createDto.permission)
     else await this.checkPathExists(createDto.path)
 
@@ -47,11 +48,17 @@ export class MenuService {
     if (targetParentId === id) throw new BusinessException('上级菜单不能为自己')
     if ((await this.findDescendantIds([id])).includes(targetParentId)) throw new BusinessException('上级菜单不能为自己的下级菜单')
     await this.checkParentMenuType(targetParentId, targetType)
+    // 显式区分「未传 path」与「传了 null/空串」：DTO 的 @Transform 会把空串转 null，后者应判为空地址而不是回退旧值
+    const targetPath = updateDto.path === undefined ? entity.path : updateDto.path
+    this.checkPathByMenuType(targetType, targetPath)
     if (targetType === MenuType.BUTTON) await this.checkPermissionExists(updateDto.permission, id)
-    else await this.checkPathExists(updateDto.path ?? entity.path, id)
-    // 本菜单已有子菜单时不可改为外链（前端 iframe 包装组件无子路由出口，子菜单会不可达）
-    if (targetType !== MenuType.BUTTON && isExternal(updateDto.path ?? entity.path) && (await this.menuRepository.existsBy({ parentId: Equal(id) }))) {
-      throw new BusinessException('存在子菜单，无法改为外链')
+    else await this.checkPathExists(targetPath, id)
+    // 类型语义变更时校验子级：菜单/内嵌/外链无子路由出口（按钮也不能挂在外链下），按钮本身是叶子节点
+    const needChildCheck =
+      (targetType === MenuType.MENU && (entity.menuType !== MenuType.MENU || (!isHttpUrl(entity.path ?? '') && isHttpUrl(targetPath)))) || (targetType === MenuType.BUTTON && entity.menuType !== MenuType.BUTTON)
+    if (needChildCheck && (await this.menuRepository.existsBy({ parentId: Equal(id) }))) {
+      if (targetType === MenuType.BUTTON) throw new BusinessException('存在子菜单，无法改为按钮')
+      throw new BusinessException(isHttpUrl(targetPath) ? '存在子菜单，无法改为内嵌/外链' : '存在子菜单，无法改为菜单')
     }
 
     Object.assign(entity, updateDto, { parentId: targetParentId })
@@ -214,8 +221,21 @@ export class MenuService {
       entity.permission = null
     }
     // 外链菜单不存组件路径；内链菜单无「新标签页」打开方式，固定当前页
-    if (isExternal(entity.path ?? '')) entity.component = null
+    if (isHttpUrl(entity.path ?? '')) entity.component = null
     else entity.target = '1'
+  }
+
+  /**
+   * 校验菜单类型与路由地址的匹配关系（防止绕过前端直接调接口写入脏数据）
+   * 目录只能是站内路由；内嵌/外链靠「菜单（C）+ http(s) 地址」表达；mailto/tel 等协议会被前端当 iframe 渲染成空白页
+   * @param menuType 目标菜单类型
+   * @param path 目标路由地址
+   */
+  private checkPathByMenuType(menuType: string, path?: string | null): void {
+    if (menuType === MenuType.BUTTON || !path) return
+    const trimmedPath = path.trim()
+    if (menuType === MenuType.DIRECTORY && isHttpUrl(trimmedPath)) throw new BusinessException('目录的路由地址不能是外部链接')
+    if (hasProtocolPrefix(trimmedPath) && !isHttpUrl(trimmedPath)) throw new BusinessException('路由地址仅支持 http(s) 开头的外部链接')
   }
 
   /** 校验路由 path 唯一（排除指定 ID） */
@@ -236,13 +256,22 @@ export class MenuService {
     if (await queryBuilder.getExists()) throw new BusinessException(`按钮权限 ${permission} 已存在`)
   }
 
-  /** 校验上级菜单类型（菜单 C 下不能挂子级；外链菜单下不能挂子级；按钮 F 不校验） */
+  /** 校验上级菜单类型（菜单 C 下不能挂子级；内嵌/外链下不能挂子级；按钮必须挂目录或普通菜单下） */
   private async checkParentMenuType(parentId: string, menuType: string): Promise<void> {
-    if (parentId === CommonConstant.DEFAULT_PARENT_ID || menuType === MenuType.BUTTON) return
+    const isRoot = parentId === CommonConstant.DEFAULT_PARENT_ID
+    // 按钮权限必须挂在具体目录/菜单下，不能挂在根节点、内嵌或外链上
+    if (menuType === MenuType.BUTTON) {
+      if (isRoot) throw new BusinessException('按钮必须挂在目录或菜单下')
+      const parent = await this.menuRepository.findOneBy({ id: Equal(parentId) })
+      if (!parent) throw new BusinessException('上级菜单不存在')
+      if (isHttpUrl(parent.path ?? '')) throw new BusinessException('外链菜单下不能挂载按钮')
+      return
+    }
+    if (isRoot) return
     const parent = await this.menuRepository.findOneBy({ id: Equal(parentId) })
     if (!parent) throw new BusinessException('上级菜单不存在')
     if (parent.menuType === MenuType.MENU) throw new BusinessException('菜单（C）下不能挂载子菜单')
-    if (isExternal(parent.path ?? '')) throw new BusinessException('外链菜单下不能挂载子菜单')
+    if (isHttpUrl(parent.path ?? '')) throw new BusinessException('外链菜单下不能挂载子菜单')
   }
 
   /** 内存计算菜单子孙 ID 集合（含自身，防环校验用） */
