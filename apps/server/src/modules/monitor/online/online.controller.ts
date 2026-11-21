@@ -1,7 +1,7 @@
 import { OnlineService } from './online.service'
 import { QueryOnlineDto, ForceLogoutDto } from './online.dto'
 import { Controller, Delete, Get, Query } from '@nestjs/common'
-import { BusinessType, Operlog, PaginationPipe, RequirePermissions } from '@/common'
+import { BusinessType, CurrentUser, Operlog, PaginationPipe, RequirePermissions } from '@/common'
 
 @Controller('monitor/online')
 export class OnlineController {
@@ -19,6 +19,13 @@ export class OnlineController {
   @RequirePermissions(['monitor:online:query'])
   public findCount() {
     return this.onlineService.findCount()
+  }
+
+  /** 在线会话详情 */
+  @Get('detail')
+  @RequirePermissions(['monitor:online:query'])
+  public findDetail(@Query('userId') userId: string, @Query('uuid') uuid: string, @CurrentUser('uuid') currentUuid: string) {
+    return this.onlineService.findDetail(userId, uuid, currentUuid)
   }
 
   /** 强制用户退出登录，清除与该用户相关的所有 Redis 缓存 */

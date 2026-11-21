@@ -10,6 +10,8 @@ export interface JwtPayload {
   type?: 'access' | 'refresh'
   // 刷新令牌轮换唯一标识（每次刷新重新生成，使旧刷新令牌作废）
   jti?: string
+  /** 会话首次登录时间（仅 refresh token 携带，轮换时原样续传） */
+  loginTime?: string
 }
 
 // user:roles:{userId} 缓存结构（AuthService.getInfo 写入，守卫/拦截器消费）

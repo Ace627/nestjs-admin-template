@@ -52,13 +52,13 @@ const { sys_common_status, sys_oper_type } = useDict('sys_common_status', 'sys_o
 
 const visible = ref<boolean>(false)
 const operInfo = ref({} as Operlog.Item)
-const dialogWidth = computed(() => (appStore.isDesktop ? `1080px` : `calc(100% - 32px)`))
+const dialogWidth = computed(() => (appStore.isDesktop ? `960px` : `calc(100% - 32px)`))
 const descriptionsColumn = computed(() => (appStore.isDesktop ? 2 : 1))
 
 /** JSON 字符串美化展示，非 JSON 内容原样输出 */
 function formatJsonText(rawText?: string) {
-  if (!rawText) return '-'
   try {
+    if (!rawText) return '-'
     return JSON.stringify(JSON.parse(rawText), null, 2)
   } catch {
     return rawText

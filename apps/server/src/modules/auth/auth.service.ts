@@ -104,7 +104,7 @@ export class AuthService {
     } catch {
       throw new BusinessException('登录状态已失效，请重新登录', HttpStatus.UNAUTHORIZED)
     }
-    const { userId, username, uuid, type } = payload
+    const { userId, username, uuid, type, loginTime } = payload
     if (type !== 'refresh') throw new BusinessException('登录状态已失效，请重新登录', HttpStatus.UNAUTHORIZED)
     // 值比对防「已轮换的旧刷新令牌重放」
     const refreshTokenKey = `${RedisConstant.REFRESH_TOKEN_KEY}:${userId}:${uuid}`
@@ -114,13 +114,13 @@ export class AuthService {
     const { activeRoles } = await this.warmAuthCaches(userId)
     if (activeRoles.length === 0) throw new BusinessException('登录状态已失效，请重新登录', HttpStatus.UNAUTHORIZED)
     // 轮换：签发新 refreshToken（新 jti）并重置 TTL，旧令牌随之作废
-    const newRefreshToken = this.jwtService.sign({ userId, username, uuid, type: 'refresh', jti: randomUUID() })
+    const newRefreshToken = this.jwtService.sign({ userId, username, uuid, type: 'refresh', jti: randomUUID(), loginTime: loginTime ?? formatTime() })
     await this.redisService.set(refreshTokenKey, newRefreshToken, 'EX', this.refreshExpiresIn)
     // 重发 accessToken（同 uuid，签名结果确定）并重置访问 key TTL
     const accessToken = this.jwtService.sign({ userId, username, uuid })
     await this.redisService.set(`${RedisConstant.ACCESS_TOKEN_KEY}:${userId}:${uuid}`, accessToken, 'EX', this.expiresIn)
     // 在线记录覆盖重建（原记录可能已过期，EXPIRE 对缺失键无效）
-    await this.logService.saveOnlineRecord(request, userId, username, uuid)
+    await this.logService.saveOnlineRecord(request, { userId, username, uuid, isRefresh: true, loginTime })
     // 续签成功写一条访问日志（不 await：IP 归属查询失败不能拖慢续签）
     this.logService.createLoginlog(request, '刷新令牌成功', { userId, username }).catch((error) => this.logger.warn(`写入续签日志失败：${error instanceof Error ? error.message : error}`))
     return { accessToken, refreshToken: newRefreshToken, expiresIn: this.expiresIn }
@@ -185,10 +185,11 @@ export class AuthService {
   private async generateTokenPair(user: { id: string; username: string }) {
     const { id: userId, username } = user
     const uuid = randomUUID()
+    const loginTime = formatTime()
     const accessTokenKey = `${RedisConstant.ACCESS_TOKEN_KEY}:${userId}:${uuid}`
     const refreshTokenKey = `${RedisConstant.REFRESH_TOKEN_KEY}:${userId}:${uuid}`
     const accessToken = this.jwtService.sign({ userId, username, uuid })
-    const refreshToken = this.jwtService.sign({ userId, username, uuid, type: 'refresh', jti: randomUUID() })
+    const refreshToken = this.jwtService.sign({ userId, username, uuid, type: 'refresh', jti: randomUUID(), loginTime })
     await this.redisService.set(accessTokenKey, accessToken, 'EX', this.expiresIn)
     await this.redisService.set(refreshTokenKey, refreshToken, 'EX', this.refreshExpiresIn)
     return { accessToken, accessTokenKey, refreshToken }

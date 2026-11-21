@@ -4,15 +4,19 @@
 
     <ProTable ref="tableRef" v-loading="loading" :data="list" :columns="columns">
       <template #action="{ row }">
+        <el-link type="primary" @click="handleView(row)">详情</el-link>
         <el-link v-permissions="['monitor:online:forceLogout']" type="primary" @click="handleForceLogout(row)">强退</el-link>
       </template>
     </ProTable>
 
     <ProPagination :total v-model:current-page="queryParams.pageNo" v-model:page-size="queryParams.pageSize" @pagination="getList" />
+
+    <OnlineDetailDialog ref="onlineDetailDialogRef" />
   </div>
 </template>
 
 <script setup lang="ts">
+import OnlineDetailDialog from './detail.vue'
 import { TipModal } from '@/utils'
 import type { Online } from '@/types'
 import { OnlineRequest } from '@/api/monitor/online.request'
@@ -22,6 +26,7 @@ const list = ref<Online.Item[]>([])
 const total = ref<number>(0)
 const loading = ref<boolean>(true)
 const queryParams = ref<Online.QueryParams>({ pageNo: 1, pageSize: 10 })
+const onlineDetailDialogRef = useTemplateRef('onlineDetailDialogRef')
 
 const items: ProSearchItem[] = [
   { type: 'input', prop: 'ip', label: '登录地址' },
@@ -36,7 +41,7 @@ const columns: ProTableColumn<Online.Item>[] = [
   { align: 'center', prop: 'os', label: '操作系统', showOverflowTooltip: true, minWidth: 150 },
   { align: 'center', prop: 'browser', label: '浏览器', showOverflowTooltip: true, minWidth: 180 },
   { align: 'center', prop: 'loginTime', label: '登录时间', width: 170 },
-  { align: 'center', slot: 'action', label: '操作', fixed: 'right', width: 80 },
+  { align: 'center', slot: 'action', label: '操作', fixed: 'right', minWidth: 120 },
 ]
 
 async function getList() {
@@ -61,6 +66,10 @@ function handleQuery() {
 
 function resetQuery() {
   handleQuery()
+}
+
+function handleView(row: Online.Item) {
+  onlineDetailDialogRef.value?.open(row)
 }
 
 async function handleForceLogout(row: Online.Item) {

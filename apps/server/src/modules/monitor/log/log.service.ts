@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { RedisService } from '@/shared/redis.service'
 import { Injectable, StreamableFile } from '@nestjs/common'
 import { QueryLoginlogDto, QueryOperlogDto } from './log.dto'
+import { CreateOnlineDto } from '@/modules/monitor/online/online.dto'
 import { formatTime, getLocationByIP, getRequestIp } from '@/utils'
 import { Equal, FindOptionsWhere, In, LessThan, Like, Repository } from 'typeorm'
 import { ExcelService } from '@/modules/common/excel/excel.service'
@@ -43,26 +44,22 @@ export class LogService {
     // 如果登录成功，就记录这个登录信息，方便在线用户查询
     if (userId && accessTokenKey) {
       const uuid = accessTokenKey.split(':').at(-1)
-      await this.saveOnlineRecord(request, userId, loginlog.username, uuid)
+      await this.saveOnlineRecord(request, { userId, username: loginlog.username, uuid })
     }
     await this.loginlogRepository.save(loginlog)
     return '添加成功'
   }
 
   /** 写在线用户记录（登录时创建；无感刷新时覆盖重建，键缺失后 EXPIRE 无法续期，必须重写） */
-  public async saveOnlineRecord(request: ExpressRequest, userId: string, username: string, uuid: string | undefined) {
+  public async saveOnlineRecord(request: ExpressRequest, createDto: CreateOnlineDto) {
+    const { userId, username, uuid, isRefresh = false, loginTime } = createDto
     const ip = getRequestIp(request)
-    const { browser, os } = this.parseUserAgent(request.headers['user-agent'] || '')
-    const record = {
-      userId,
-      ip,
-      location: await getLocationByIP(ip),
-      username,
-      loginTime: formatTime(),
-      browser,
-      os,
-      uuid,
-    }
+    const userAgent = (request.headers['user-agent'] || '').slice(0, 512)
+    const { browser, os } = this.parseUserAgent(userAgent)
+    const record = { browser, os, uuid, username, userId, ip, userAgent }
+    record['location'] = await getLocationByIP(ip)
+    record['loginTime'] = loginTime ?? formatTime()
+    record['refreshTime'] = isRefresh ? formatTime() : null
     const key = `${RedisConstant.ADMIN_USER_ONLINE_KEY}:${userId}:${uuid}`
     await this.redisService.set(key, JSON.stringify(record), 'EX', this.configService.getOrThrow(ConfigConstant.JWT_EXPIRES_IN))
   }
