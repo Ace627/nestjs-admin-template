@@ -1,9 +1,28 @@
-export { isString } from 'lodash-es'
-export { isArray } from 'lodash-es'
 export { isEmpty } from 'lodash-es'
 
 /**
+ * 判断值是否为字符串
+ * - 原始字符串由 typeof 判定；new String('x') 这类包装对象 typeof 结果是 'object'，需用 instanceof 兜住
+ * @param value - 待判断的值
+ * @returns 是字符串（含 String 包装对象）则返回 true
+ */
+export function isString(value: unknown): value is string {
+  return typeof value === 'string' || value instanceof String
+}
+
+/**
+ * 判断值是否为数组
+ * - 用 Array.isArray 而非 instanceof Array：跨执行上下文（如 iframe）的数组用 instanceof 会误判为 false
+ * @param value - 待判断的值
+ * @returns 是数组则返回 true，并在类型上收窄为 unknown[]
+ */
+export function isArray(value: unknown): value is unknown[] {
+  return Array.isArray(value)
+}
+
+/**
  * 判断链接是否为外部链接
+ * 支持 http(s)、ftp、mailto、tel 协议前缀，以及 // 开头的协议相对地址
  * @param value - 待判断的链接/路径
  * @returns boolean
  */
@@ -11,7 +30,7 @@ export function isExternal(value: unknown): boolean {
   if (typeof value !== 'string') return false
   const trimmedValue = value.trim()
   if (trimmedValue === '') return false
-  return /^(https?:|mailto:|tel:)/.test(trimmedValue)
+  return /^(https?:|ftp:|mailto:|tel:|\/\/)/.test(trimmedValue)
 }
 
 /**
@@ -32,7 +51,7 @@ export function isHttpUrl(value: unknown): boolean {
  * @returns boolean
  */
 export function hasProtocolPrefix(value: unknown): boolean {
-  if (typeof value !== 'string') return false
+  if (!isString(value)) return false
   return /^[a-z][a-z0-9+.-]*:/i.test(value.trim())
 }
 
@@ -43,10 +62,10 @@ export function hasProtocolPrefix(value: unknown): boolean {
  * @returns boolean
  */
 export function isNumberString(value: unknown): boolean {
-  if (typeof value !== 'string') return false
+  if (!isString(value)) return false
   const trimmedValue = value.trim()
   if (trimmedValue === '') return false
-  return /^-?\d+(\.\d+)?$/.test(trimmedValue) // 匹配整数或浮点数
+  return /^-?\d+(\.\d+)?([eE][+-]?\d+)?$/.test(trimmedValue) // 匹配整数、浮点数与科学计数法
 }
 
 /**
@@ -56,7 +75,7 @@ export function isNumberString(value: unknown): boolean {
  * @returns boolean
  */
 export function isIntegerString(value: unknown): boolean {
-  if (typeof value !== 'string') return false
+  if (!isString(value)) return false
   const trimmedValue = value.trim()
   if (trimmedValue === '') return false
   return /^-?\d+$/.test(trimmedValue) // 可选负号 + 纯数字
@@ -69,7 +88,7 @@ export function isIntegerString(value: unknown): boolean {
  */
 export function isJsonObjectString(value: unknown): boolean {
   try {
-    if (typeof value !== 'string') return false
+    if (!isString(value)) return false
     const trimmedValue = value.trim()
     if (!trimmedValue.startsWith('{') || !trimmedValue.endsWith('}')) return false
     JSON.parse(trimmedValue)
@@ -86,7 +105,7 @@ export function isJsonObjectString(value: unknown): boolean {
  */
 export function isJsonArrayString(value: unknown): boolean {
   try {
-    if (typeof value !== 'string') return false
+    if (!isString(value)) return false
     const trimmedValue = value.trim()
     if (!trimmedValue.startsWith('[') || !trimmedValue.endsWith(']')) return false
     JSON.parse(trimmedValue)
