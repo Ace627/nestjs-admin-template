@@ -43,7 +43,7 @@ describe('UploadService.mergeChunk', () => {
 
     await expect(service.mergeChunk({ fileHash, fileName: 'demo.bin', fileSize: content.length, totalChunks: 4 })).resolves.toBe('文件合并成功')
     expect(readFileSync(join(workDir, `${fileHash}.bin`)).equals(content)).toBe(true)
-    expect(existsSync(join(workDir, fileHash))).toBe(false)
+    expect(existsSync(join(workDir, '.chunks', fileHash))).toBe(false)
   })
 
   it('重复合并幂等返回成功，不抛异常', async () => {
@@ -122,6 +122,39 @@ describe('UploadService.checkFile', () => {
   })
 })
 
+describe('UploadService 无扩展名文件', () => {
+  it('分片存放在 .chunks 子目录，不占用最终文件名', async () => {
+    const service = createService()
+    const content = Buffer.from('extensionless')
+    const fileHash = createSha256(content)
+    await uploadParts(service, fileHash, content, 2, 1)
+
+    expect(existsSync(join(workDir, '.chunks', fileHash))).toBe(true)
+    expect(existsSync(join(workDir, fileHash))).toBe(false)
+  })
+
+  it('合并成功，最终文件与分片目录不再同名冲突', async () => {
+    const service = createService()
+    const content = Buffer.from('extensionless')
+    const fileHash = createSha256(content)
+    await uploadParts(service, fileHash, content, 2)
+
+    await expect(service.mergeChunk({ fileHash, fileName: 'demo', fileSize: content.length, totalChunks: 2 })).resolves.toBe('文件合并成功')
+    expect(readFileSync(join(workDir, fileHash)).equals(content)).toBe(true)
+    expect(existsSync(join(workDir, '.chunks', fileHash))).toBe(false)
+  })
+
+  it('合并后秒传判定生效', async () => {
+    const service = createService()
+    const content = Buffer.from('extensionless')
+    const fileHash = createSha256(content)
+    await uploadParts(service, fileHash, content, 2)
+    await service.mergeChunk({ fileHash, fileName: 'demo', fileSize: content.length, totalChunks: 2 })
+
+    await expect(service.checkFile({ fileHash, fileSize: content.length })).resolves.toEqual({ isExist: true, uploadedChunks: [] })
+  })
+})
+
 describe('UploadService 路径安全', () => {
   it('拒绝逃逸上传根目录的 fileHash', async () => {
     const service = createService()
@@ -135,6 +168,6 @@ describe('UploadService 路径安全', () => {
     await uploadParts(service, fileHash, content, 4, 1)
 
     await expect(service.clearChunk({ fileHash })).resolves.toBe('分片目录已成功清理')
-    expect(existsSync(join(workDir, fileHash))).toBe(false)
+    expect(existsSync(join(workDir, '.chunks', fileHash))).toBe(false)
   })
 })

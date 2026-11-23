@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto'
 import { once } from 'node:events'
-import { extname, resolve } from 'node:path'
+import { extname, join, resolve } from 'node:path'
 import { createSha256 } from '@/utils'
 import { finished } from 'node:stream/promises'
 import { BusinessException, UploadConstant } from '@/common'
@@ -15,6 +15,9 @@ import { extractPartNumber, findMissingPartNumbers, resolveInsideDirectory } fro
 export class UploadService {
   /** 文件上传根目录，默认为项目根目录下的 `uploads` 文件夹 */
   private readonly UPLOAD_DIR_PATH = resolve(process.cwd(), 'uploads')
+
+  /** 分片目录名：必须与最终文件命名空间隔离，否则无扩展名文件会与分片目录同名 */
+  private readonly CHUNK_DIR_NAME = '.chunks'
 
   /** 单文件上传（≤10MB 直接上传，>10MB 拒绝并提示分片） */
   public async uploadFile(file: ExpressMulterFile) {
@@ -40,7 +43,7 @@ export class UploadService {
     // 1. 已合并完成且大小一致 => 秒传
     if (await this.hasFinalFile(fileHash, fileSize)) return { isExist: true, uploadedChunks: [] }
     // 2. 断点续传：返回已落盘的分片序号（0 起）
-    const chunkDir = resolveInsideDirectory(this.UPLOAD_DIR_PATH, fileHash)
+    const chunkDir = this.resolveChunkDirectory(fileHash)
     const partNumbers = (await this.readdirOrEmpty(chunkDir)).map(extractPartNumber).filter((partNumber): partNumber is number => partNumber !== null)
     return { isExist: false, uploadedChunks: [...new Set(partNumbers)].sort((left, right) => left - right) }
   }
@@ -50,7 +53,7 @@ export class UploadService {
     const chunkFile = files?.[0]
     if (!chunkFile?.buffer?.length) throw new BusinessException('分片内容不能为空')
     if (chunkFile.size > UploadConstant.MAX_CHUNK_SIZE) throw new BusinessException('分片大小超出限制')
-    const chunkDir = resolveInsideDirectory(this.UPLOAD_DIR_PATH, uploadChunkDto.fileHash)
+    const chunkDir = this.resolveChunkDirectory(uploadChunkDto.fileHash)
     await mkdir(chunkDir, { recursive: true })
     await this.writeFileAtomic(resolveInsideDirectory(chunkDir, String(uploadChunkDto.partNumber)), chunkFile.buffer)
     return '分片上传成功'
@@ -69,7 +72,7 @@ export class UploadService {
       throw new BusinessException('目标文件已存在但大小不一致，请联系管理员处理')
     }
     // 2. 分片目录与缺口校验
-    const chunkDir = resolveInsideDirectory(this.UPLOAD_DIR_PATH, fileHash)
+    const chunkDir = this.resolveChunkDirectory(fileHash)
     const partNumbers = (await this.readdirOrEmpty(chunkDir)).map(extractPartNumber).filter((partNumber): partNumber is number => partNumber !== null)
     if (!partNumbers.length) throw new BusinessException('分片文件不存在，请重新上传')
     const missingPartNumbers = findMissingPartNumbers(partNumbers, totalChunks)
@@ -108,7 +111,7 @@ export class UploadService {
 
   /** 清理分片 */
   public async clearChunk(clearChunkDto: ClearChunkDto) {
-    const chunkDir = resolveInsideDirectory(this.UPLOAD_DIR_PATH, clearChunkDto.fileHash)
+    const chunkDir = this.resolveChunkDirectory(clearChunkDto.fileHash)
     if (!(await this.statOrNull(chunkDir))) return '分片目录不存在，无需清理'
     await rm(chunkDir, { recursive: true, force: true })
     return '分片目录已成功清理'
@@ -117,6 +120,11 @@ export class UploadService {
   /* -------------------------------------------------------------------------- */
   /*                               Private Handler                              */
   /* -------------------------------------------------------------------------- */
+
+  /** 分片目录：uploads/.chunks/{fileHash}，与最终文件 uploads/{fileHash}{ext} 隔离命名空间 */
+  private resolveChunkDirectory(fileHash: string): string {
+    return resolveInsideDirectory(this.UPLOAD_DIR_PATH, join(this.CHUNK_DIR_NAME, fileHash))
+  }
 
   /** 最终文件是否已完整落盘：merge 走原子改名，文件名出现即代表内容完整，仍需复核大小 */
   private async hasFinalFile(fileHash: string, fileSize: number): Promise<boolean> {
