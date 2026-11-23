@@ -2,7 +2,7 @@
   <el-dialog v-model="visible" :title="dialogTitle" :close-on-click-modal="false" :width="dialogWidth">
     <el-form ref="formRef" :model="form" :rules="rules" label-width="90px">
       <el-row :gutter="16">
-        <el-col :span="24">
+        <el-col :span="24" v-if="!isRootDept">
           <el-form-item label="上级部门" prop="parentId">
             <el-tree-select v-model="form.parentId" :data="deptTree" check-strictly node-key="id" :props="{ label: 'deptName' }" placeholder="请选择上级部门" clearable style="width: 100%" />
           </el-form-item>
@@ -74,6 +74,9 @@ const dialogTitle = computed(() => (isEdit.value ? '修改部门' : '新增部�
 const deptTree = ref<Dept.DeptItem[]>([])
 
 const { sys_normal_disable } = useDict('sys_normal_disable')
+
+/** 顶级部门（parentId 为 '0'）编辑时隐藏上级部门 */
+const isRootDept = computed(() => form.value.parentId === '0')
 
 const rules: FormRules = {
   parentId: [{ required: true, message: '上级部门不能为空', trigger: 'change' }],
