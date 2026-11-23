@@ -1,5 +1,5 @@
 import { TipModal } from '@/utils'
-import { AxiosError, HttpStatusCode, type AxiosInstance } from 'axios'
+import { AxiosError, HttpStatusCode, isCancel, type AxiosInstance } from 'axios'
 
 const ErrorMessageMap: Record<string, string> = {
   [HttpStatusCode.BadRequest]: '请求参数错误，请检查后重试',
@@ -18,6 +18,9 @@ const ErrorMessageMap: Record<string, string> = {
 
 export function responseErrorInterceptor(instance: AxiosInstance) {
   instance.interceptors.response.use(undefined, async (error: AxiosError<ApiResponse>) => {
+    // 主动取消（AbortController）不是异常，交由调用方按取消处理，不弹错误提示
+    if (isCancel(error)) return Promise.reject(error)
+
     // 业务错误由响应转换拦截器以普通对象 reject（无 message 字段），此处须兜底防 TypeError 中断提示链路
     let message = error?.message ?? ''
     let status = error?.response?.status ?? -1

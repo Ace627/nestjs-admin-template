@@ -5,7 +5,7 @@ import { InjectDataSource, InjectRepository } from '@nestjs/typeorm'
 import { DataSource, Equal, FindOptionsWhere, In, Like, Not, Repository } from 'typeorm'
 import { listToTree } from '@/utils'
 import { BusinessException, CommonConstant, FileEntity, FileType } from '@/common'
-import { CreateFolderDto, MoveFileDto, QueryFileDto, RecycleQueryDto, RegisterFileDto, UpdateFolderDto } from './file.dto'
+import { CreateFolderDto, MoveFileDto, QueryFileDto, RecycleQueryDto, RegisterFileDto, UpdateFileDto, UpdateFolderDto } from './file.dto'
 
 @Injectable()
 export class FileService {
@@ -49,6 +49,16 @@ export class FileService {
     if (!entity || entity.fileType !== FileType.FOLDER) throw new BusinessException('目录不存在')
     if (updateDto.fileName && updateDto.fileName !== entity.fileName) await this.assertFolderNameUnique(entity.parentId, updateDto.fileName, entity.id)
     Object.assign(entity, { fileName: updateDto.fileName })
+    await this.fileRepository.save(entity)
+    return '修改成功'
+  }
+
+  /** 重命名文件（仅改展示名，禁止改扩展名，物理文件与 MIME 保持不变） */
+  public async updateFile(updateDto: UpdateFileDto): Promise<string> {
+    const entity = await this.fileRepository.findOneBy({ id: Equal(updateDto.id) })
+    if (!entity || entity.fileType !== FileType.FILE) throw new BusinessException('文件不存在')
+    if (extname(updateDto.fileName).toLowerCase() !== (entity.fileExt ?? '').toLowerCase()) throw new BusinessException('不允许修改文件扩展名')
+    entity.fileName = updateDto.fileName
     await this.fileRepository.save(entity)
     return '修改成功'
   }

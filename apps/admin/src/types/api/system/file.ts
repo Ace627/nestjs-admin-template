@@ -43,6 +43,14 @@ export interface RecycleQuery {
 
 export type FolderForm = Partial<Pick<Item, 'id' | 'parentId' | 'fileName'>>
 
+/** 文件重命名参数（仅改展示名，扩展名不可修改） */
+export interface RenameForm {
+  /** 文件 ID */
+  id: string
+  /** 新文件名 */
+  fileName: string
+}
+
 /** 移动参数 */
 export interface MoveParams {
   /** 待移动的文件/目录 ID（逗号分隔） */

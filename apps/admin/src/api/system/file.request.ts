@@ -22,6 +22,11 @@ export class FileRequest {
     return request.put('/system/file/folder/update', data)
   }
 
+  /** 重命名文件（仅改展示名，扩展名不可修改） */
+  static updateFile(data: File.RenameForm): Promise<string> {
+    return request.put('/system/file/update', data)
+  }
+
   /** 移动文件/目录到目标目录（ids 为逗号拼接字符串） */
   static move(data: File.MoveParams): Promise<string> {
     return request.put('/system/file/move', data)

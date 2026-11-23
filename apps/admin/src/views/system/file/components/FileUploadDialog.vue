@@ -1,5 +1,13 @@
 <template>
-  <el-dialog v-model="visible" title="上传文件" :close-on-click-modal="false" width="640px">
+  <el-dialog
+    v-model="visible"
+    title="上传文件"
+    :close-on-click-modal="false"
+    :show-close="!isUploading"
+    :close-on-press-escape="!isUploading"
+    :before-close="handleBeforeClose"
+    width="640px"
+  >
     <el-upload
       class="upload-trigger"
       drag
@@ -33,8 +41,9 @@
     </div>
 
     <template #footer>
-      <el-button @click="visible = false">关闭</el-button>
-      <el-button type="primary" :loading="isUploading" :disabled="!hasPending" @click="handleUpload">开始上传</el-button>
+      <el-button v-if="isUploading" :disabled="!canCancel" @click="handleCancel">取消上传</el-button>
+      <el-button v-else @click="visible = false">关闭</el-button>
+      <el-button type="primary" :loading="isUploading" :disabled="isUploading || !hasPending" @click="handleUpload">开始上传</el-button>
     </template>
   </el-dialog>
 </template>
@@ -43,6 +52,7 @@
 defineOptions({ name: 'FileUploadDialog' })
 import type { UploadFile, UploadRawFile } from 'element-plus'
 import { TipModal } from '@/utils'
+import { sha256Hex } from '@/utils/crypto'
 import { UploadRequest } from '@/api/common/upload.request'
 import { FileRequest } from '@/api/system/file.request'
 import type { File as SysFile } from '@/types'
@@ -51,13 +61,20 @@ const SINGLE_LIMIT = 10 * 1024 * 1024
 const CHUNK_SIZE = 5 * 1024 * 1024
 const CHUNK_CONCURRENCY = 3
 
-type UploadStatus = 'pending' | 'hashing' | 'uploading' | 'merging' | 'registering' | 'done' | 'error'
+type UploadStatus = 'pending' | 'hashing' | 'uploading' | 'merging' | 'registering' | 'done' | 'error' | 'canceled'
+
+/** 可（重新）发起上传的状态：取消过的文件允许再次点击开始上传 */
+const UPLOADABLE_STATUSES: UploadStatus[] = ['pending', 'error', 'canceled']
+/** 可中断的阶段：合并与登记不可中断，避免服务端留下半成品或未登记的物理文件 */
+const CANCELABLE_STATUSES: UploadStatus[] = ['hashing', 'uploading']
 
 interface UploadItem {
   file: UploadRawFile
   status: UploadStatus
   progress: number
   message: string
+  /** 已算出的整体哈希：取消后清理分片、重试时复用（免二次全文件哈希） */
+  fileHash?: string
 }
 
 const emit = defineEmits<{ success: [] }>()
@@ -67,7 +84,13 @@ const parentId = ref('0')
 const uploadItems = ref<UploadItem[]>([])
 
 const isUploading = ref(false)
-const hasPending = computed(() => uploadItems.value.some((item) => ['pending', 'error'].includes(item.status)))
+/** 当前这一轮上传的取消控制器，null 表示没有进行中的上传 */
+const abortController = ref<AbortController | null>(null)
+/** 用户已点击取消：等上传循环收尾后统一清理分片，避免与在途分片写入竞争 */
+const cancelRequested = ref(false)
+
+const hasPending = computed(() => uploadItems.value.some((item) => UPLOADABLE_STATUSES.includes(item.status)))
+const canCancel = computed(() => isUploading.value && uploadItems.value.some((item) => CANCELABLE_STATUSES.includes(item.status)))
 
 const STATUS_TEXT: Record<UploadStatus, string> = {
   pending: '待上传',
@@ -77,13 +100,20 @@ const STATUS_TEXT: Record<UploadStatus, string> = {
   registering: '登记中',
   done: '成功',
   error: '失败',
+  canceled: '已取消',
 }
 
 function statusTagType(status: UploadStatus) {
   if (status === 'done') return 'success'
   if (status === 'error') return 'danger'
-  if (status === 'pending') return 'info'
+  if (status === 'pending' || status === 'canceled') return 'info'
   return 'warning'
+}
+
+/** 主动取消产生的错误：axios 取消为 CanceledError，哈希中断为 AbortError */
+function isAbortError(error: unknown): boolean {
+  if (!(error instanceof Error)) return false
+  return error.name === 'CanceledError' || error.name === 'AbortError'
 }
 
 function open(folderId: string) {
@@ -97,27 +127,36 @@ function handleFileChange(uploadFile: UploadFile) {
   uploadItems.value.push({ file: uploadFile.raw as UploadRawFile, status: 'pending', progress: 0, message: STATUS_TEXT.pending })
 }
 
-/** 计算文件整体 SHA-256（秒传与断点续传的锚点） */
-async function computeSha256(file: UploadRawFile): Promise<string> {
-  const digest = await crypto.subtle.digest('SHA-256', await file.arrayBuffer())
-  return Array.from(new Uint8Array(digest)).map((byte) => byte.toString(16).padStart(2, '0')).join('')
-}
-
-/** 顺序处理全部待上传文件；单文件失败不中断后续文件 */
+/** 顺序处理全部待上传文件；单文件失败不中断后续文件，主动取消则中止后续文件 */
 async function handleUpload() {
   if (isUploading.value) return
+  const controller = new AbortController()
+  abortController.value = controller
+  cancelRequested.value = false
   isUploading.value = true
   let successCount = 0
   try {
     for (const item of uploadItems.value) {
-      if (!['pending', 'error'].includes(item.status)) continue
+      if (!UPLOADABLE_STATUSES.includes(item.status)) continue
+      if (controller.signal.aborted) {
+        item.status = 'canceled'
+        item.progress = 0
+        item.message = STATUS_TEXT.canceled
+        continue
+      }
       try {
-        await uploadOne(item)
+        await uploadOne(item, controller.signal)
         item.status = 'done'
         item.progress = 100
         item.message = STATUS_TEXT.done
         successCount += 1
       } catch (error: unknown) {
+        if (isAbortError(error)) {
+          item.status = 'canceled'
+          item.progress = 0
+          item.message = STATUS_TEXT.canceled
+          continue
+        }
         const errMsg = error instanceof Error ? error.message : String(error)
         item.status = 'error'
         item.progress = 0
@@ -125,38 +164,70 @@ async function handleUpload() {
         console.log('handleUpload errMsg: ', errMsg)
       }
     }
-    if (successCount) {
-      emit('success')
-      TipModal.msgSuccess(`成功上传 ${successCount} 个文件`)
-    }
+    if (successCount) emit('success')
   } finally {
     isUploading.value = false
+    abortController.value = null
+  }
+  if (cancelRequested.value) {
+    cancelRequested.value = false
+    await cleanupCanceledFiles()
+    TipModal.msg(`已取消上传${successCount ? `，此前成功 ${successCount} 个文件` : ''}，相关分片已清理`)
+  } else if (successCount) {
+    TipModal.msgSuccess(`成功上传 ${successCount} 个文件`)
   }
 }
 
-/** 单文件上传：哈希 → 秒传检查 → 直传/分片 → 合并 → 登记 */
-async function uploadOne(item: UploadItem) {
+/** 取消上传：只中断请求，分片与本地进度等上传循环收尾后统一清理 */
+function handleCancel() {
+  if (!canCancel.value) return
+  cancelRequested.value = true
+  abortController.value?.abort()
+}
+
+/** 清理被取消文件的服务端分片，并复位本地进度（已完成的文件不受影响） */
+async function cleanupCanceledFiles() {
+  const canceledItems = uploadItems.value.filter((item) => item.status !== 'done' && item.fileHash)
+  for (const fileHash of new Set(canceledItems.map((item) => item.fileHash as string))) {
+    await UploadRequest.clearChunk({ fileHash }).catch(() => undefined)
+  }
+  for (const item of canceledItems) item.progress = 0
+}
+
+/** 上传中禁止关闭弹窗：X 与 ESC 已禁用，这里兜底拦截其他关闭入口 */
+function handleBeforeClose(done: () => void) {
+  if (isUploading.value) {
+    TipModal.msgWarning('文件正在上传，请先取消上传')
+    return
+  }
+  done()
+}
+
+/** 单文件上传：哈希 → 秒传检查 → 直传/分片 → 合并 → 登记；合并与登记不可中断 */
+async function uploadOne(item: UploadItem, signal: AbortSignal) {
   const { file } = item
   item.status = 'hashing'
   item.message = STATUS_TEXT.hashing
-  const fileHash = await computeSha256(file)
+  const fileHash = await sha256Hex(await file.arrayBuffer(), signal)
+  item.fileHash = fileHash
   const registerParams: SysFile.RegisterParams = { parentId: parentId.value, fileHash, fileName: file.name, fileSize: file.size, mimeType: file.type || undefined }
 
   item.status = 'uploading'
   item.message = STATUS_TEXT.uploading
-  const check = await UploadRequest.checkFile({ fileHash })
+  const check = await UploadRequest.checkFile({ fileHash, fileSize: file.size }, { signal })
 
   if (check.isExist) {
     item.message = '秒传命中'
   } else if (file.size <= SINGLE_LIMIT) {
     const formData = new FormData()
     formData.append('file', file)
-    await UploadRequest.uploadFile(formData)
+    await UploadRequest.uploadFile(formData, { signal })
   } else {
-    await uploadByChunks(item, fileHash, check.uploadedChunks)
+    const totalChunks = Math.ceil(file.size / CHUNK_SIZE)
+    await uploadByChunks(item, fileHash, check.uploadedChunks, signal)
     item.status = 'merging'
     item.message = STATUS_TEXT.merging
-    await UploadRequest.mergeChunks({ fileHash, fileName: file.name })
+    await UploadRequest.mergeChunks({ fileHash, fileName: file.name, fileSize: file.size, totalChunks })
   }
 
   item.status = 'registering'
@@ -164,10 +235,10 @@ async function uploadOne(item: UploadItem) {
   await FileRequest.register(registerParams)
 }
 
-/** 分片上传：跳过已传分片（断点续传），并发 3，失败清理临时分片 */
-async function uploadByChunks(item: UploadItem, fileHash: string, uploadedChunks: string[]) {
+/** 分片上传：跳过已传分片（断点续传），并发 3；真实失败立即清理分片，主动取消交给收尾统一清理 */
+async function uploadByChunks(item: UploadItem, fileHash: string, uploadedChunks: number[], signal: AbortSignal) {
   try {
-    const uploadedIndexes = new Set(uploadedChunks.map((name) => Number.parseInt(name.split('-')[0], 10)))
+    const uploadedIndexes = new Set(uploadedChunks)
     const totalChunks = Math.ceil(item.file.size / CHUNK_SIZE)
     const pendingIndexes = Array.from({ length: totalChunks }, (_, index) => index).filter((index) => !uploadedIndexes.has(index))
     let completedCount = totalChunks - pendingIndexes.length
@@ -176,20 +247,21 @@ async function uploadByChunks(item: UploadItem, fileHash: string, uploadedChunks
     let cursor = 0
     const workers = Array.from({ length: Math.min(CHUNK_CONCURRENCY, pendingIndexes.length) }, async () => {
       while (cursor < pendingIndexes.length) {
+        if (signal.aborted) break
         const index = pendingIndexes[cursor++]
         const start = index * CHUNK_SIZE
         const formData = new FormData()
         formData.append('file', item.file.slice(start, Math.min(start + CHUNK_SIZE, item.file.size)))
         formData.append('fileHash', fileHash)
-        formData.append('chunkHash', `${index}`)
-        await UploadRequest.uploadChunk(formData)
+        formData.append('partNumber', `${index}`)
+        await UploadRequest.uploadChunk(formData, { signal })
         completedCount += 1
         item.progress = Math.round((completedCount / totalChunks) * 100)
       }
     })
     await Promise.all(workers)
   } catch (error: unknown) {
-    await UploadRequest.clearChunk({ fileHash }).catch(() => undefined)
+    if (!isAbortError(error)) await UploadRequest.clearChunk({ fileHash }).catch(() => undefined)
     return Promise.reject(error)
   }
 }

@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, ParseArrayPipe, Post, Put, Query } from '@nestjs/common'
 import { BusinessType, Operlog, PaginationPipe, RequirePermissions, SkipTransform } from '@/common'
 import { FileService } from './file.service'
-import { CreateFolderDto, MoveFileDto, QueryFileDto, RecycleQueryDto, RegisterFileDto, UpdateFolderDto } from './file.dto'
+import { CreateFolderDto, MoveFileDto, QueryFileDto, RecycleQueryDto, RegisterFileDto, UpdateFileDto, UpdateFolderDto } from './file.dto'
 
 @Controller('system/file')
 export class FileController {
@@ -35,6 +35,14 @@ export class FileController {
   @Operlog({ title: '文件管理', businessType: BusinessType.UPDATE })
   updateFolder(@Body() updateDto: UpdateFolderDto) {
     return this.fileService.updateFolder(updateDto)
+  }
+
+  /** 重命名文件 */
+  @Put('update')
+  @RequirePermissions(['system:file:update'])
+  @Operlog({ title: '文件管理', businessType: BusinessType.UPDATE })
+  updateFile(@Body() updateDto: UpdateFileDto) {
+    return this.fileService.updateFile(updateDto)
   }
 
   /** 移动文件/目录到目标目录 */

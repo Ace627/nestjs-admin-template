@@ -105,7 +105,6 @@ interface UploadTask {
   percent: number
   status: TaskStatus
   hash: string
-  chunkHashes: string[]
   doneChunkIndexes: Set<number>
   abortController: AbortController | null
 }
@@ -183,7 +182,6 @@ function addTasks(files: File[]) {
       percent: 0,
       status: 'pending',
       hash: '',
-      chunkHashes: [],
       doneChunkIndexes: new Set(),
       abortController: null,
     }
@@ -196,7 +194,7 @@ function addTasks(files: File[]) {
  *
  * 主线程 FileReader.readAsArrayBuffer 逐片读取
  * → transfer ArrayBuffer 到 Worker
- * → Worker 内 crypto.subtle.digest('SHA-256') 硬件加速计算
+ * → Worker 内 sha256Hex 计算（优先 crypto.subtle，http 环境自动走纯 JS 实现）
  * → 全部完成后 postMessage 返回
  */
 function computeAllHashes(task: UploadTask): Promise<{ fileHash: string; chunkHashes: string[] }> {
@@ -248,7 +246,7 @@ function uploadOneChunk(task: UploadTask, chunkIndex: number) {
   const formData = new FormData()
   formData.append('file', chunk, task.fileName)
   formData.append('fileHash', task.hash)
-  formData.append('chunkHash', task.chunkHashes[chunkIndex] + '-' + chunkIndex)
+  formData.append('partNumber', `${chunkIndex}`)
   return UploadRequest.uploadChunk(formData, { signal: task.abortController!.signal }).then(() => {})
 }
 
@@ -258,26 +256,22 @@ async function startUpload(task: UploadTask) {
 
   if (!task.hash) {
     task.status = 'calculating'
-    const { fileHash, chunkHashes } = await computeAllHashes(task)
+    const { fileHash } = await computeAllHashes(task)
     if (!fileHash) {
       task.status = 'pending'
       return
     }
     task.hash = fileHash
-    task.chunkHashes = chunkHashes
 
     task.status = 'checking'
-    const checkResult = await UploadRequest.checkFile({ fileHash })
+    const checkResult = await UploadRequest.checkFile({ fileHash, fileSize: task.fileSize })
     if (checkResult.isExist) {
       task.completedChunks = task.totalChunks
       task.percent = 100
       task.status = 'done'
       return
     }
-    const uploadedSet = new Set(checkResult.uploadedChunks)
-    chunkHashes.forEach((chunkHash, index) => {
-      if (uploadedSet.has(chunkHash + '-' + index)) task.doneChunkIndexes.add(index)
-    })
+    checkResult.uploadedChunks.forEach((index) => task.doneChunkIndexes.add(index))
     task.completedChunks = task.doneChunkIndexes.size
     task.percent = Math.round((task.completedChunks / task.totalChunks) * 100)
   }
@@ -293,7 +287,7 @@ async function startUpload(task: UploadTask) {
 
   if (pending.length === 0) {
     task.status = 'merging'
-    await UploadRequest.mergeChunks({ fileHash: task.hash, fileName: task.fileName })
+    await UploadRequest.mergeChunks({ fileHash: task.hash, fileName: task.fileName, fileSize: task.fileSize, totalChunks: task.totalChunks })
     task.status = 'done'
     task.percent = 100
     return
@@ -333,7 +327,7 @@ async function startUpload(task: UploadTask) {
   }
 
   task.status = 'merging'
-  await UploadRequest.mergeChunks({ fileHash: task.hash, fileName: task.fileName })
+  await UploadRequest.mergeChunks({ fileHash: task.hash, fileName: task.fileName, fileSize: task.fileSize, totalChunks: task.totalChunks })
 
   task.status = 'done'
   task.percent = 100

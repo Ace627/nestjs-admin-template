@@ -44,6 +44,7 @@
         <template #action="{ row }">
           <el-link v-if="row.fileType === FILE_TYPE.FILE" type="primary" @click="handleDownload(row)">下载</el-link>
           <el-link v-else type="primary" @click="handleEnterFolder(row)">进入</el-link>
+          <el-link v-if="row.fileType === FILE_TYPE.FILE" v-permissions="['system:file:update']" type="primary" @click="handleRename(row)">重命名</el-link>
           <el-link v-permissions="['system:file:update']" type="primary" @click="handleMove(row)">移动</el-link>
           <el-link v-permissions="['system:file:delete']" type="primary" @click="handleDelete(row)">删除</el-link>
         </template>
@@ -53,6 +54,7 @@
     </div>
 
     <FolderDialog ref="folderDialogRef" @success="handleFolderChanged" />
+    <FileRenameDialog ref="fileRenameDialogRef" @success="getList" />
     <FileMoveDialog ref="fileMoveDialogRef" @success="handleMoveChanged" />
     <FileUploadDialog ref="fileUploadDialogRef" @success="getList" />
     <RecycleDrawer ref="recycleDrawerRef" @changed="handleRecycleChanged" />
@@ -65,6 +67,7 @@ import { FILE_TYPE } from '@/types/api/system/file'
 import FolderTree from './components/FolderTree.vue'
 import { FileRequest } from '@/api/system/file.request'
 import FolderDialog from './components/FolderDialog.vue'
+import FileRenameDialog from './components/FileRenameDialog.vue'
 import RecycleDrawer from './components/RecycleDrawer.vue'
 import FileMoveDialog from './components/FileMoveDialog.vue'
 import { formatFileSize, linkDownload } from '@/utils/file'
@@ -79,6 +82,7 @@ const isMultiple = computed(() => multipleSelection.value.length > 0)
 const tableRef = useTemplateRef('tableRef')
 const folderTreeRef = useTemplateRef('folderTreeRef')
 const folderDialogRef = useTemplateRef('folderDialogRef')
+const fileRenameDialogRef = useTemplateRef('fileRenameDialogRef')
 const fileMoveDialogRef = useTemplateRef('fileMoveDialogRef')
 const fileUploadDialogRef = useTemplateRef('fileUploadDialogRef')
 const recycleDrawerRef = useTemplateRef('recycleDrawerRef')
@@ -100,7 +104,7 @@ const columns: ProTableColumn<File.Item>[] = [
   { align: 'center', label: '大小', slot: 'fileSize', width: 110, printFormatter: (row) => formatFileSize(row.fileSize) },
   { align: 'center', prop: 'createBy', label: '创建人', width: 120 },
   { align: 'center', prop: 'createTime', label: '创建时间', minWidth: 170 },
-  { align: 'center', slot: 'action', label: '操作', fixed: 'right', width: 130 },
+  { align: 'center', slot: 'action', label: '操作', fixed: 'right', width: 180 },
 ]
 
 async function getList() {
@@ -153,6 +157,11 @@ function handleFolderCreate(parentId: string) {
 
 function handleFolderRename(node: File.TreeItem) {
   folderDialogRef.value?.open('rename', undefined, node)
+}
+
+/** 文件重命名入口（扩展名由弹窗锁定，不可修改） */
+function handleRename(row: File.Item) {
+  fileRenameDialogRef.value?.open(row)
 }
 
 /** 删除目录（后端级联软删子孙） */

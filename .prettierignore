@@ -1,4 +1,6 @@
 dist
 node_modules
+apps/server/src/database/migrations
+
 reset.*css
 pnpm-lock.yaml

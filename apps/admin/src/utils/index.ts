@@ -2,6 +2,7 @@ export * from './file'
 export * from './convert'
 export * from './validate'
 export * from './tip-modal'
+export * from './crypto'
 
 export * from './common/time'
 export * from './common/sleep'

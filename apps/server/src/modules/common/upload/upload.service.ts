@@ -1,11 +1,15 @@
-import { createSha256 } from '@/utils'
-import type { RmOptions } from 'node:fs'
-import { Injectable } from '@nestjs/common'
+import { createHash } from 'node:crypto'
+import { once } from 'node:events'
 import { extname, resolve } from 'node:path'
-import { BusinessException } from '@/common'
-import { pipeline } from 'node:stream/promises'
+import { createSha256 } from '@/utils'
+import { finished } from 'node:stream/promises'
+import { BusinessException, UploadConstant } from '@/common'
+import { Injectable } from '@nestjs/common'
+import { createReadStream, createWriteStream } from 'node:fs'
+import { mkdir, readdir, rename, rm, stat, writeFile } from 'node:fs/promises'
+import type { Stats } from 'node:fs'
 import { CheckFileDto, ClearChunkDto, MergeChunkDto, UploadChunkDto } from './upload.dto'
-import { existsSync, mkdirSync, writeFileSync, rmSync, readdirSync, createReadStream, createWriteStream } from 'node:fs'
+import { extractPartNumber, findMissingPartNumbers, resolveInsideDirectory } from './upload.util'
 
 @Injectable()
 export class UploadService {
@@ -14,87 +18,99 @@ export class UploadService {
 
   /** 单文件上传（≤10MB 直接上传，>10MB 拒绝并提示分片） */
   public async uploadFile(file: ExpressMulterFile) {
-    // 限制文件最大 10MB，超出提示分片上传
-    if (file.size > 10 * 1024 * 1024) throw new BusinessException('文件大于10MB，请使用分片上传')
+    if (!file?.buffer?.length) throw new BusinessException('上传文件不能为空')
+    if (file.size > UploadConstant.MAX_SINGLE_FILE_SIZE) throw new BusinessException('文件大于10MB，请使用分片上传')
     // 处理中文乱码并获取后缀
     const ext = extname(Buffer.from(file.originalname, 'latin1').toString('utf8'))
     /** 根据文件内容生成唯一 SHA-256 文件名 */
     const filename = `${createSha256(file.buffer)}${ext}`
-    // 生成文件保存路径
-    const filePath = resolve(this.UPLOAD_DIR_PATH, filename)
+    const filePath = resolveInsideDirectory(this.UPLOAD_DIR_PATH, filename)
+    await mkdir(this.UPLOAD_DIR_PATH, { recursive: true })
     // 文件已存在则直接返回路径（秒传）
-    if (existsSync(filePath)) return `uploads/${filename}`
-    if (!existsSync(this.UPLOAD_DIR_PATH)) mkdirSync(this.UPLOAD_DIR_PATH, { recursive: true })
-    // 写入文件到本地
-    writeFileSync(filePath, file.buffer)
+    if (await this.statOrNull(filePath)) return `uploads/${filename}`
+    await this.writeFileAtomic(filePath, file.buffer)
     // 返回可访问地址
     return `uploads/${filename}`
   }
 
-  /** 秒传 + 断点续传检查 */
-  public checkFile(checkFileDto: CheckFileDto) {
-    if (!existsSync(this.UPLOAD_DIR_PATH)) mkdirSync(this.UPLOAD_DIR_PATH, { recursive: true })
-    const { fileHash } = checkFileDto
-    const tempDir = resolve(this.UPLOAD_DIR_PATH, fileHash)
-    // 1. 已合并完成 => 秒传
-    const hasFinalFile = readdirSync(this.UPLOAD_DIR_PATH).some((file) => file.startsWith(fileHash + '.'))
-    if (hasFinalFile) return { isExist: true, uploadedChunks: [] }
-    // 2. 断点续传 / 全新文件
-    return { isExist: false, uploadedChunks: existsSync(tempDir) ? readdirSync(tempDir) : [] }
+  /** 秒传 + 断点续传检查（哈希 + 大小双重确认，已完成的文件才判为秒传） */
+  public async checkFile(checkFileDto: CheckFileDto) {
+    const { fileHash, fileSize } = checkFileDto
+    await mkdir(this.UPLOAD_DIR_PATH, { recursive: true })
+    // 1. 已合并完成且大小一致 => 秒传
+    if (await this.hasFinalFile(fileHash, fileSize)) return { isExist: true, uploadedChunks: [] }
+    // 2. 断点续传：返回已落盘的分片序号（0 起）
+    const chunkDir = resolveInsideDirectory(this.UPLOAD_DIR_PATH, fileHash)
+    const partNumbers = (await this.readdirOrEmpty(chunkDir)).map(extractPartNumber).filter((partNumber): partNumber is number => partNumber !== null)
+    return { isExist: false, uploadedChunks: [...new Set(partNumbers)].sort((left, right) => left - right) }
   }
 
-  /** 上传单个分片 */
-  public uploadChunk(files: ExpressMulterFile[], uploadChunkDto: UploadChunkDto) {
-    const { fileHash, chunkHash } = uploadChunkDto
-    // 临时分片目录
-    const tempDir = resolve(this.UPLOAD_DIR_PATH, fileHash)
-    // 不存在则创建文件夹
-    if (!existsSync(tempDir)) mkdirSync(tempDir, { recursive: true })
-    // 写入分片文件
-    writeFileSync(resolve(tempDir, chunkHash), files[0].buffer)
-    // 返回成功信息
+  /** 上传单个分片（同一序号重传直接覆盖，天然幂等） */
+  public async uploadChunk(files: ExpressMulterFile[], uploadChunkDto: UploadChunkDto) {
+    const chunkFile = files?.[0]
+    if (!chunkFile?.buffer?.length) throw new BusinessException('分片内容不能为空')
+    if (chunkFile.size > UploadConstant.MAX_CHUNK_SIZE) throw new BusinessException('分片大小超出限制')
+    const chunkDir = resolveInsideDirectory(this.UPLOAD_DIR_PATH, uploadChunkDto.fileHash)
+    await mkdir(chunkDir, { recursive: true })
+    await this.writeFileAtomic(resolveInsideDirectory(chunkDir, String(uploadChunkDto.partNumber)), chunkFile.buffer)
     return '分片上传成功'
   }
 
-  /** 合并所有分片 */
+  /** 合并所有分片：校验分片完整性与总大小，边合并边算 SHA-256，校验通过后原子改名 */
   public async mergeChunk(mergeChunkDto: MergeChunkDto) {
-    const { fileHash, fileName } = mergeChunkDto
-    const tempDir = resolve(this.UPLOAD_DIR_PATH, fileHash)
+    const { fileHash, fileName, fileSize, totalChunks } = mergeChunkDto
     const ext = extname(fileName)
-    const finalFilePath = resolve(this.UPLOAD_DIR_PATH, `${fileHash}${ext}`)
-    // 1. 已存在 => 抛出异常
-    if (existsSync(finalFilePath)) throw new BusinessException('文件已存在，无需合并')
-    // 2. 分片目录不存在，抛出异常（全局捕获会处理）
-    if (!existsSync(tempDir)) throw new BusinessException('分片文件不存在，请重新上传')
-    // 3. 读取并按分片序号排序
-    const chunks = readdirSync(tempDir).sort((a, b) => parseInt(a.split('-').pop() || '0') - parseInt(b.split('-').pop() || '0'))
-    // 4. 流式合并（企业级标准，高性能、不占内存）
-    const writeStream = createWriteStream(finalFilePath)
-    // Node 默认最多给一个流加 10 个事件监听，防止意外内存泄漏
-    // 但这是分片合并，必须给一个 writeStream 绑定多个监听器，是正常业务场景，不是泄漏
-    // 所以这里提高监听上限，消除警告
-    writeStream.setMaxListeners(0)
-    // 遍历分片文件，按序号合并
-    for (const chunk of chunks) await pipeline(createReadStream(resolve(tempDir, chunk)), writeStream, { end: false })
-    // 关闭写入流，等待所有数据写入完成
-    writeStream.end()
-    await new Promise<void>((resolve) => writeStream.on('finish', () => resolve())) // 等待真正写入完成
-    // 5. 清理临时目录
-    this.deleteDirectory(tempDir)
-    // 6. 返回成功信息
+    const finalFilePath = resolveInsideDirectory(this.UPLOAD_DIR_PATH, `${fileHash}${ext}`)
+    await mkdir(this.UPLOAD_DIR_PATH, { recursive: true })
+    // 1. 幂等：已完整落盘直接返回成功，尺寸不符则说明磁盘出现异常文件
+    const existingStats = await this.statOrNull(finalFilePath)
+    if (existingStats?.isFile()) {
+      if (existingStats.size === fileSize) return '文件合并成功'
+      throw new BusinessException('目标文件已存在但大小不一致，请联系管理员处理')
+    }
+    // 2. 分片目录与缺口校验
+    const chunkDir = resolveInsideDirectory(this.UPLOAD_DIR_PATH, fileHash)
+    const partNumbers = (await this.readdirOrEmpty(chunkDir)).map(extractPartNumber).filter((partNumber): partNumber is number => partNumber !== null)
+    if (!partNumbers.length) throw new BusinessException('分片文件不存在，请重新上传')
+    const missingPartNumbers = findMissingPartNumbers(partNumbers, totalChunks)
+    if (missingPartNumbers.length) {
+      const preview = missingPartNumbers.slice(0, 5).join('、')
+      throw new BusinessException(`分片不完整，缺少第 ${preview} 片（共缺 ${missingPartNumbers.length} 片）`)
+    }
+    // 3. 顺序流式合并，同时累积 SHA-256 与字节数，避免为校验再读一遍文件
+    const contentHash = createHash('sha256')
+    const tempFilePath = `${finalFilePath}.${process.pid}.tmp`
+    const writeStream = createWriteStream(tempFilePath)
+    let writtenBytes = 0
+    try {
+      for (let partNumber = 0; partNumber < totalChunks; partNumber += 1) {
+        const chunkReadStream: AsyncIterable<Buffer> = createReadStream(resolveInsideDirectory(chunkDir, String(partNumber)))
+        for await (const piece of chunkReadStream) {
+          writtenBytes += piece.length
+          contentHash.update(piece)
+          if (!writeStream.write(piece)) await once(writeStream, 'drain')
+        }
+      }
+      writeStream.end()
+      await finished(writeStream)
+      if (writtenBytes !== fileSize) throw new BusinessException(`分片总大小与文件大小不一致（应为 ${fileSize} 字节，实际 ${writtenBytes} 字节）`)
+      if (contentHash.digest('hex') !== fileHash) throw new BusinessException('文件校验失败，内容与哈希不一致，请重新上传')
+      await rename(tempFilePath, finalFilePath)
+    } catch (error) {
+      writeStream.destroy()
+      await rm(tempFilePath, { force: true })
+      throw error
+    }
+    // 4. 清理临时目录
+    await rm(chunkDir, { recursive: true, force: true })
     return '文件合并成功'
   }
 
   /** 清理分片 */
-  public clearChunk(clearChunkDto: ClearChunkDto) {
-    const { fileHash } = clearChunkDto
-    // 1. 拼接临时分片目录
-    const tempDir = resolve(process.cwd(), 'uploads', fileHash)
-    // 2. 目录不存在 → 直接返回
-    if (!existsSync(tempDir)) return '分片目录不存在，无需清理'
-    // 3. 递归删除目录（安全强制删除）
-    this.deleteDirectory(tempDir)
-    // 4. 返回成功信息
+  public async clearChunk(clearChunkDto: ClearChunkDto) {
+    const chunkDir = resolveInsideDirectory(this.UPLOAD_DIR_PATH, clearChunkDto.fileHash)
+    if (!(await this.statOrNull(chunkDir))) return '分片目录不存在，无需清理'
+    await rm(chunkDir, { recursive: true, force: true })
     return '分片目录已成功清理'
   }
 
@@ -102,9 +118,44 @@ export class UploadService {
   /*                               Private Handler                              */
   /* -------------------------------------------------------------------------- */
 
-  /** 删除指定目录 */
-  private deleteDirectory(dirPath: string, options: RmOptions = {}) {
-    if (!existsSync(dirPath)) return
-    rmSync(dirPath, Object.assign({ recursive: true, force: true }, options))
+  /** 最终文件是否已完整落盘：merge 走原子改名，文件名出现即代表内容完整，仍需复核大小 */
+  private async hasFinalFile(fileHash: string, fileSize: number): Promise<boolean> {
+    // 排除合并中断留下的 .tmp 临时文件；无扩展名文件的最终文件名就是哈希本身
+    const matchedNames = (await this.readdirOrEmpty(this.UPLOAD_DIR_PATH)).filter((name) => (name === fileHash || name.startsWith(`${fileHash}.`)) && !name.endsWith('.tmp'))
+    for (const name of matchedNames) {
+      const stats = await this.statOrNull(resolveInsideDirectory(this.UPLOAD_DIR_PATH, name))
+      if (stats?.isFile() && stats.size === fileSize) return true
+    }
+    return false
+  }
+
+  /** 先写临时文件再改名，避免中断留下半成品被误判为完整文件 */
+  private async writeFileAtomic(targetPath: string, content: Buffer): Promise<void> {
+    const tempFilePath = `${targetPath}.${process.pid}.tmp`
+    try {
+      await writeFile(tempFilePath, content)
+      await rename(tempFilePath, targetPath)
+    } catch (error) {
+      await rm(tempFilePath, { force: true })
+      throw error
+    }
+  }
+
+  /** 读取目录，目录不存在时返回空数组 */
+  private async readdirOrEmpty(dirPath: string): Promise<string[]> {
+    try {
+      return await readdir(dirPath)
+    } catch {
+      return []
+    }
+  }
+
+  /** 读取文件状态，不存在或不可访问时返回 null */
+  private async statOrNull(targetPath: string): Promise<Stats | null> {
+    try {
+      return await stat(targetPath)
+    } catch {
+      return null
+    }
   }
 }

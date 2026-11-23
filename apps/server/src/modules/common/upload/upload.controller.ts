@@ -1,4 +1,4 @@
-import { SkipThrottle } from '@/common'
+import { SkipThrottle, UploadConstant } from '@/common'
 import { UploadService } from './upload.service'
 import { AnyFilesInterceptor, FileInterceptor } from '@nestjs/platform-express'
 import { CheckFileDto, ClearChunkDto, MergeChunkDto, UploadChunkDto } from './upload.dto'
@@ -11,7 +11,7 @@ export class UploadController {
 
   /** 单文件上传 */
   @Post('file')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: UploadConstant.MAX_SINGLE_FILE_SIZE, files: 1, fields: 8 } }))
   public uploadFile(@UploadedFile() file: ExpressMulterFile) {
     return this.uploadService.uploadFile(file)
   }
@@ -25,7 +25,7 @@ export class UploadController {
   /** 上传单个分片 */
   @SkipThrottle()
   @Post('chunk')
-  @UseInterceptors(AnyFilesInterceptor())
+  @UseInterceptors(AnyFilesInterceptor({ limits: { fileSize: UploadConstant.MAX_CHUNK_SIZE, files: 1, fields: 8 } }))
   public uploadChunk(@UploadedFiles() files: ExpressMulterFile[], @Body() body: UploadChunkDto) {
     return this.uploadService.uploadChunk(files, body)
   }

@@ -20,6 +20,17 @@ export class UpdateFolderDto extends PartialType(CreateFolderDto) {
   id: string
 }
 
+/* ----------------------------- 重命名文件 ----------------------------- */
+
+export class UpdateFileDto {
+  @IsNotEmpty({ message: '文件 ID 不能为空' })
+  id: string
+
+  @IsNotEmpty({ message: '文件名不能为空' })
+  @Length(1, 255, { message: '文件名长度须在 1 到 255 个字符之间' })
+  fileName: string
+}
+
 /* ----------------------------- 移动 ----------------------------- */
 
 export class MoveFileDto {

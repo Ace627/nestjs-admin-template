@@ -1,8 +1,9 @@
 /**
- * 浏览器原生 SHA-256 计算（最终正确版）
- * 100% 对齐后端 createSha256(文件二进制)
- * 无 createHash / update，只用标准 digest API
+ * 文件 SHA-256 计算 Worker
+ * @description 统一走 @/utils/crypto，兼容 http 等非安全上下文（crypto.subtle 不可用）
  */
+import { sha256Hex } from '@/utils/crypto'
+
 interface WorkerInit {
   type: 'init'
   totalChunks: number
@@ -27,13 +28,6 @@ let totalChunks = 0
 let receivedChunks = 0
 const chunkBufferMap = new Map<number, ArrayBuffer>() // 按index存原始二进制
 const chunkHashMap = new Map<number, string>()
-
-// ArrayBuffer → Hex（和后端digest(hex)一致）
-function bufferToHex(buffer: ArrayBuffer): string {
-  return Array.from(new Uint8Array(buffer))
-    .map((byte) => byte.toString(16).padStart(2, '0'))
-    .join('')
-}
 
 // 拼接所有分片二进制 → 完整文件Buffer
 function concatBuffers(buffers: ArrayBuffer[]): ArrayBuffer {
@@ -66,7 +60,7 @@ self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
     const { index, buffer } = message
 
     // 1. 计算当前分片的 SHA256（给后端存分片用）
-    const chunkHash = bufferToHex(await crypto.subtle.digest('SHA-256', buffer))
+    const chunkHash = await sha256Hex(buffer)
     chunkHashMap.set(index, chunkHash)
     // 2. 保存分片原始二进制（最后算完整文件Hash用）
     chunkBufferMap.set(index, buffer)
@@ -82,7 +76,7 @@ self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
 
       // 🔥 核心：拼接完整文件二进制 → 算SHA256（和后端完全一致）
       const fullFileBuffer = concatBuffers(sortedBuffers)
-      const fileHash = bufferToHex(await crypto.subtle.digest('SHA-256', fullFileBuffer))
+      const fileHash = await sha256Hex(fullFileBuffer)
 
       // 返回结果
       self.postMessage({

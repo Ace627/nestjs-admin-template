@@ -3,14 +3,14 @@ import { request } from '@/utils/request'
 import type { AxiosRequestConfig } from 'axios'
 
 export abstract class UploadRequest {
-  /** 单文件上传（≤10MB） */
-  static uploadFile(data: FormData): Promise<string> {
-    return request.post('/common/upload/file', data)
+  /** 单文件上传（≤10MB），支持传 AbortSignal 取消 */
+  static uploadFile(data: FormData, config: AxiosRequestConfig = {}): Promise<string> {
+    return request.post('/common/upload/file', data, config)
   }
 
-  /** 秒传 + 断点续传检查 */
-  static checkFile(data: Upload.CheckFileParams): Promise<Upload.CheckFileResponse> {
-    return request.post('/common/upload/check', data)
+  /** 秒传 + 断点续传检查，支持传 AbortSignal 取消 */
+  static checkFile(data: Upload.CheckFileParams, config: AxiosRequestConfig = {}): Promise<Upload.CheckFileResponse> {
+    return request.post('/common/upload/check', data, config)
   }
 
   /** 上传单个分片 */
