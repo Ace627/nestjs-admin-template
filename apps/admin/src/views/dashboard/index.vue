@@ -68,7 +68,7 @@
           </template>
           <div v-if="myMenuList.length" class="dashboard__entries">
             <div v-for="menu in myMenuList" :key="menu.path" class="dashboard__entry" @click="handleNavigate(menu.path, menu)">
-              <SvgIcon :name="menu.icon" class="dashboard__entry-icon" />
+              <SvgIcon v-if="menu.icon" :name="menu.icon" class="dashboard__entry-icon" />
               <span>{{ menu.title }}</span>
             </div>
           </div>

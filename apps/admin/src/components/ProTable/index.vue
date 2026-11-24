@@ -25,7 +25,7 @@
 <script setup lang="ts">
 defineOptions({ name: 'ProTable', inheritAttrs: false })
 import { mergeProps } from 'vue'
-import type { TableInstance } from 'element-plus'
+import type { TableColumnCtx, TableInstance } from 'element-plus'
 import { generateTableColumnKey, registerTablePrintContext } from '@/utils'
 import type { ProTableColumn, ProTableProps } from './types'
 
@@ -58,6 +58,12 @@ const columnSlotNames = computed(() => props.columns.filter((column): column is 
 const slots = useSlots()
 // 透传给 Table 的插槽名
 const forwardSlotNames = computed(() => Object.keys(slots).filter((name) => !columnSlotNames.value.includes(name)))
+
+/**
+ * 插槽作用域沿用 Element Plus 的列作用域结构
+ * @description row 统一为 any：ProTable 不感知业务实体类型，页面调用类型化方法时按需断言为具体实体
+ */
+defineSlots<Record<string, (scope: { row: any; $index: number; column: TableColumnCtx<any> }) => any>>()
 
 // 存储 Table 实例的引用
 const proTableRef = shallowRef<TableInstance>()
