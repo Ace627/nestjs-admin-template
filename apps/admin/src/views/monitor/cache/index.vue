@@ -9,7 +9,7 @@
         <el-descriptions-item label="客户端数">{{ cacheInfo.info.connected_clients }}</el-descriptions-item>
         <el-descriptions-item label="运行时间">{{ cacheInfo.info.uptime_in_days }}天</el-descriptions-item>
         <el-descriptions-item label="使用内存">{{ cacheInfo.info.used_memory_human }}</el-descriptions-item>
-        <el-descriptions-item label="使用 CPU">{{ cacheInfo.info.used_cpu_user }}</el-descriptions-item>
+        <el-descriptions-item label="平均 CPU 占用">{{ formatAverageCpuUsage }}</el-descriptions-item>
         <el-descriptions-item label="内存配置">{{ formatMaxmemoryText }}</el-descriptions-item>
         <el-descriptions-item label="AOF 开启">{{ cacheInfo.info.aof_enabled === 1 ? '是' : '否' }}</el-descriptions-item>
         <el-descriptions-item label="RDB 状态">{{ cacheInfo.info.rdb_last_bgsave_status }}</el-descriptions-item>
@@ -69,6 +69,13 @@ const formatMaxmemoryText = computed(() => {
 /** 格式化 Redis 运行模式 */
 const formatRedisMode = computed(() => {
   return (RedisModeMap[cacheInfo.value.info.redis_mode] || '未知') + '模式'
+})
+
+/** 格式化平均 CPU 占用（累计 CPU 时间 / 运行秒数） */
+const formatAverageCpuUsage = computed(() => {
+  const { used_cpu_sys = 0, used_cpu_user = 0, uptime_in_seconds = 0 } = cacheInfo.value.info
+  if (!uptime_in_seconds || uptime_in_seconds <= 0) return '0.00%'
+  return `${(((used_cpu_sys + used_cpu_user) / uptime_in_seconds) * 100).toFixed(2)}%`
 })
 
 /** 格式化网络入口/出口 */

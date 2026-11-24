@@ -30,6 +30,8 @@ export interface Redis {
   tcp_port: number
   /** Redis 服务器已运行的天数 */
   uptime_in_days: number
+  /** Redis 服务器已运行的秒数 */
+  uptime_in_seconds: number
   /** Redis 当前使用的内存大小，人类可读格式（如：718.46K） */
   used_memory_human: string
   /** AOF（Append Only File）持久化是否启用：0=禁用，1=启用 */
@@ -54,6 +56,8 @@ export interface Redis {
   used_memory: number
   /** Redis 主进程在用户模式下累计消耗的 CPU 时间（秒） */
   used_cpu_user: number
+  /** Redis 主进程在内核模式下累计消耗的 CPU 时间（秒） */
+  used_cpu_sys: number
 }
 
 /** 缓存监控 - 聚合信息 */

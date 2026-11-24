@@ -33,7 +33,7 @@ import type { ProTableColumn, ProTableProps } from './types'
 const props = withDefaults(defineProps<ProTableProps>(), {
   highlightCurrentRow: true,
   elementLoadingText: '正在加载数据，请稍候...',
-  elementLoadingBackground: 'rgba(0, 0, 0, 0.72)',
+  elementLoadingBackground: 'var(--el-mask-color)',
 })
 
 /**
