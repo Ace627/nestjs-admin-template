@@ -1,5 +1,5 @@
-import { randomUUID } from '@/utils'
 import type { AuthType } from '@/types'
+import { maskSensitiveData, randomUUID } from '@/utils'
 import { UserContext } from '../context/user.context'
 import { CommonConstant } from '../constant/common.constant'
 import { Injectable, Logger, NestMiddleware } from '@nestjs/common'
@@ -38,8 +38,9 @@ export class BeforeEachMiddleware implements NestMiddleware {
     logInfo.url = request.path || ''
     logInfo.method = request.method
     logInfo.requestId = request[CommonConstant.REQUEST_ID]
-    if (query && Object.keys(query).length) logInfo.query = query
-    if (body && Object.keys(body).length) logInfo.body = body
+    // 参数脱敏：沿用操作日志的敏感字段关键词规则，避免明文密码 / token 落日志
+    if (query && Object.keys(query).length) logInfo.query = maskSensitiveData(query)
+    if (body && Object.keys(body).length) logInfo.body = maskSensitiveData(body)
     this.logger.log(JSON.stringify(Object.assign({}, logInfo, headers)))
   }
 }

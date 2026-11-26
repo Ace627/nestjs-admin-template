@@ -1,4 +1,4 @@
-import { isArray, isString } from '@/utils'
+import { isArray, isString, maskSensitiveData } from '@/utils'
 import { BusinessException, CommonConstant } from '..'
 import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus, Logger } from '@nestjs/common'
 
@@ -35,7 +35,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const requestStartTime = request[CommonConstant.REQUEST_START_TIME] ?? currentTimestamp
     const { code, status, message } = this.analyzeException(exception)
     const { query, body } = request
-    const rawContent = { query, body, message }
+    // 参数脱敏：与操作日志、请求日志共用同一套敏感字段关键词规则，避免明文密码 / token 落日志
+    const rawContent = maskSensitiveData({ query, body, message })
     const printContent = this.isDev ? JSON.stringify(rawContent) : rawContent
     this.logger.error(`${request.method} ${request.path} ${requestId}`)
     this.logger.error(printContent, exception.stack, AllExceptionsFilter.name)
