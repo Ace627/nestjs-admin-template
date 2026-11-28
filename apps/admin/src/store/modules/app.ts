@@ -16,10 +16,10 @@ export const useAppStore = defineStore('app', () => {
   }
 
   /** 关闭侧边栏（主要用于移动端状态下） */
-  function closeSidebar(hasAnimation: boolean = false): void {
+  function closeSidebar(skipTransition: boolean = false): void {
     isCollapse.value = true
     setSidebarStatus(isCollapse.value)
-    withoutAnimation.value = hasAnimation
+    withoutAnimation.value = skipTransition
   }
 
   /** 展开侧边栏（主要用于从移动端切回桌面端时恢复展开状态） */

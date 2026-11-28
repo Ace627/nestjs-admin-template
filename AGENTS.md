@@ -62,7 +62,8 @@ pnpm db:init      # 建库 + 生成/执行迁移 + 灌种子数据
 pnpm start:dev    # http://localhost:3000/api
 pnpm build        # nest build
 pnpm lint         # eslint --fix，配置见 eslint.config.mjs
-pnpm test         # jest（rootDir=src，*.spec.ts；当前仓库 0 个用例）
+pnpm test         # vitest watch；用例在 src/**/*.spec.ts（当前 5 个文件 74 个用例）
+pnpm test:run     # vitest run，CI 用
 
 # 数据库（改实体后）
 pnpm migration:generate   # 生成到 src/database/migrations/

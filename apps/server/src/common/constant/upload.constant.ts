@@ -16,3 +16,6 @@ export const UploadConstant = {
   /** 单文件总大小上限：2GB（sys_file.file_size 为 int，有符号上限 2147483647） */
   MAX_FILE_SIZE: 2147483647,
 } as const
+
+/** 禁止上传的后缀：uploads 目录被静态托管，避免上传可执行/可渲染文件造成存储型 XSS */
+export const FORBIDDEN_UPLOAD_EXTENSIONS: readonly string[] = ['.html', '.htm', '.xhtml', '.svg', '.js', '.mjs', '.cjs', '.xml']

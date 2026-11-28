@@ -46,10 +46,11 @@ import { CommonModule } from './modules/common/common.module'
     { provide: APP_INTERCEPTOR, useClass: DataScopeInterceptor },
     // 操作日志拦截器，用于记录所有接口请求和响应
     { provide: APP_INTERCEPTOR, useClass: OperlogInterceptor },
+    // 该拦截器会对应用中所有接口的响应进行统一处理（如包装响应格式、添加耗时统计）
+    // 必须注册在缓存拦截器之前（外层）：先由它包装响应，缓存层才能只缓存业务数据，避免缓存 requestId/duration
+    { provide: APP_INTERCEPTOR, useClass: ResponseTransformInterceptor },
     // 该拦截器会对应用中指定接口的响应进行缓存处理（如命中缓存直接返回、未命中则写入缓存）
     { provide: APP_INTERCEPTOR, useClass: ResponseCacheInterceptor },
-    // 该拦截器会对应用中所有接口的响应进行统一处理（如包装响应格式、添加耗时统计）
-    { provide: APP_INTERCEPTOR, useClass: ResponseTransformInterceptor },
   ],
 })
 export class AppModule implements NestModule {

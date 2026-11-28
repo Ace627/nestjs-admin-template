@@ -185,9 +185,10 @@ async function handleFolderRemove(node: File.TreeItem) {
   }
 }
 
-/** 目录新建/重命名成功后刷新树；新建后切到目标目录会由用户自行点击 */
+/** 目录新建/重命名成功后同时刷新树与列表（列表中的目录行名称需同步） */
 function handleFolderChanged() {
   folderTreeRef.value?.getTree()
+  getList()
 }
 
 /** 删除文件/目录（软删进入回收站） */

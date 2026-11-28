@@ -99,6 +99,8 @@ async function handleRestore(row?: File.Item) {
     if (cancel) return TipModal.msg('操作取消')
     const ids = row ? row.id : multipleSelection.value.map((item) => item.id).join(',')
     await FileRequest.restore({ ids })
+    // 当前页只有一条时还原后回退上一页，避免停留在空页
+    if (list.value.length <= 1) queryParams.value.pageNo = queryParams.value.pageNo > 1 ? queryParams.value.pageNo - 1 : 1
     await getList()
     emit('changed')
     TipModal.msgSuccess('还原成功')
@@ -117,6 +119,8 @@ async function handleDeletePermanent(row?: File.Item) {
     if (cancel) return TipModal.msg('操作取消')
     const ids = row ? row.id : multipleSelection.value.map((item) => item.id).join(',')
     const message = await FileRequest.deletePermanent({ ids })
+    // 当前页只有一条时彻底删除后回退上一页，避免停留在空页
+    if (list.value.length <= 1) queryParams.value.pageNo = queryParams.value.pageNo > 1 ? queryParams.value.pageNo - 1 : 1
     await getList()
     emit('changed')
     TipModal.msgSuccess(message)

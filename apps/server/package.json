@@ -9,7 +9,7 @@
     "migration:run": "npm run typeorm migration:run",
     "migration:revert": "npm run typeorm migration:revert",
     "db:init": "node scripts/init-db.mjs",
-    "build": "cross-env NODE_ENV=production nest build",
+    "build": "tsc --noEmit && cross-env NODE_ENV=production nest build",
     "start": "cross-env NODE_ENV=development nest start",
     "start:dev": "cross-env NODE_ENV=development nest start --watch",
     "start:debug": "cross-env NODE_ENV=development nest start --debug --watch",

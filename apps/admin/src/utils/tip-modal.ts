@@ -2,7 +2,7 @@ import { ElLoading, ElMessage, ElMessageBox, ElNotification } from 'element-plus
 import type { ElMessageBoxOptions, LoadingOptionsResolved, MessageOptions, NotificationOptions } from 'element-plus'
 
 /* 全局请求 loading 的唯一实例 */
-let loadingInstance: ReturnType<typeof ElLoading.service>
+let loadingInstance: ReturnType<typeof ElLoading.service> | null = null
 
 export abstract class TipModal {
   /** 消息提示 */
@@ -96,6 +96,7 @@ export abstract class TipModal {
 
   /** 关闭遮罩层 */
   static hideLoading() {
-    loadingInstance.close()
+    loadingInstance?.close()
+    loadingInstance = null
   }
 }

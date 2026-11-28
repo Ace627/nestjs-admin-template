@@ -29,11 +29,6 @@ export class JobService {
     await this.initJob()
   }
 
-  // 需要此服务上下文的时候记得用箭头函数（invokeTarget 示例：JobService.test()）
-  test = () => {
-    console.log('test', process.pid, formatTime())
-  }
-
   /* -------------------------------------------------------------------------- */
   /*                                Schedule Job                                */
   /* -------------------------------------------------------------------------- */
@@ -49,7 +44,7 @@ export class JobService {
     await this.analysisInvokeTarget(createDto)
     // 4. 保存
     const entity = new JobEntity()
-    Object.assign(entity, createDto)
+    Object.assign(entity, createDto, { status: createDto.status ?? CommonConstant.STATUS_NORMAL })
     const job = await this.jobRepository.save(entity)
     // 5. 启动
     if (job.status === CommonConstant.STATUS_NORMAL) await this.start(job)

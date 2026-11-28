@@ -20,6 +20,6 @@ export const RouterConstant = {
   /** 重定向页路由名称 */
   REDIRECT_PAGE_NAME: 'Redirect',
 
-  /** 白名单路由路径 */
-  PATH_WHITE_LIST: ['/login', '/register'],
+  /** 白名单路由路径（无需登录即可访问） */
+  PATH_WHITE_LIST: ['/login'],
 }

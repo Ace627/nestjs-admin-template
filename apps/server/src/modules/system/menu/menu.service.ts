@@ -88,9 +88,17 @@ export class MenuService {
     const targets = await this.menuRepository.findBy({ id: In(ids) })
     if (targets.length !== new Set(ids).size) throw new BusinessException('菜单不存在')
     if (await this.menuRepository.existsBy({ parentId: In(ids) })) throw new BusinessException('存在子菜单，无法删除')
+    // 先记录受影响角色，删除后清理其权限缓存，避免被删菜单的权限码在缓存 TTL 内继续放行
+    const affectedRoles = await this.dataSource
+      .createQueryBuilder()
+      .select('role_menu.role_id', 'roleId')
+      .from('sys_role_menu', 'role_menu')
+      .where('role_menu.menu_id IN (:...ids)', { ids })
+      .getRawMany<{ roleId: string }>()
     await this.menuRepository.delete(ids)
     // 清理角色-菜单中间表残留
     await this.dataSource.createQueryBuilder().delete().from('sys_role_menu').where('menu_id IN (:...ids)', { ids }).execute()
+    await Promise.all(affectedRoles.map(({ roleId }) => this.redisService.del(`${RedisConstant.ROLE_PERMISSIONS}:${roleId}`)))
     return '删除成功'
   }
 

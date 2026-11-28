@@ -100,7 +100,7 @@ cd apps/server && pnpm db:init && cd ../..
 
 # 5. 启动（两个终端分别执行）
 cd apps/server && pnpm start:dev   # 后端 http://localhost:3000/api
-cd apps/admin && pnpm dev          # 前端 http://localhost:5173（开发代理已指向 3000）
+cd apps/admin && pnpm dev          # 前端 http://localhost:7878（开发代理已指向 3000）
 ```
 
 启动完成后使用默认账号登录：**admin / 123456**（超级管理员，建议登录后修改密码）。

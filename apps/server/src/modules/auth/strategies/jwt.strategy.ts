@@ -18,18 +18,18 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
       passReqToCallback: true,
-      secretOrKey: configService.get<string>(ConfigConstant.JWT_SECRET, 'JWT_SECRET'),
+      secretOrKey: configService.getOrThrow<string>(ConfigConstant.JWT_SECRET),
     })
   }
 
   async validate(request: ExpressRequest, payload: AuthType.JwtPayload) {
     // 从 payload 中提取 userId 和 uuid
     const { userId, uuid } = payload
+    // 刷新令牌不能当作访问令牌使用（两者共用 userId+uuid 的 Redis 键）
+    if (payload.type === 'refresh') throw new BusinessException('访问凭证无效', HttpStatus.UNAUTHORIZED)
     // 校验 Redis 中的 AccessToken 是否存在（可吊销）
     const redisToken = await this.redisService.get(`${RedisConstant.ACCESS_TOKEN_KEY}:${userId}:${uuid}`)
     if (!redisToken) throw new BusinessException('访问凭证已过期或不存在', HttpStatus.UNAUTHORIZED)
-    // 从请求头中提取 AccessToken
-    // const accessToken = ExtractJwt.fromAuthHeaderAsBearerToken()(request)
     // 自动续期缓存（best-effort，不阻塞请求，失败仅打日志不影响认证结果）
     this.expire(userId, uuid)
     // 续期成功后返回 payload

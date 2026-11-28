@@ -11,7 +11,6 @@ import type { CSSProperties } from 'vue'
 import type { SvgIconProps } from './types'
 
 const props = withDefaults(defineProps<SvgIconProps>(), {
-  // color: 'currentColor',
   size: '1em',
 })
 

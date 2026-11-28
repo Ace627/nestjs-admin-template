@@ -207,6 +207,7 @@ function closeSelectedTag(tag: TagView) {
 
 /** 刷新当前正在右键操作的标签页 */
 function refreshSelectedTag(view: TagView) {
+  if (!view?.path) return
   tagsViewStore.delCachedView(view)
   router.replace({ path: RouterConstant.REDIRECT_PAGE_URL + view.path, query: view.query })
 }
@@ -282,6 +283,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
   scrollbarRef.value?.wrapRef?.removeEventListener('scroll', handleScroll)
+  document.body.removeEventListener('click', closeMenu)
 })
 
 watch(

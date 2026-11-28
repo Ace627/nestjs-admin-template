@@ -39,11 +39,6 @@ const uniqueOpened = computed(() => settingStore.uniqueOpened)
   border: none;
   overflow: hidden;
   width: 100%;
-  // background-color: red !important;
-}
-
-.scrollbar-wrapper {
-  background-color: purple !important;
 }
 
 /* 折叠状态下多级菜单有子菜单激活时顶级主菜单的样式 */

@@ -102,11 +102,12 @@ export class UserService {
     return '更新成功'
   }
 
-  /** 重置密码 */
-  public async resetPassword(updateDto: ResetUserPwdDto) {
+  /** 重置密码（按调用者数据范围校验目标账号） */
+  public async resetPassword(updateDto: ResetUserPwdDto, ds?: DataScopeCondition) {
     // 1. 根据用户名查询用户
     const user = await this.userRepository.findOneBy({ username: Equal(updateDto.username) })
     if (!user) throw new BusinessException('该用户不存在')
+    await this.assertInScope([user.id], ds)
     // 2. 校验新旧密码不能相同
     const isSame = await verifyPassword(updateDto.password, user.password)
     if (isSame) throw new BusinessException('新密码不能与原密码相同')

@@ -3,7 +3,7 @@ import App from '@/App.vue'
 import { setupStore } from '@/store'
 import { setupRouter } from '@/router'
 import { setupPlugins } from '@/plugins'
-import { setupDirectives } from './directives'
+import { setupDirectives } from '@/directives'
 import 'virtual:uno.css'
 import 'virtual:svg-icons-register'
 
@@ -25,8 +25,6 @@ async function bootstrap() {
 
   // 挂载应用实例到 DOM 元素 #app 中
   app.mount('#app')
-
-  console.log('系统初始化完成')
 }
 
 bootstrap()

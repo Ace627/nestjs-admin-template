@@ -3,7 +3,7 @@ import { once } from 'node:events'
 import { extname, join, resolve } from 'node:path'
 import { createSha256 } from '@/utils'
 import { finished } from 'node:stream/promises'
-import { BusinessException, UploadConstant } from '@/common'
+import { BusinessException, FORBIDDEN_UPLOAD_EXTENSIONS, UploadConstant } from '@/common'
 import { Injectable } from '@nestjs/common'
 import { createReadStream, createWriteStream } from 'node:fs'
 import { mkdir, readdir, rename, rm, stat, writeFile } from 'node:fs/promises'
@@ -19,12 +19,18 @@ export class UploadService {
   /** 分片目录名：必须与最终文件命名空间隔离，否则无扩展名文件会与分片目录同名 */
   private readonly CHUNK_DIR_NAME = '.chunks'
 
+  /** 校验后缀是否在禁止上传名单内（静态托管目录不接受可执行/可渲染文件） */
+  private assertExtensionAllowed(ext: string): void {
+    if (FORBIDDEN_UPLOAD_EXTENSIONS.includes(ext.toLowerCase())) throw new BusinessException('禁止上传该类型的文件')
+  }
+
   /** 单文件上传（≤10MB 直接上传，>10MB 拒绝并提示分片） */
   public async uploadFile(file: ExpressMulterFile) {
     if (!file?.buffer?.length) throw new BusinessException('上传文件不能为空')
     if (file.size > UploadConstant.MAX_SINGLE_FILE_SIZE) throw new BusinessException('文件大于10MB，请使用分片上传')
     // 处理中文乱码并获取后缀
     const ext = extname(Buffer.from(file.originalname, 'latin1').toString('utf8'))
+    this.assertExtensionAllowed(ext)
     /** 根据文件内容生成唯一 SHA-256 文件名 */
     const filename = `${createSha256(file.buffer)}${ext}`
     const filePath = resolveInsideDirectory(this.UPLOAD_DIR_PATH, filename)
@@ -63,6 +69,7 @@ export class UploadService {
   public async mergeChunk(mergeChunkDto: MergeChunkDto) {
     const { fileHash, fileName, fileSize, totalChunks } = mergeChunkDto
     const ext = extname(fileName)
+    this.assertExtensionAllowed(ext)
     const finalFilePath = resolveInsideDirectory(this.UPLOAD_DIR_PATH, `${fileHash}${ext}`)
     await mkdir(this.UPLOAD_DIR_PATH, { recursive: true })
     // 1. 幂等：已完整落盘直接返回成功，尺寸不符则说明磁盘出现异常文件

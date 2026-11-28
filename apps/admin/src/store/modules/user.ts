@@ -39,6 +39,10 @@ export const useUserStore = defineStore('user', () => {
     } finally {
       removeTokenPair()
       tagsViewStore.clear()
+      // 清空用户态，避免重新登录后被「已有角色」的短路逻辑跳过动态路由注册
+      currentUserInfo.value = {} as Auth.CurrentUserInfo['user']
+      roles.value = []
+      permissions.value = []
     }
   }
 

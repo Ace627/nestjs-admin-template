@@ -7,7 +7,7 @@
         <el-button v-permissions="['monitor:job:delete']" plain type="danger" @click="handleDelete()" :disabled="!isMultiple">
           <template #icon><SvgIcon name="Delete" /></template><span>批量删除</span>
         </el-button>
-        <el-button v-permissions="['monitor:job:delete']" plain type="danger" @click="handleClear">
+        <el-button v-permissions="['monitor:job:clear']" plain type="danger" @click="handleClear">
           <template #icon><SvgIcon name="Delete" /></template><span>清空</span>
         </el-button>
         <el-button v-permissions="['monitor:job:export']" plain type="warning" :loading="exportLoading" @click="handleExport">

@@ -10,7 +10,7 @@
       <el-input v-model.trim="form.repeatPassword" type="password" show-password placeholder="请再次输入新密码" />
     </el-form-item>
     <el-form-item>
-      <el-button v-permissions="['system:user:update']" type="primary" class="w-120px" :loading="submitting" @click="handleSubmit">提交</el-button>
+      <el-button type="primary" class="w-120px" :loading="submitting" @click="handleSubmit">提交</el-button>
     </el-form-item>
   </el-form>
 </template>

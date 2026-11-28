@@ -52,18 +52,18 @@ export class UserController {
     return this.userService.importData(file, importDto)
   }
 
-  /** 重置密码 */
+  /** 重置密码（受数据权限约束，不能重置数据范围外的账号） */
   @Put('resetPassword')
   @RequirePermissions(['system:user:update'])
+  @DataScope({ alias: 'user', userColumn: 'id' })
   @Operlog({ title: '用户管理', businessType: BusinessType.UPDATE })
-  public resetPassword(@Body() updateDto: ResetUserPwdDto) {
-    return this.userService.resetPassword(updateDto)
+  public resetPassword(@Body() updateDto: ResetUserPwdDto, @DataScopeSql() ds: DataScopeCondition) {
+    return this.userService.resetPassword(updateDto, ds)
   }
 
-  /** 修改密码 */
+  /** 修改密码（登录用户修改自己的密码，不挂管理权限码） */
   @Put('updatePassword')
-  @RequirePermissions(['system:user:update'])
-  @Operlog({ title: '用户管理', businessType: BusinessType.UPDATE })
+  @Operlog({ title: '个人中心', businessType: BusinessType.UPDATE })
   public updatePassword(@CurrentUser('userId') userId: string, @Body() updateDto: UpdateUserPwdDto) {
     return this.userService.updatePassword(userId, updateDto)
   }
@@ -84,9 +84,8 @@ export class UserController {
     return this.userService.findOneById(id, ds)
   }
 
-  /** 查找用户个人资料 */
+  /** 查找用户个人资料（登录用户查看自己，不挂管理权限码） */
   @Get('profile')
-  @RequirePermissions(['system:user:query'])
   public getProfile(@CurrentUser('userId') userId: string) {
     return this.userService.getProfile(userId)
   }

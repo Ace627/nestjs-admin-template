@@ -55,7 +55,12 @@ import JobDialog from './components/JobDialog.vue'
 import { JobRequest } from '@/api/monitor/job.request'
 import type { Job, ProSearchItem, ProTableColumn } from '@/types'
 
-const { sys_common_status, sys_job_group } = useDict('sys_common_status', 'sys_job_group')
+const { sys_job_group } = useDict('sys_job_group')
+/** 任务状态：正常/暂停（与 sys_common_status 的成功/失败语义无关，不使用字典） */
+const jobStatusOptions = [
+  { label: '正常', value: '1' },
+  { label: '暂停', value: '0' },
+]
 const router = useRouter()
 
 const list = ref<Job.Item[]>([])
@@ -75,7 +80,7 @@ const hiddenColumnKeys = ref<string[]>([])
 const items: ProSearchItem[] = [
   { type: 'input', prop: 'jobName', label: '任务名称' },
   { type: 'select', prop: 'jobGroup', label: '任务组名', options: sys_job_group },
-  { type: 'select', prop: 'status', label: '任务状态', options: sys_common_status },
+  { type: 'select', prop: 'status', label: '任务状态', options: jobStatusOptions },
 ]
 const columns: ProTableColumn<Job.Item>[] = [
   { align: 'center', type: 'selection' },
@@ -84,7 +89,7 @@ const columns: ProTableColumn<Job.Item>[] = [
   { align: 'center', prop: 'jobGroup', label: '任务组名', width: 100 },
   { align: 'center', prop: 'invokeTarget', label: '调用目标', showOverflowTooltip: true, minWidth: 200 },
   { align: 'center', prop: 'cronExpression', label: '执行表达式', showOverflowTooltip: true, width: 140 },
-  { align: 'center', label: '任务状态', slot: 'status', width: 80, printFormatter: (row) => sys_common_status.value.find((item) => item.dictValue === String(row.status))?.dictLabel ?? String(row.status ?? '') },
+  { align: 'center', label: '任务状态', slot: 'status', width: 80, printFormatter: (row) => jobStatusOptions.find((item) => item.value === String(row.status))?.label ?? String(row.status ?? '') },
   { align: 'center', label: '并发执行', slot: 'concurrent', width: 90, printFormatter: (row) => (row.concurrent === '1' ? '允许' : '禁止') },
   { align: 'center', label: '备注', slot: 'remark', minWidth: 120 },
   { align: 'center', prop: 'createTime', label: '创建时间', width: 170 },

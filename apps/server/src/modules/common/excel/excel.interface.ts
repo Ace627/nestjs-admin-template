@@ -13,7 +13,7 @@ export class ExcelOption {
   /** 当值为空时，字段的默认值 */
   defaultValue?: string
 
-  /** 字段类型（0：导出导入；1：仅导出；2：仅导入） */
+  /** 字段类型（0：仅导入；1：仅导出；2：导入和导出），取值见 ExcelType */
   type?: string
 
   /** 列宽 */

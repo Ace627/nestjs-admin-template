@@ -14,12 +14,13 @@ export class PaginationPipe implements PipeTransform {
    * @returns 处理后的参数（新增 skip/take 字段，保留原有字段）
    */
   transform(value: any) {
-    // 1. 解析页码：优先取前端传入的 pageNo，无则默认第1页
-    // +value.pageNo 是把字符串类型的参数转为数字类型（前端传参默认是字符串）
-    const pageNo = value.pageNo ? value.pageNo : 1
+    // 1. 解析页码：非法值（非数字/小于 1）回退第 1 页
+    const parsedPageNo = Math.trunc(Number(value.pageNo))
+    const pageNo = Number.isFinite(parsedPageNo) && parsedPageNo >= 1 ? parsedPageNo : 1
 
-    // 2. 解析每页条数：优先取前端传入的 pageSize，无则默认每页10条
-    const pageSize = value.pageSize ? value.pageSize : 10
+    // 2. 解析每页条数：非法值回退 10 条，并限制在 1~100 之间，避免超大 pageSize 打满数据库
+    const parsedPageSize = Math.trunc(Number(value.pageSize))
+    const pageSize = Number.isFinite(parsedPageSize) ? Math.min(100, Math.max(1, parsedPageSize)) : 10
 
     // 3. 计算分页偏移量（skip）：即数据库查询时需要「跳过前面多少条数据」
     // 公式：(当前页码 - 1) * 每页条数 → 比如第2页、每页10条，需要跳过前10条

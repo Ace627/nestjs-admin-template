@@ -4,11 +4,11 @@
 
     <div class="mb-16px flex items-center justify-between">
       <div>
-        <el-button v-permissions="['monitor:loginlog:delete']" :loading type="danger" plain @click="handleDelete()" :disabled="!isMultiple">
+        <el-button v-permissions="['monitor:loginlog:delete']" type="danger" plain @click="handleDelete()" :disabled="!isMultiple">
           <template #icon> <SvgIcon name="Delete" /> </template>
           <span>批量删除</span>
         </el-button>
-        <el-button v-permissions="['monitor:loginlog:clear']" :loading type="danger" plain @click="handleClear">
+        <el-button v-permissions="['monitor:loginlog:clear']" type="danger" plain @click="handleClear">
           <template #icon> <SvgIcon name="Delete" /> </template>
           <span>清空</span>
         </el-button>
